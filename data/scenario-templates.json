@@ -1,0 +1,303 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2025-01-22T10:00:00Z",
+  "data": {
+    "templates": [
+      {
+        "name": "Armement automatique par horaire",
+        "description": "Arme automatiquement l'alarme à une heure définie, idéal pour programmer l'activation nocturne",
+        "category": "Sécurité",
+        "icon": "Shield",
+        "preview": {
+          "triggers": ["Horaire: 23:00"],
+          "conditions": ["Jours: Tous les jours de la semaine"],
+          "actions": ["MQTT: Armer l'alarme"]
+        },
+        "template": {
+          "name": "Armement automatique nocturne",
+          "description": "Arme l'alarme automatiquement tous les soirs à 23h00",
+          "tags": ["alarme", "sécurité", "automatique", "horaire"],
+          "Quand": [
+            {
+              "type": "Horaire",
+              "sous_categorie": "Heure fixe",
+              "mqtt_topic": "neurHomIA/automation/time",
+              "mqtt_trigger": "23:00",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Si": [
+            {
+              "type": "Jour de la semaine",
+              "sous_categorie": "Tous les jours",
+              "mqtt_topic": "neurHomIA/automation/weekday",
+              "mqtt_condition": "any",
+              "mqtt_payload": "",
+              "qos": 0
+            }
+          ],
+          "Alors": [
+            {
+              "type": "MQTT_Publish",
+              "sous_categorie": "Commande alarme",
+              "mqtt_topic": "alarm/main/command/arm",
+              "mqtt_payload": "{\"mode\": \"full\", \"delay\": 60}",
+              "qos": 1,
+              "retain": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "Désarmement automatique le matin",
+        "description": "Désarme l'alarme automatiquement le matin en semaine, avec horaires différents le week-end",
+        "category": "Sécurité",
+        "icon": "ShieldOff",
+        "preview": {
+          "triggers": ["Horaire: 07:00"],
+          "conditions": ["Jours: Lundi à Vendredi"],
+          "actions": ["MQTT: Désarmer l'alarme"]
+        },
+        "template": {
+          "name": "Désarmement matinal en semaine",
+          "description": "Désarme l'alarme automatiquement à 7h00 du lundi au vendredi",
+          "tags": ["alarme", "sécurité", "automatique", "horaire", "semaine"],
+          "Quand": [
+            {
+              "type": "Horaire",
+              "sous_categorie": "Heure fixe",
+              "mqtt_topic": "neurHomIA/automation/time",
+              "mqtt_trigger": "07:00",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Si": [
+            {
+              "type": "Jour de la semaine",
+              "sous_categorie": "Lundi à Vendredi",
+              "mqtt_topic": "neurHomIA/automation/weekday",
+              "mqtt_condition": "weekday",
+              "mqtt_payload": "",
+              "qos": 0
+            }
+          ],
+          "Alors": [
+            {
+              "type": "MQTT_Publish",
+              "sous_categorie": "Commande alarme",
+              "mqtt_topic": "alarm/main/command/disarm",
+              "mqtt_payload": "{\"user\": \"automation\"}",
+              "qos": 1,
+              "retain": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "Notification SMS en cas de déclenchement",
+        "description": "Envoie un SMS d'alerte via Sms2Mqtt lorsque l'alarme se déclenche",
+        "category": "Notification",
+        "icon": "MessageSquare",
+        "preview": {
+          "triggers": ["MQTT: Alarme déclenchée"],
+          "conditions": [],
+          "actions": ["SMS: Envoyer notification d'alerte"]
+        },
+        "template": {
+          "name": "Alerte SMS déclenchement alarme",
+          "description": "Notification SMS immédiate en cas de déclenchement d'alarme",
+          "tags": ["alarme", "notification", "sms", "alerte"],
+          "Quand": [
+            {
+              "type": "MQTT_Subscribe",
+              "sous_categorie": "État alarme",
+              "mqtt_topic": "alarm/main/events/triggered",
+              "mqtt_trigger": "",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Si": [],
+          "Alors": [
+            {
+              "type": "MQTT_Publish",
+              "sous_categorie": "Envoi SMS",
+              "mqtt_topic": "sms2mqtt/send",
+              "mqtt_payload": "{\"number\": \"+33XXXXXXXXX\", \"message\": \"⚠️ ALERTE : L'alarme de votre domicile vient de se déclencher !\"}",
+              "qos": 1,
+              "retain": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "Notification push en cas de déclenchement",
+        "description": "Envoie une notification push via Http2Mqtt lorsque l'alarme se déclenche",
+        "category": "Notification",
+        "icon": "Bell",
+        "preview": {
+          "triggers": ["MQTT: Alarme déclenchée"],
+          "conditions": [],
+          "actions": ["Push: Notification via webhook"]
+        },
+        "template": {
+          "name": "Alerte push déclenchement alarme",
+          "description": "Notification push immédiate en cas de déclenchement d'alarme",
+          "tags": ["alarme", "notification", "push", "webhook"],
+          "Quand": [
+            {
+              "type": "MQTT_Subscribe",
+              "sous_categorie": "État alarme",
+              "mqtt_topic": "alarm/main/events/triggered",
+              "mqtt_trigger": "",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Si": [],
+          "Alors": [
+            {
+              "type": "MQTT_Publish",
+              "sous_categorie": "Webhook HTTP",
+              "mqtt_topic": "http2mqtt/webhook",
+              "mqtt_payload": "{\"url\": \"https://your-notification-service.com/api/notify\", \"method\": \"POST\", \"headers\": {\"Authorization\": \"Bearer YOUR_TOKEN\"}, \"data\": {\"title\": \"🚨 Alarme déclenchée\", \"message\": \"L'alarme de votre domicile s'est déclenchée\", \"priority\": \"high\"}}",
+              "qos": 1,
+              "retain": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "Armement sur détection d'absence",
+        "description": "Arme automatiquement l'alarme lorsque tous les occupants ont quitté le domicile",
+        "category": "Sécurité",
+        "icon": "UserMinus",
+        "preview": {
+          "triggers": ["MQTT: Absence détectée"],
+          "conditions": ["Délai: 5 minutes sans présence"],
+          "actions": ["MQTT: Armement partiel"]
+        },
+        "template": {
+          "name": "Armement automatique sur absence",
+          "description": "Active l'alarme en mode partiel après 5 minutes d'absence détectée",
+          "tags": ["alarme", "présence", "automatique", "absence"],
+          "Quand": [
+            {
+              "type": "MQTT_Subscribe",
+              "sous_categorie": "Détecteur présence",
+              "mqtt_topic": "presence/home/state",
+              "mqtt_trigger": "away",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Si": [
+            {
+              "type": "Délai",
+              "sous_categorie": "Temporisation",
+              "mqtt_topic": "neurHomIA/automation/delay",
+              "mqtt_condition": "300",
+              "mqtt_payload": "",
+              "qos": 0
+            }
+          ],
+          "Alors": [
+            {
+              "type": "MQTT_Publish",
+              "sous_categorie": "Commande alarme",
+              "mqtt_topic": "alarm/main/command/arm_partial",
+              "mqtt_payload": "{\"mode\": \"partial\", \"zones\": [\"entrance\", \"windows\"]}",
+              "qos": 1,
+              "retain": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "Éclairage automatique sur alarme",
+        "description": "Allume toutes les lumières lorsque l'alarme se déclenche pour dissuader les intrus",
+        "category": "Sécurité",
+        "icon": "Lightbulb",
+        "preview": {
+          "triggers": ["MQTT: Alarme déclenchée"],
+          "conditions": [],
+          "actions": ["MQTT: Allumer toutes les lumières"]
+        },
+        "template": {
+          "name": "Éclairage d'urgence sur déclenchement",
+          "description": "Active tous les éclairages en cas de déclenchement d'alarme",
+          "tags": ["alarme", "lumière", "sécurité", "dissuasion"],
+          "Quand": [
+            {
+              "type": "MQTT_Subscribe",
+              "sous_categorie": "État alarme",
+              "mqtt_topic": "alarm/main/events/triggered",
+              "mqtt_trigger": "",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Si": [],
+          "Alors": [
+            {
+              "type": "MQTT_Publish",
+              "sous_categorie": "Commande lumières",
+              "mqtt_topic": "lights/all/command",
+              "mqtt_payload": "{\"state\": \"ON\", \"brightness\": 255, \"color\": \"#FF0000\"}",
+              "qos": 1,
+              "retain": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "Vérification de l'armement nocturne",
+        "description": "Vérifie que l'alarme est bien armée tard le soir et envoie une notification si ce n'est pas le cas",
+        "category": "Sécurité",
+        "icon": "CheckCircle",
+        "preview": {
+          "triggers": ["Horaire: 23:30"],
+          "conditions": ["MQTT: État alarme désarmée"],
+          "actions": ["SMS: Rappel d'armement"]
+        },
+        "template": {
+          "name": "Rappel d'armement nocturne",
+          "description": "Rappelle d'armer l'alarme si elle n'est pas armée à 23h30",
+          "tags": ["alarme", "rappel", "notification", "sécurité"],
+          "Quand": [
+            {
+              "type": "Horaire",
+              "sous_categorie": "Heure fixe",
+              "mqtt_topic": "neurHomIA/automation/time",
+              "mqtt_trigger": "23:30",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Si": [
+            {
+              "type": "MQTT_Subscribe",
+              "sous_categorie": "État alarme",
+              "mqtt_topic": "alarm/main/state/current",
+              "mqtt_condition": "disarmed",
+              "mqtt_payload": "",
+              "qos": 1
+            }
+          ],
+          "Alors": [
+            {
+              "type": "MQTT_Publish",
+              "sous_categorie": "Envoi SMS",
+              "mqtt_topic": "sms2mqtt/send",
+              "mqtt_payload": "{\"number\": \"+33XXXXXXXXX\", \"message\": \"💡 Rappel : N'oubliez pas d'armer l'alarme avant de dormir\"}",
+              "qos": 1,
+              "retain": false
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
