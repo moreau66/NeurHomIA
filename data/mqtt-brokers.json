@@ -1,0 +1,55 @@
+{
+  "systemBrokers": [
+    {
+      "id": "mcp-mosquitto-core",
+      "name": "NeurHomeIA Broker (MCP)",
+      "template": "MCP-Mosquitto2Mqtt",
+      "autoDetect": true,
+      "description": "Broker MQTT principal géré par NeurHomeIA avec configuration optimisée pour la domotique",
+      "defaultConfig": {
+        "broker": "mqtt://mosquitto:1883",
+        "port": 1883,
+        "wsPort": 9001,
+        "containerName": "mcp-mosquitto",
+        "category": "core",
+        "useTls": false,
+        "allowInsecure": true
+      },
+      "defaultTopics": [
+        "mcp/services/#",
+        "homeassistant/#",
+        "$SYS/#",
+        "domotique/#",
+        "zigbee2mqtt/#"
+      ],
+      "monitoring": {
+        "healthTopic": "$SYS/broker/uptime",
+        "clientsTopic": "$SYS/broker/clients/total",
+        "messagesTopic": "$SYS/broker/messages/sent"
+      },
+      "features": [
+        "Persistance des données",
+        "Support WebSocket",
+        "ACL et authentification",
+        "Topics de découverte",
+        "Monitoring système",
+        "Bridge MQTT support"
+      ]
+    }
+  ],
+  "customBrokers": [],
+  "bridgeTemplates": [
+    {
+      "id": "local-to-cloud",
+      "name": "Bridge Local → Cloud",
+      "description": "Pont entre broker local et broker cloud",
+      "direction": "both",
+      "topicPatterns": [
+        {
+          "pattern": "domotique/#",
+          "description": "Tous les topics domotique"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1531 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-11-09T00:00:00Z",
+  "data": {
+    "widgets": [
+      {
+        "schema": {
+          "id": "widget_temperature",
+          "name": "Capteur de Température",
+          "version": "1.0.0",
+          "description": "Widget pour afficher la température d'un capteur",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["temperature_sensor", "climate_sensor", "multi_sensor"],
+          "display": {
+            "icon": "Thermometer",
+            "primaryColor": "hsl(25, 95%, 53%)",
+            "secondaryColor": "hsl(25, 90%, 65%)",
+            "size": "small",
+            "refreshInterval": 30000
+          },
+          "sections": [
+            {
+              "id": "main",
+              "title": "Température",
+              "fields": [
+                {
+                  "key": "temperature",
+                  "label": "Température",
+                  "type": "number",
+                  "unit": "°C",
+                  "icon": "Thermometer",
+                  "precision": 1,
+                  "visible": true,
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            }
+          ],
+          "dataMapping": {
+            "temperature": {
+              "topic": "home/{deviceId}/temperature",
+              "path": "value",
+              "fallback": 0
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_humidity",
+          "name": "Capteur d'Humidité",
+          "version": "1.0.0",
+          "description": "Widget pour afficher l'humidité d'un capteur",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["humidity_sensor", "climate_sensor", "multi_sensor"],
+          "display": {
+            "icon": "Droplets",
+            "primaryColor": "hsl(200, 95%, 53%)",
+            "secondaryColor": "hsl(200, 90%, 65%)",
+            "size": "small",
+            "refreshInterval": 30000
+          },
+          "sections": [
+            {
+              "id": "main",
+              "title": "Humidité",
+              "fields": [
+                {
+                  "key": "humidity",
+                  "label": "Humidité",
+                  "type": "number",
+                  "unit": "%",
+                  "icon": "Droplets",
+                  "precision": 0,
+                  "min": 0,
+                  "max": 100,
+                  "visible": true,
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            }
+          ],
+          "dataMapping": {
+            "humidity": {
+              "topic": "home/{deviceId}/humidity",
+              "path": "value",
+              "fallback": 0
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_battery",
+          "name": "Niveau de Batterie",
+          "version": "1.0.0",
+          "description": "Widget pour afficher le niveau de batterie d'un appareil",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["battery_device", "sensor", "remote"],
+          "display": {
+            "icon": "Battery",
+            "primaryColor": "hsl(142, 76%, 36%)",
+            "secondaryColor": "hsl(142, 70%, 50%)",
+            "size": "small",
+            "refreshInterval": 60000
+          },
+          "sections": [
+            {
+              "id": "main",
+              "title": "Batterie",
+              "fields": [
+                {
+                  "key": "battery",
+                  "label": "Niveau",
+                  "type": "progress",
+                  "unit": "%",
+                  "icon": "Battery",
+                  "min": 0,
+                  "max": 100,
+                  "visible": true,
+                  "style": {
+                    "size": "medium",
+                    "align": "center"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            }
+          ],
+          "dataMapping": {
+            "battery": {
+              "topic": "home/{deviceId}/battery",
+              "path": "value",
+              "fallback": 100
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_door_window",
+          "name": "Détecteur Porte/Fenêtre",
+          "version": "1.0.0",
+          "description": "Widget pour surveiller l'état d'une porte ou fenêtre avec historique",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["door_sensor", "window_sensor", "contact_sensor"],
+          "display": {
+            "icon": "DoorOpen",
+            "primaryColor": "hsl(262, 83%, 58%)",
+            "secondaryColor": "hsl(262, 70%, 70%)",
+            "size": "medium",
+            "refreshInterval": 5000
+          },
+          "sections": [
+            {
+              "id": "main",
+              "title": "État",
+              "fields": [
+                {
+                  "key": "state",
+                  "label": "État",
+                  "type": "status-indicator",
+                  "icon": "DoorOpen",
+                  "visible": true,
+                  "statusColors": {
+                    "open": "hsl(0, 84%, 60%)",
+                    "closed": "hsl(142, 76%, 36%)"
+                  },
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            },
+            {
+              "id": "history",
+              "title": "Historique",
+              "fields": [
+                {
+                  "key": "lastOpened",
+                  "label": "Dernière ouverture",
+                  "type": "text",
+                  "icon": "Clock",
+                  "visible": true
+                },
+                {
+                  "key": "openCount",
+                  "label": "Ouvertures aujourd'hui",
+                  "type": "number",
+                  "icon": "Activity",
+                  "visible": true
+                }
+              ],
+              "layout": "list",
+              "visible": true
+            }
+          ],
+          "interactions": [
+            {
+              "type": "refresh",
+              "label": "Actualiser",
+              "icon": "RefreshCw"
+            }
+          ],
+          "dataMapping": {
+            "state": {
+              "topic": "home/{deviceId}/contact",
+              "path": "state",
+              "fallback": "closed"
+            },
+            "lastOpened": {
+              "topic": "home/{deviceId}/contact",
+              "path": "lastChanged",
+              "fallback": "Jamais"
+            },
+            "openCount": {
+              "topic": "home/{deviceId}/stats",
+              "path": "openCount",
+              "fallback": 0
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_climate_multi",
+          "name": "Capteur Climatique Complet",
+          "version": "1.0.0",
+          "description": "Widget multi-capteur combinant température, humidité et pression",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["climate_sensor", "multi_sensor", "weather_station"],
+          "display": {
+            "icon": "CloudSun",
+            "primaryColor": "hsl(215, 20%, 65%)",
+            "secondaryColor": "hsl(215, 25%, 75%)",
+            "size": "large",
+            "refreshInterval": 30000
+          },
+          "sections": [
+            {
+              "id": "main",
+              "title": "Climat",
+              "fields": [
+                {
+                  "key": "temperature",
+                  "label": "Température",
+                  "type": "number",
+                  "unit": "°C",
+                  "icon": "Thermometer",
+                  "precision": 1,
+                  "visible": true,
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                },
+                {
+                  "key": "humidity",
+                  "label": "Humidité",
+                  "type": "number",
+                  "unit": "%",
+                  "icon": "Droplets",
+                  "precision": 0,
+                  "min": 0,
+                  "max": 100,
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                },
+                {
+                  "key": "pressure",
+                  "label": "Pression",
+                  "type": "number",
+                  "unit": "hPa",
+                  "icon": "Gauge",
+                  "precision": 0,
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 3,
+              "visible": true
+            }
+          ],
+          "dataMapping": {
+            "temperature": {
+              "topic": "home/{deviceId}/climate",
+              "path": "temperature",
+              "fallback": 0
+            },
+            "humidity": {
+              "topic": "home/{deviceId}/climate",
+              "path": "humidity",
+              "fallback": 0
+            },
+            "pressure": {
+              "topic": "home/{deviceId}/climate",
+              "path": "pressure",
+              "fallback": 1013
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_air_quality",
+          "name": "Qualité de l'Air",
+          "version": "1.0.0",
+          "description": "Widget pour surveiller la qualité de l'air (CO2, VOC, PM2.5) avec seuils de couleur",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["air_quality_sensor", "multi_sensor"],
+          "display": {
+            "icon": "Wind",
+            "primaryColor": "hsl(142, 76%, 36%)",
+            "secondaryColor": "hsl(142, 70%, 50%)",
+            "size": "large",
+            "refreshInterval": 30000
+          },
+          "sections": [
+            {
+              "id": "main",
+              "title": "Qualité de l'Air",
+              "fields": [
+                {
+                  "key": "co2",
+                  "label": "CO₂",
+                  "type": "gauge",
+                  "unit": "ppm",
+                  "icon": "AlertCircle",
+                  "min": 400,
+                  "max": 2000,
+                  "precision": 0,
+                  "visible": true,
+                  "statusColors": {
+                    "400-800": "hsl(142, 76%, 36%)",
+                    "800-1200": "hsl(45, 93%, 47%)",
+                    "1200-2000": "hsl(0, 84%, 60%)"
+                  },
+                  "style": {
+                    "size": "large"
+                  }
+                },
+                {
+                  "key": "voc",
+                  "label": "COV",
+                  "type": "number",
+                  "unit": "ppb",
+                  "icon": "Flame",
+                  "precision": 0,
+                  "visible": true,
+                  "statusColors": {
+                    "0-220": "hsl(142, 76%, 36%)",
+                    "220-660": "hsl(45, 93%, 47%)",
+                    "660-2200": "hsl(0, 84%, 60%)"
+                  },
+                  "style": {
+                    "size": "medium"
+                  }
+                },
+                {
+                  "key": "pm25",
+                  "label": "PM2.5",
+                  "type": "number",
+                  "unit": "μg/m³",
+                  "icon": "Sparkles",
+                  "precision": 1,
+                  "visible": true,
+                  "statusColors": {
+                    "0-12": "hsl(142, 76%, 36%)",
+                    "12-35": "hsl(45, 93%, 47%)",
+                    "35-100": "hsl(0, 84%, 60%)"
+                  },
+                  "style": {
+                    "size": "medium"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 3,
+              "visible": true
+            },
+            {
+              "id": "summary",
+              "title": "Résumé",
+              "fields": [
+                {
+                  "key": "airQualityIndex",
+                  "label": "Indice Qualité",
+                  "type": "status-indicator",
+                  "icon": "CheckCircle",
+                  "visible": true,
+                  "statusColors": {
+                    "excellent": "hsl(142, 76%, 36%)",
+                    "good": "hsl(142, 70%, 50%)",
+                    "moderate": "hsl(45, 93%, 47%)",
+                    "poor": "hsl(25, 95%, 53%)",
+                    "bad": "hsl(0, 84%, 60%)"
+                  }
+                }
+              ],
+              "layout": "horizontal",
+              "visible": true
+            }
+          ],
+          "dataMapping": {
+            "co2": {
+              "topic": "home/{deviceId}/air_quality",
+              "path": "co2",
+              "fallback": 400
+            },
+            "voc": {
+              "topic": "home/{deviceId}/air_quality",
+              "path": "voc",
+              "fallback": 0
+            },
+            "pm25": {
+              "topic": "home/{deviceId}/air_quality",
+              "path": "pm25",
+              "fallback": 0
+            },
+            "airQualityIndex": {
+              "topic": "home/{deviceId}/air_quality",
+              "path": "index",
+              "fallback": "good"
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_energy_monitor",
+          "name": "Moniteur d'Énergie",
+          "version": "1.0.0",
+          "description": "Widget pour surveiller la consommation énergétique avec puissance instantanée, historique et coût estimé",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["energy_meter", "smart_plug", "power_monitor"],
+          "display": {
+            "icon": "Zap",
+            "primaryColor": "hsl(45, 93%, 47%)",
+            "secondaryColor": "hsl(45, 85%, 60%)",
+            "size": "large",
+            "refreshInterval": 5000
+          },
+          "sections": [
+            {
+              "id": "main",
+              "title": "Consommation Actuelle",
+              "fields": [
+                {
+                  "key": "power",
+                  "label": "Puissance Instantanée",
+                  "type": "gauge",
+                  "unit": "W",
+                  "icon": "Zap",
+                  "min": 0,
+                  "max": 5000,
+                  "precision": 0,
+                  "visible": true,
+                  "statusColors": {
+                    "0-500": "hsl(142, 76%, 36%)",
+                    "500-2000": "hsl(45, 93%, 47%)",
+                    "2000-5000": "hsl(0, 84%, 60%)"
+                  },
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                },
+                {
+                  "key": "dailyConsumption",
+                  "label": "Consommation du Jour",
+                  "type": "number",
+                  "unit": "kWh",
+                  "icon": "Activity",
+                  "precision": 2,
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                },
+                {
+                  "key": "estimatedCost",
+                  "label": "Coût Estimé",
+                  "type": "number",
+                  "unit": "€",
+                  "icon": "Euro",
+                  "precision": 2,
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 3,
+              "visible": true
+            },
+            {
+              "id": "history",
+              "title": "Historique",
+              "fields": [
+                {
+                  "key": "consumptionChart",
+                  "label": "Consommation 24h",
+                  "type": "chart",
+                  "icon": "BarChart3",
+                  "visible": true
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            },
+            {
+              "id": "stats",
+              "title": "Statistiques",
+              "fields": [
+                {
+                  "key": "weeklyAverage",
+                  "label": "Moyenne Hebdomadaire",
+                  "type": "number",
+                  "unit": "kWh",
+                  "icon": "TrendingUp",
+                  "precision": 2,
+                  "visible": true
+                },
+                {
+                  "key": "monthlyCost",
+                  "label": "Coût Mensuel Estimé",
+                  "type": "number",
+                  "unit": "€",
+                  "icon": "Wallet",
+                  "precision": 2,
+                  "visible": true
+                },
+                {
+                  "key": "peakPower",
+                  "label": "Puissance de Pointe",
+                  "type": "number",
+                  "unit": "W",
+                  "icon": "Zap",
+                  "precision": 0,
+                  "visible": true
+                }
+              ],
+              "layout": "grid",
+              "columns": 3,
+              "visible": true
+            }
+          ],
+          "interactions": [
+            {
+              "type": "refresh",
+              "label": "Actualiser",
+              "icon": "RefreshCw",
+              "style": "secondary"
+            },
+            {
+              "type": "command",
+              "label": "Réinitialiser Compteur",
+              "icon": "RotateCcw",
+              "topic": "home/{deviceId}/energy/reset",
+              "payload": { "type": "daily" },
+              "confirmation": "Voulez-vous réinitialiser le compteur journalier ?",
+              "style": "destructive"
+            }
+          ],
+          "dataMapping": {
+            "power": {
+              "topic": "home/{deviceId}/power",
+              "path": "value",
+              "fallback": 0
+            },
+            "dailyConsumption": {
+              "topic": "home/{deviceId}/energy/daily",
+              "path": "value",
+              "fallback": 0
+            },
+            "estimatedCost": {
+              "topic": "home/{deviceId}/energy/cost",
+              "path": "value",
+              "fallback": 0
+            },
+            "consumptionChart": {
+              "topic": "home/{deviceId}/energy/history",
+              "path": "data",
+              "fallback": []
+            },
+            "weeklyAverage": {
+              "topic": "home/{deviceId}/energy/stats",
+              "path": "weeklyAverage",
+              "fallback": 0
+            },
+            "monthlyCost": {
+              "topic": "home/{deviceId}/energy/stats",
+              "path": "monthlyCost",
+              "fallback": 0
+            },
+            "peakPower": {
+              "topic": "home/{deviceId}/energy/stats",
+              "path": "peakPower",
+              "fallback": 0
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_thermostat",
+          "name": "Thermostat Intelligent",
+          "version": "1.0.0",
+          "description": "Widget de thermostat avec mode manuel/automatique, programmation horaire et graphique de température",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["thermostat", "climate_control", "hvac"],
+          "display": {
+            "icon": "Flame",
+            "primaryColor": "hsl(15, 80%, 50%)",
+            "secondaryColor": "hsl(15, 75%, 65%)",
+            "size": "large",
+            "refreshInterval": 10000
+          },
+          "sections": [
+            {
+              "id": "temperature",
+              "title": "Température",
+              "fields": [
+                {
+                  "key": "currentTemp",
+                  "label": "Température Actuelle",
+                  "type": "number",
+                  "unit": "°C",
+                  "icon": "Thermometer",
+                  "precision": 1,
+                  "visible": true,
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                },
+                {
+                  "key": "targetTemp",
+                  "label": "Température Cible",
+                  "type": "dial",
+                  "unit": "°C",
+                  "icon": "Target",
+                  "min": 5,
+                  "max": 35,
+                  "step": 0.5,
+                  "precision": 1,
+                  "visible": true,
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 2,
+              "visible": true
+            },
+            {
+              "id": "mode",
+              "title": "Mode de Fonctionnement",
+              "fields": [
+                {
+                  "key": "operatingMode",
+                  "label": "Mode",
+                  "type": "toggle-switch",
+                  "icon": "Settings",
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                },
+                {
+                  "key": "hvacMode",
+                  "label": "État HVAC",
+                  "type": "status-indicator",
+                  "icon": "Flame",
+                  "visible": true,
+                  "statusColors": {
+                    "heating": "hsl(0, 84%, 60%)",
+                    "cooling": "hsl(200, 95%, 53%)",
+                    "off": "hsl(240, 5%, 65%)"
+                  }
+                },
+                {
+                  "key": "fanSpeed",
+                  "label": "Vitesse Ventilateur",
+                  "type": "status-indicator",
+                  "icon": "Wind",
+                  "visible": true,
+                  "statusColors": {
+                    "low": "hsl(142, 76%, 36%)",
+                    "medium": "hsl(45, 93%, 47%)",
+                    "high": "hsl(0, 84%, 60%)",
+                    "auto": "hsl(215, 20%, 65%)"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 3,
+              "visible": true
+            },
+            {
+              "id": "schedule",
+              "title": "Programmation",
+              "fields": [
+                {
+                  "key": "scheduleEnabled",
+                  "label": "Programmation Active",
+                  "type": "boolean",
+                  "icon": "Calendar",
+                  "visible": true
+                },
+                {
+                  "key": "nextScheduleChange",
+                  "label": "Prochain Changement",
+                  "type": "text",
+                  "icon": "Clock",
+                  "visible": true
+                },
+                {
+                  "key": "weekdayTemp",
+                  "label": "Température Semaine",
+                  "type": "number",
+                  "unit": "°C",
+                  "icon": "Calendar",
+                  "precision": 1,
+                  "visible": true
+                },
+                {
+                  "key": "weekendTemp",
+                  "label": "Température Weekend",
+                  "type": "number",
+                  "unit": "°C",
+                  "icon": "CalendarDays",
+                  "precision": 1,
+                  "visible": true
+                }
+              ],
+              "layout": "grid",
+              "columns": 2,
+              "visible": true
+            },
+            {
+              "id": "history",
+              "title": "Historique",
+              "fields": [
+                {
+                  "key": "temperatureChart",
+                  "label": "Température 24h",
+                  "type": "chart",
+                  "icon": "LineChart",
+                  "visible": true
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            }
+          ],
+          "interactions": [
+            {
+              "type": "refresh",
+              "label": "Actualiser",
+              "icon": "RefreshCw",
+              "style": "secondary"
+            },
+            {
+              "type": "command",
+              "label": "Mode Chauffage",
+              "icon": "Flame",
+              "topic": "home/{deviceId}/thermostat/mode",
+              "payload": { "mode": "heating" },
+              "style": "primary"
+            },
+            {
+              "type": "command",
+              "label": "Mode Refroidissement",
+              "icon": "Snowflake",
+              "topic": "home/{deviceId}/thermostat/mode",
+              "payload": { "mode": "cooling" },
+              "style": "primary"
+            },
+            {
+              "type": "command",
+              "label": "Désactiver",
+              "icon": "Power",
+              "topic": "home/{deviceId}/thermostat/mode",
+              "payload": { "mode": "off" },
+              "confirmation": "Voulez-vous désactiver le thermostat ?",
+              "style": "destructive"
+            },
+            {
+              "type": "toggle",
+              "label": "Activer/Désactiver Programmation",
+              "icon": "Calendar",
+              "topic": "home/{deviceId}/thermostat/schedule",
+              "style": "secondary"
+            }
+          ],
+          "dataMapping": {
+            "currentTemp": {
+              "topic": "home/{deviceId}/thermostat/temperature",
+              "path": "current",
+              "fallback": 20
+            },
+            "targetTemp": {
+              "topic": "home/{deviceId}/thermostat/target",
+              "path": "value",
+              "fallback": 20
+            },
+            "operatingMode": {
+              "topic": "home/{deviceId}/thermostat/mode",
+              "path": "operating",
+              "fallback": "manual"
+            },
+            "hvacMode": {
+              "topic": "home/{deviceId}/thermostat/mode",
+              "path": "hvac",
+              "fallback": "off"
+            },
+            "fanSpeed": {
+              "topic": "home/{deviceId}/thermostat/fan",
+              "path": "speed",
+              "fallback": "auto"
+            },
+            "scheduleEnabled": {
+              "topic": "home/{deviceId}/thermostat/schedule",
+              "path": "enabled",
+              "fallback": false
+            },
+            "nextScheduleChange": {
+              "topic": "home/{deviceId}/thermostat/schedule",
+              "path": "nextChange",
+              "fallback": "Aucun"
+            },
+            "weekdayTemp": {
+              "topic": "home/{deviceId}/thermostat/schedule",
+              "path": "weekdayTemp",
+              "fallback": 20
+            },
+            "weekendTemp": {
+              "topic": "home/{deviceId}/thermostat/schedule",
+              "path": "weekendTemp",
+              "fallback": 19
+            },
+            "temperatureChart": {
+              "topic": "home/{deviceId}/thermostat/history",
+              "path": "data",
+              "fallback": []
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_light_advanced",
+          "name": "Éclairage Avancé",
+          "version": "1.0.0",
+          "description": "Widget de contrôle d'éclairage avec variateur d'intensité, température de couleur et scènes prédéfinies",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["smart_light", "rgbw_light", "dimmable_light"],
+          "display": {
+            "icon": "Lightbulb",
+            "primaryColor": "hsl(45, 100%, 51%)",
+            "secondaryColor": "hsl(45, 100%, 70%)",
+            "size": "large",
+            "refreshInterval": 2000
+          },
+          "sections": [
+            {
+              "id": "control",
+              "title": "Contrôle Principal",
+              "fields": [
+                {
+                  "key": "state",
+                  "label": "État",
+                  "type": "toggle-switch",
+                  "icon": "Power",
+                  "visible": true,
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                },
+                {
+                  "key": "brightness",
+                  "label": "Intensité",
+                  "type": "slider",
+                  "unit": "%",
+                  "icon": "Sun",
+                  "min": 0,
+                  "max": 100,
+                  "step": 1,
+                  "precision": 0,
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                },
+                {
+                  "key": "colorTemp",
+                  "label": "Température de Couleur",
+                  "type": "slider",
+                  "unit": "K",
+                  "icon": "Palette",
+                  "min": 2700,
+                  "max": 6500,
+                  "step": 100,
+                  "precision": 0,
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 3,
+              "visible": true
+            },
+            {
+              "id": "color",
+              "title": "Couleur RGB",
+              "fields": [
+                {
+                  "key": "rgbColor",
+                  "label": "Couleur",
+                  "type": "color-picker",
+                  "icon": "Palette",
+                  "colorFormat": "rgb",
+                  "visible": true,
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                },
+                {
+                  "key": "saturation",
+                  "label": "Saturation",
+                  "type": "slider",
+                  "unit": "%",
+                  "icon": "Droplets",
+                  "min": 0,
+                  "max": 100,
+                  "step": 1,
+                  "precision": 0,
+                  "visible": true,
+                  "style": {
+                    "size": "medium"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 2,
+              "visible": true
+            },
+            {
+              "id": "scenes",
+              "title": "Scène Active",
+              "fields": [
+                {
+                  "key": "activeScene",
+                  "label": "Scène",
+                  "type": "status-indicator",
+                  "icon": "Sparkles",
+                  "visible": true,
+                  "statusColors": {
+                    "relax": "hsl(25, 95%, 53%)",
+                    "focus": "hsl(200, 95%, 53%)",
+                    "energize": "hsl(45, 100%, 51%)",
+                    "reading": "hsl(45, 93%, 47%)",
+                    "movie": "hsl(262, 83%, 58%)",
+                    "custom": "hsl(142, 76%, 36%)"
+                  },
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            },
+            {
+              "id": "presets",
+              "title": "Scènes Prédéfinies",
+              "fields": [
+                {
+                  "key": "sceneRelax",
+                  "label": "Détente",
+                  "type": "button",
+                  "icon": "Moon",
+                  "visible": true
+                },
+                {
+                  "key": "sceneFocus",
+                  "label": "Concentration",
+                  "type": "button",
+                  "icon": "Zap",
+                  "visible": true
+                },
+                {
+                  "key": "sceneReading",
+                  "label": "Lecture",
+                  "type": "button",
+                  "icon": "Book",
+                  "visible": true
+                },
+                {
+                  "key": "sceneMovie",
+                  "label": "Cinéma",
+                  "type": "button",
+                  "icon": "Film",
+                  "visible": true
+                }
+              ],
+              "layout": "grid",
+              "columns": 4,
+              "visible": true
+            }
+          ],
+          "interactions": [
+            {
+              "type": "toggle",
+              "label": "ON/OFF",
+              "icon": "Power",
+              "topic": "home/{deviceId}/light/state",
+              "style": "primary"
+            },
+            {
+              "type": "command",
+              "label": "Scène Détente",
+              "icon": "Moon",
+              "topic": "home/{deviceId}/light/scene",
+              "payload": { "scene": "relax", "brightness": 30, "colorTemp": 2700 },
+              "style": "secondary"
+            },
+            {
+              "type": "command",
+              "label": "Scène Concentration",
+              "icon": "Zap",
+              "topic": "home/{deviceId}/light/scene",
+              "payload": { "scene": "focus", "brightness": 100, "colorTemp": 6500 },
+              "style": "secondary"
+            },
+            {
+              "type": "command",
+              "label": "Scène Lecture",
+              "icon": "Book",
+              "topic": "home/{deviceId}/light/scene",
+              "payload": { "scene": "reading", "brightness": 70, "colorTemp": 4000 },
+              "style": "secondary"
+            },
+            {
+              "type": "command",
+              "label": "Scène Cinéma",
+              "icon": "Film",
+              "topic": "home/{deviceId}/light/scene",
+              "payload": { "scene": "movie", "brightness": 10, "colorTemp": 2700 },
+              "style": "secondary"
+            },
+            {
+              "type": "refresh",
+              "label": "Actualiser",
+              "icon": "RefreshCw",
+              "style": "secondary"
+            }
+          ],
+          "dataMapping": {
+            "state": {
+              "topic": "home/{deviceId}/light/state",
+              "path": "value",
+              "fallback": false
+            },
+            "brightness": {
+              "topic": "home/{deviceId}/light/brightness",
+              "path": "value",
+              "fallback": 100
+            },
+            "colorTemp": {
+              "topic": "home/{deviceId}/light/temperature",
+              "path": "value",
+              "fallback": 4000
+            },
+            "rgbColor": {
+              "topic": "home/{deviceId}/light/color",
+              "path": "rgb",
+              "fallback": "rgb(255,255,255)"
+            },
+            "saturation": {
+              "topic": "home/{deviceId}/light/color",
+              "path": "saturation",
+              "fallback": 100
+            },
+            "activeScene": {
+              "topic": "home/{deviceId}/light/scene",
+              "path": "active",
+              "fallback": "custom"
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      },
+      {
+        "schema": {
+          "id": "widget_security_system",
+          "name": "Système de Sécurité",
+          "version": "1.0.0",
+          "description": "Widget complet de sécurité avec alarme, zones, détecteurs, caméras et historique d'événements",
+          "author": "NeurHome-IA",
+          "deviceTypes": ["security_system", "alarm", "surveillance"],
+          "display": {
+            "icon": "Shield",
+            "primaryColor": "hsl(0, 84%, 60%)",
+            "secondaryColor": "hsl(0, 70%, 75%)",
+            "size": "large",
+            "refreshInterval": 3000
+          },
+          "sections": [
+            {
+              "id": "status",
+              "title": "État Principal",
+              "fields": [
+                {
+                  "key": "alarmState",
+                  "label": "État de l'Alarme",
+                  "type": "status-indicator",
+                  "icon": "ShieldAlert",
+                  "visible": true,
+                  "statusColors": {
+                    "disarmed": "hsl(142, 76%, 36%)",
+                    "armed": "hsl(25, 95%, 53%)",
+                    "armed_partial": "hsl(45, 93%, 47%)",
+                    "pending": "hsl(45, 93%, 47%)",
+                    "triggered": "hsl(0, 84%, 60%)",
+                    "panic": "hsl(0, 84%, 60%)"
+                  },
+                  "style": {
+                    "size": "large",
+                    "align": "center"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            },
+            {
+              "id": "zones",
+              "title": "Zones de Surveillance",
+              "fields": [
+                {
+                  "key": "zone1Status",
+                  "label": "Zone 1 (Entrée)",
+                  "type": "status-indicator",
+                  "icon": "DoorOpen",
+                  "visible": true,
+                  "statusColors": {
+                    "active": "hsl(0, 84%, 60%)",
+                    "inactive": "hsl(142, 76%, 36%)",
+                    "bypass": "hsl(240, 5%, 64%)"
+                  }
+                },
+                {
+                  "key": "zone2Status",
+                  "label": "Zone 2 (Salon)",
+                  "type": "status-indicator",
+                  "icon": "Home",
+                  "visible": true,
+                  "statusColors": {
+                    "active": "hsl(0, 84%, 60%)",
+                    "inactive": "hsl(142, 76%, 36%)",
+                    "bypass": "hsl(240, 5%, 64%)"
+                  }
+                },
+                {
+                  "key": "zone3Status",
+                  "label": "Zone 3 (Garage)",
+                  "type": "status-indicator",
+                  "icon": "Car",
+                  "visible": true,
+                  "statusColors": {
+                    "active": "hsl(0, 84%, 60%)",
+                    "inactive": "hsl(142, 76%, 36%)",
+                    "bypass": "hsl(240, 5%, 64%)"
+                  }
+                },
+                {
+                  "key": "zone4Status",
+                  "label": "Zone 4 (Jardin)",
+                  "type": "status-indicator",
+                  "icon": "Trees",
+                  "visible": true,
+                  "statusColors": {
+                    "active": "hsl(0, 84%, 60%)",
+                    "inactive": "hsl(142, 76%, 36%)",
+                    "bypass": "hsl(240, 5%, 64%)"
+                  }
+                }
+              ],
+              "layout": "grid",
+              "columns": 2,
+              "visible": true
+            },
+            {
+              "id": "sensors",
+              "title": "Détecteurs",
+              "fields": [
+                {
+                  "key": "motionDetectors",
+                  "label": "Détecteurs de Mouvement",
+                  "type": "number",
+                  "unit": "actifs",
+                  "icon": "Waves",
+                  "visible": true
+                },
+                {
+                  "key": "doorSensors",
+                  "label": "Capteurs de Porte",
+                  "type": "number",
+                  "unit": "ouverts",
+                  "icon": "DoorOpen",
+                  "visible": true
+                },
+                {
+                  "key": "windowSensors",
+                  "label": "Capteurs de Fenêtre",
+                  "type": "number",
+                  "unit": "ouverts",
+                  "icon": "RectangleHorizontal",
+                  "visible": true
+                }
+              ],
+              "layout": "grid",
+              "columns": 3,
+              "visible": true
+            },
+            {
+              "id": "cameras",
+              "title": "Caméras",
+              "fields": [
+                {
+                  "key": "cameraStatus",
+                  "label": "Caméras",
+                  "type": "status-indicator",
+                  "icon": "Camera",
+                  "visible": true,
+                  "statusColors": {
+                    "recording": "hsl(0, 84%, 60%)",
+                    "standby": "hsl(45, 93%, 47%)",
+                    "offline": "hsl(240, 5%, 64%)"
+                  }
+                },
+                {
+                  "key": "activeCameras",
+                  "label": "Caméras Actives",
+                  "type": "text",
+                  "icon": "Video",
+                  "visible": true
+                },
+                {
+                  "key": "lastRecording",
+                  "label": "Dernier Enregistrement",
+                  "type": "text",
+                  "icon": "Clock",
+                  "visible": true
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            },
+            {
+              "id": "keypad",
+              "title": "Code d'Accès",
+              "fields": [
+                {
+                  "key": "securityCode",
+                  "label": "Code de Sécurité",
+                  "type": "keypad",
+                  "visible": true,
+                  "codeLength": 4,
+                  "maxAttempts": 3
+                }
+              ],
+              "layout": "grid",
+              "columns": 1,
+              "visible": true
+            },
+            {
+              "id": "events",
+              "title": "Événements Récents",
+              "fields": [
+                {
+                  "key": "lastEvent",
+                  "label": "Dernier Événement",
+                  "type": "text",
+                  "icon": "AlertTriangle",
+                  "visible": true
+                },
+                {
+                  "key": "eventCount",
+                  "label": "Événements Aujourd'hui",
+                  "type": "number",
+                  "icon": "Activity",
+                  "visible": true
+                },
+                {
+                  "key": "eventTimeline",
+                  "label": "Historique",
+                  "type": "timeline",
+                  "visible": true
+                }
+              ],
+              "layout": "list",
+              "visible": true
+            }
+          ],
+          "interactions": [
+            {
+              "type": "refresh",
+              "label": "Actualiser",
+              "icon": "RefreshCw",
+              "style": "secondary"
+            },
+            {
+              "type": "secure-command",
+              "label": "Armer",
+              "icon": "ShieldCheck",
+              "topic": "home/{deviceId}/alarm/arm",
+              "payload": { "mode": "full" },
+              "confirmation": "Armer l'alarme en mode complet ?",
+              "requireCode": true,
+              "style": "primary"
+            },
+            {
+              "type": "secure-command",
+              "label": "Armer Partiel",
+              "icon": "ShieldHalf",
+              "topic": "home/{deviceId}/alarm/arm",
+              "payload": { "mode": "partial" },
+              "requireCode": true,
+              "style": "secondary"
+            },
+            {
+              "type": "secure-command",
+              "label": "Désarmer",
+              "icon": "ShieldOff",
+              "topic": "home/{deviceId}/alarm/disarm",
+              "payload": { "mode": "off" },
+              "confirmation": "Désarmer complètement l'alarme ?",
+              "requireCode": true,
+              "style": "secondary"
+            },
+            {
+              "type": "command",
+              "label": "Alerte Panique",
+              "icon": "AlertTriangle",
+              "topic": "home/{deviceId}/alarm/panic",
+              "payload": { "trigger": true },
+              "confirmation": "Déclencher l'alerte panique ?",
+              "style": "destructive"
+            },
+            {
+              "type": "navigate",
+              "label": "Voir Caméras",
+              "icon": "Camera",
+              "style": "secondary"
+            }
+          ],
+          "dataMapping": {
+            "alarmState": {
+              "topic": "home/{deviceId}/alarm/state",
+              "path": "status",
+              "fallback": "disarmed"
+            },
+            "zone1Status": {
+              "topic": "home/{deviceId}/alarm/zones",
+              "path": "zone1",
+              "fallback": "inactive"
+            },
+            "zone2Status": {
+              "topic": "home/{deviceId}/alarm/zones",
+              "path": "zone2",
+              "fallback": "inactive"
+            },
+            "zone3Status": {
+              "topic": "home/{deviceId}/alarm/zones",
+              "path": "zone3",
+              "fallback": "inactive"
+            },
+            "zone4Status": {
+              "topic": "home/{deviceId}/alarm/zones",
+              "path": "zone4",
+              "fallback": "inactive"
+            },
+            "motionDetectors": {
+              "topic": "home/{deviceId}/sensors/motion",
+              "path": "activeCount",
+              "fallback": 0
+            },
+            "doorSensors": {
+              "topic": "home/{deviceId}/sensors/doors",
+              "path": "openCount",
+              "fallback": 0
+            },
+            "windowSensors": {
+              "topic": "home/{deviceId}/sensors/windows",
+              "path": "openCount",
+              "fallback": 0
+            },
+            "cameraStatus": {
+              "topic": "home/{deviceId}/cameras/status",
+              "path": "state",
+              "fallback": "standby"
+            },
+            "activeCameras": {
+              "topic": "home/{deviceId}/cameras/status",
+              "path": "active",
+              "fallback": "0 sur 0"
+            },
+            "lastRecording": {
+              "topic": "home/{deviceId}/cameras/recording",
+              "path": "lastTime",
+              "fallback": "Aucun"
+            },
+            "lastEvent": {
+              "topic": "home/{deviceId}/alarm/events",
+              "path": "last.description",
+              "fallback": "Aucun événement"
+            },
+            "eventCount": {
+              "topic": "home/{deviceId}/alarm/events",
+              "path": "todayCount",
+              "fallback": 0
+            },
+            "eventTimeline": {
+              "topic": "home/{deviceId}/alarm/events",
+              "path": "timeline",
+              "fallback": []
+            }
+          },
+          "createdAt": "2025-11-09T00:00:00Z",
+          "updatedAt": "2025-11-09T00:00:00Z"
+        },
+        "source": "github",
+        "discoveryTopic": "ui/widget/discovery",
+        "enabled": true,
+        "lastSeen": "2025-11-09T00:00:00Z"
+      }
+    ]
+  }
+}
