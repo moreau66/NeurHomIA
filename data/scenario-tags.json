@@ -1,0 +1,216 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-15T00:00:00Z",
+  "tags": [
+    {
+      "id": "tag-security",
+      "name": "Sécurité",
+      "color": "#EF4444",
+      "icon": "Shield",
+      "description": "Scénarios liés à la sécurité, l'alarme et la protection",
+      "category": "security",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-comfort",
+      "name": "Confort",
+      "color": "#10B981",
+      "icon": "Sofa",
+      "description": "Scénarios d'automatisation du confort quotidien",
+      "category": "comfort",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-lighting",
+      "name": "Éclairage",
+      "color": "#F59E0B",
+      "icon": "Lightbulb",
+      "description": "Gestion automatique de l'éclairage",
+      "category": "lighting",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-climate",
+      "name": "Climatisation",
+      "color": "#3B82F6",
+      "icon": "Thermometer",
+      "description": "Contrôle du chauffage et de la climatisation",
+      "category": "climate",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-energy",
+      "name": "Énergie",
+      "color": "#8B5CF6",
+      "icon": "Zap",
+      "description": "Optimisation de la consommation énergétique",
+      "category": "energy",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-presence",
+      "name": "Présence",
+      "color": "#EC4899",
+      "icon": "Users",
+      "description": "Scénarios basés sur la détection de présence",
+      "category": "presence",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-scheduling",
+      "name": "Planification",
+      "color": "#06B6D4",
+      "icon": "Calendar",
+      "description": "Scénarios programmés et récurrents",
+      "category": "scheduling",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-night",
+      "name": "Nuit",
+      "color": "#1E3A8A",
+      "icon": "Moon",
+      "description": "Scénarios pour le mode nuit",
+      "category": "scheduling",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-morning",
+      "name": "Matin",
+      "color": "#FBBF24",
+      "icon": "Sunrise",
+      "description": "Scénarios de réveil et routine matinale",
+      "category": "scheduling",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-away",
+      "name": "Absence",
+      "color": "#64748B",
+      "icon": "DoorClosed",
+      "description": "Scénarios activés lors des absences",
+      "category": "presence",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-vacation",
+      "name": "Vacances",
+      "color": "#14B8A6",
+      "icon": "Palmtree",
+      "description": "Mode vacances et simulation de présence",
+      "category": "presence",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-weather",
+      "name": "Météo",
+      "color": "#0EA5E9",
+      "icon": "CloudSun",
+      "description": "Scénarios basés sur les conditions météo",
+      "category": "climate",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-automation",
+      "name": "Automatisation",
+      "color": "#A855F7",
+      "icon": "Cog",
+      "description": "Automatisations générales",
+      "category": "other",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-notification",
+      "name": "Notification",
+      "color": "#F97316",
+      "icon": "Bell",
+      "description": "Scénarios d'alertes et notifications",
+      "category": "other",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    },
+    {
+      "id": "tag-media",
+      "name": "Multimédia",
+      "color": "#E11D48",
+      "icon": "Play",
+      "description": "Contrôle des équipements multimédia",
+      "category": "comfort",
+      "metadata": {
+        "createdAt": "2025-01-15T00:00:00Z",
+        "updatedAt": "2025-01-15T00:00:00Z",
+        "usageCount": 0,
+        "isFromGitHub": true
+      }
+    }
+  ]
+}
