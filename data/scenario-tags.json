@@ -1,216 +1,923 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2025-01-15T00:00:00Z",
-  "tags": [
-    {
-      "id": "tag-security",
-      "name": "Sécurité",
-      "color": "#EF4444",
-      "icon": "Shield",
-      "description": "Scénarios liés à la sécurité, l'alarme et la protection",
-      "category": "security",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
+  "version": 1,
+  "timestamp": "2025-01-22T10:00:00Z",
+  "data": {
+    "entityCategories": [
+      {
+        "id": "smart_lamp",
+        "name": "Lampe intelligente",
+        "type": "light",
+        "icon": "Lightbulb",
+        "description": "Lampe connectée avec contrôle on/off et luminosité",
+        "defaultTopics": [
+          {
+            "key": "state",
+            "topic": "domotique/[localisation]/[type]/[appareil]/state",
+            "description": "État actuel de l'appareil",
+            "category": "État",
+            "direction": "publish",
+            "qos": 1,
+            "dataType": "string",
+            "examplePayload": "ON",
+            "suggestedPayloads": [
+              {"label": "Allumé", "value": "ON", "description": "Appareil activé"},
+              {"label": "Éteint", "value": "OFF", "description": "Appareil désactivé"}
+            ]
+          },
+          {
+            "key": "power",
+            "topic": "domotique/[localisation]/[type]/[appareil]/power",
+            "description": "Commande d'alimentation",
+            "category": "Contrôle",
+            "direction": "subscribe",
+            "qos": 0,
+            "dataType": "string",
+            "examplePayload": "ON",
+            "suggestedPayloads": [
+              {"label": "Allumer", "value": "ON", "description": "Mettre sous tension"},
+              {"label": "Éteindre", "value": "OFF", "description": "Couper l'alimentation"}
+            ]
+          },
+          {
+            "key": "brightness",
+            "topic": "domotique/[localisation]/[type]/[appareil]/brightness",
+            "description": "Contrôle de la luminosité (0-255)",
+            "category": "Éclairage",
+            "direction": "subscribe",
+            "qos": 0,
+            "dataType": "number",
+            "unit": "niveau",
+            "examplePayload": "150",
+            "suggestedPayloads": [
+              {"label": "Minimum", "value": "1", "description": "Luminosité minimale"},
+              {"label": "Faible", "value": "64", "description": "25% de luminosité"},
+              {"label": "Moyen", "value": "128", "description": "50% de luminosité"},
+              {"label": "Fort", "value": "192", "description": "75% de luminosité"},
+              {"label": "Maximum", "value": "255", "description": "Luminosité maximale"}
+            ]
+          },
+          {
+            "key": "color",
+            "topic": "domotique/[localisation]/[type]/[appareil]/color",
+            "description": "Contrôle de la couleur RGB",
+            "category": "Éclairage",
+            "direction": "subscribe",
+            "qos": 0,
+            "dataType": "string",
+            "examplePayload": "255,0,0",
+            "suggestedPayloads": [
+              {"label": "Rouge", "value": "255,0,0", "description": "Couleur rouge"},
+              {"label": "Vert", "value": "0,255,0", "description": "Couleur verte"},
+              {"label": "Bleu", "value": "0,0,255", "description": "Couleur bleue"},
+              {"label": "Blanc", "value": "255,255,255", "description": "Couleur blanche"},
+              {"label": "Jaune", "value": "255,255,0", "description": "Couleur jaune"}
+            ]
+          },
+          {
+            "key": "color_mode",
+            "topic": "domotique/[localisation]/[type]/[appareil]/color_mode",
+            "description": "Mode de couleur (rgb/temperature)",
+            "category": "Éclairage",
+            "direction": "subscribe",
+            "qos": 0,
+            "dataType": "string",
+            "examplePayload": "rgb",
+            "suggestedPayloads": [
+              {"label": "RGB", "value": "rgb", "description": "Mode couleur RGB"},
+              {"label": "Température", "value": "temperature", "description": "Mode température de couleur"}
+            ]
+          },
+          {
+            "key": "color_temp",
+            "topic": "domotique/[localisation]/[type]/[appareil]/color_temp",
+            "description": "Température de couleur en Kelvin (2000-6500K)",
+            "category": "Éclairage",
+            "direction": "subscribe",
+            "qos": 0,
+            "dataType": "number",
+            "unit": "K",
+            "examplePayload": "4000",
+            "suggestedPayloads": [
+              {"label": "Très chaud", "value": "2000", "description": "Lumière très chaude"},
+              {"label": "Chaud", "value": "2700", "description": "Lumière chaude"},
+              {"label": "Neutre", "value": "4000", "description": "Lumière neutre"},
+              {"label": "Froid", "value": "5000", "description": "Lumière froide"},
+              {"label": "Très froid", "value": "6500", "description": "Lumière très froide"}
+            ]
+          },
+          {
+            "key": "effect",
+            "topic": "domotique/[localisation]/[type]/[appareil]/effect",
+            "description": "Effet lumineux",
+            "category": "Éclairage",
+            "direction": "subscribe",
+            "qos": 0,
+            "dataType": "string",
+            "examplePayload": "none",
+            "suggestedPayloads": [
+              {"label": "Aucun", "value": "none", "description": "Pas d'effet"},
+              {"label": "Clignotement", "value": "blink", "description": "Clignotement"},
+              {"label": "Pulsation", "value": "pulse", "description": "Pulsation douce"},
+              {"label": "Arc-en-ciel", "value": "rainbow", "description": "Cycle de couleurs"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "smart_thermostat",
+        "name": "Thermostat intelligent",
+        "type": "climate",
+        "icon": "Thermometer",
+        "description": "Thermostat pour réguler la température",
+        "defaultTopics": {
+          "temperature": "zigbee2mqtt/{device_id}/local_temperature",
+          "target": "zigbee2mqtt/{device_id}/occupied_heating_setpoint",
+          "mode": "zigbee2mqtt/{device_id}/system_mode"
+        }
+      },
+      {
+        "id": "smart_switch",
+        "name": "Interrupteur intelligent",
+        "type": "switch",
+        "icon": "Power",
+        "description": "Interrupteur contrôlable à distance",
+        "defaultTopics": {
+          "state": "zigbee2mqtt/{device_id}/state",
+          "command": "zigbee2mqtt/{device_id}/set"
+        }
+      },
+      {
+        "id": "temp_sensor",
+        "name": "Capteur de température",
+        "type": "sensor",
+        "icon": "Thermometer",
+        "description": "Capteur pour mesurer la température ambiante",
+        "defaultTopics": {
+          "temperature": "zigbee2mqtt/{device_id}/temperature",
+          "humidity": "zigbee2mqtt/{device_id}/humidity"
+        }
+      },
+      {
+        "id": "smart_plug",
+        "name": "Prise intelligente",
+        "type": "switch",
+        "icon": "Plug",
+        "description": "Prise connectée avec contrôle on/off",
+        "defaultTopics": {
+          "state": "zigbee2mqtt/{device_id}/state",
+          "command": "zigbee2mqtt/{device_id}/set"
+        }
+      },
+      {
+        "id": "security_camera",
+        "name": "Caméra de sécurité",
+        "type": "camera",
+        "icon": "Camera",
+        "description": "Caméra pour la surveillance intérieure",
+        "defaultTopics": {
+          "stream": "cameras/{device_id}/stream",
+          "snapshot": "cameras/{device_id}/snapshot"
+        }
+      },
+      {
+        "id": "smart_lock",
+        "name": "Serrure connectée",
+        "type": "lock",
+        "icon": "Lock",
+        "description": "Serrure contrôlable via une application",
+        "defaultTopics": {
+          "state": "zigbee2mqtt/{device_id}/state",
+          "command": "zigbee2mqtt/{device_id}/set"
+        }
+      },
+      {
+        "id": "door_sensor",
+        "name": "Capteur d'ouverture",
+        "type": "sensor",
+        "icon": "DoorOpen",
+        "description": "Détecteur d'ouverture de porte ou fenêtre",
+        "defaultTopics": {
+          "state": "zigbee2mqtt/{device_id}/contact",
+          "battery": "zigbee2mqtt/{device_id}/battery"
+        }
+      },
+      {
+        "id": "motion_sensor",
+        "name": "Détecteur de mouvement",
+        "type": "sensor",
+        "icon": "Activity",
+        "description": "Capteur de détection de mouvement PIR",
+        "defaultTopics": {
+          "occupancy": "zigbee2mqtt/{device_id}/occupancy",
+          "battery": "zigbee2mqtt/{device_id}/battery"
+        }
+      },
+      {
+        "id": "roller_shutter",
+        "name": "Volet roulant",
+        "type": "cover",
+        "icon": "Blinds",
+        "description": "Volet roulant motorisé avec contrôle de position",
+        "defaultTopics": {
+          "position": "zigbee2mqtt/{device_id}/position",
+          "command": "zigbee2mqtt/{device_id}/set",
+          "state": "zigbee2mqtt/{device_id}/state"
+        }
+      },
+      {
+        "id": "thermostat",
+        "name": "Thermostat",
+        "type": "climate",
+        "icon": "Gauge",
+        "description": "Thermostat intelligent pour contrôle du chauffage",
+        "defaultTopics": {
+          "temperature": "zigbee2mqtt/{device_id}/local_temperature",
+          "target": "zigbee2mqtt/{device_id}/occupied_heating_setpoint",
+          "mode": "zigbee2mqtt/{device_id}/system_mode"
+        }
+      },
+      {
+        "id": "rgb_light",
+        "name": "Ampoule RGB",
+        "type": "light",
+        "icon": "Palette",
+        "description": "Ampoule avec contrôle RGB et température de couleur",
+        "defaultTopics": {
+          "state": "zigbee2mqtt/{device_id}/state",
+          "command": "zigbee2mqtt/{device_id}/set",
+          "color": "zigbee2mqtt/{device_id}/color",
+          "brightness": "zigbee2mqtt/{device_id}/brightness"
+        }
+      },
+      {
+        "id": "smoke_detector",
+        "name": "Détecteur de fumée",
+        "type": "sensor",
+        "icon": "Flame",
+        "description": "Détecteur de fumée connecté",
+        "defaultTopics": {
+          "smoke": "zigbee2mqtt/{device_id}/smoke",
+          "battery": "zigbee2mqtt/{device_id}/battery",
+          "test": "zigbee2mqtt/{device_id}/test"
+        }
+      },
+      {
+        "id": "water_leak_sensor",
+        "name": "Détecteur de fuite d'eau",
+        "type": "sensor",
+        "icon": "Droplet",
+        "description": "Capteur de détection de fuite d'eau",
+        "defaultTopics": {
+          "water_leak": "zigbee2mqtt/{device_id}/water_leak",
+          "battery": "zigbee2mqtt/{device_id}/battery"
+        }
+      },
+      {
+        "id": "weather_station",
+        "name": "Station météo",
+        "type": "sensor",
+        "icon": "Cloud",
+        "description": "Station météorologique connectée via OpenWeatherMap",
+        "entityType": "virtual",
+        "defaultTopics": {
+          "temperature": "weather/{device_id}/temperature",
+          "humidity": "weather/{device_id}/humidity",
+          "conditions": "weather/{device_id}/conditions"
+        }
+      },
+      {
+        "id": "ai_assistant",
+        "name": "Assistant IA",
+        "type": "assistant",
+        "icon": "Brain",
+        "description": "Assistant IA connecté au serveur Ollama local",
+        "entityType": "virtual",
+        "defaultTopics": {
+          "query": "ai/{device_id}/query",
+          "response": "ai/{device_id}/response"
+        }
+      },
+      {
+        "id": "person",
+        "name": "Personne",
+        "type": "person",
+        "icon": "User",
+        "description": "Représente une personne (famille/ami/autre)",
+        "entityType": "human",
+        "defaultTopics": {
+          "presence": "person/{device_id}/presence",
+          "location": "person/{device_id}/location"
+        }
+      },
+      {
+        "id": "astronomy_station",
+        "name": "Station astronomique",
+        "type": "sensor",
+        "icon": "Sun",
+        "description": "Calculs astronomiques avancés (soleil, lune, saisons)",
+        "entityType": "virtual",
+        "defaultTopics": {
+          "sun_position": "astronomy/{device_id}/sun/position",
+          "moon_phase": "astronomy/{device_id}/moon/phase"
+        }
+      },
+      {
+        "id": "smart_window",
+        "name": "Fenêtre intelligente",
+        "type": "window",
+        "icon": "Blinds",
+        "description": "Fenêtre avec volets roulants pilotés selon l'ensoleillement",
+        "entityType": "physical",
+        "defaultTopics": {
+          "position": "window/{device_id}/position",
+          "command": "window/{device_id}/set"
+        }
+      },
+      {
+        "id": "energy_manager",
+        "name": "Gestionnaire de consommation",
+        "type": "energy",
+        "icon": "Zap",
+        "description": "Appareil virtuel pour agréger et calculer la consommation électrique",
+        "entityType": "virtual",
+        "defaultTopics": {
+          "consumption": "energy/{device_id}/consumption",
+          "production": "energy/{device_id}/production"
+        }
+      },
+      {
+        "id": "generic_physical",
+        "name": "Physique générique",
+        "type": "generic",
+        "icon": "Cpu",
+        "description": "Entité physique générique",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "generic/{device_id}/state"
+        }
+      },
+      {
+        "id": "generic_virtual",
+        "name": "Virtuel générique",
+        "type": "generic",
+        "icon": "Cloud",
+        "description": "Entité virtuelle générique",
+        "entityType": "virtual",
+        "defaultTopics": {
+          "state": "virtual/{device_id}/state"
+        }
+      },
+      {
+        "id": "generic_human",
+        "name": "Humain générique",
+        "type": "generic",
+        "icon": "User",
+        "description": "Entité humaine générique",
+        "entityType": "human",
+        "defaultTopics": {
+          "presence": "human/{device_id}/presence"
+        }
+      },
+      {
+        "id": "generic_device",
+        "name": "Appareil générique",
+        "type": "generic",
+        "icon": "Cpu",
+        "description": "Modèle vierge pour un appareil IoT personnalisé",
+        "defaultTopics": {
+          "state": "device/{device_id}/state"
+        }
+      },
+      {
+        "id": "widgets",
+        "name": "Widget personnalisé",
+        "type": "widget",
+        "icon": "Component",
+        "description": "Widgets personnalisés créés avec l'éditeur",
+        "entityType": "virtual",
+        "defaultTopics": {
+          "data": "widget/{device_id}/data"
+        }
       }
-    },
-    {
-      "id": "tag-comfort",
-      "name": "Confort",
-      "color": "#10B981",
-      "icon": "Sofa",
-      "description": "Scénarios d'automatisation du confort quotidien",
-      "category": "comfort",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
+    ],
+    "locations": [
+      {
+        "id": "non_localise",
+        "name": "Non localisé",
+        "type": "autre",
+        "description": "Appareil sans localisation définie",
+        "parent_id": null
+      },
+      {
+        "id": "systeme",
+        "name": "Système",
+        "type": "zone",
+        "description": "Zone pour les entités virtuelles et services système",
+        "parent_id": null
+      },
+      {
+        "id": "exterieur",
+        "name": "Extérieur",
+        "type": "zone",
+        "description": "Zones extérieures de la propriété",
+        "parent_id": null
+      },
+      {
+        "id": "jardin",
+        "name": "Jardin",
+        "type": "zone",
+        "description": "Espace vert principal",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "cour",
+        "name": "Cour",
+        "type": "zone",
+        "description": "Espace devant la maison",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "garage_ext",
+        "name": "Garage extérieur",
+        "type": "zone",
+        "description": "Garage détaché",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "piscine",
+        "name": "Piscine",
+        "type": "zone",
+        "description": "Zone piscine",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "terrasse",
+        "name": "Terrasse",
+        "type": "zone",
+        "description": "Terrasse principale",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "balcon",
+        "name": "Balcon",
+        "type": "zone",
+        "description": "Balcon",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "allee",
+        "name": "Allée",
+        "type": "zone",
+        "description": "Allée d'accès",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "portail",
+        "name": "Portail",
+        "type": "zone",
+        "description": "Portail d'accès",
+        "parent_id": "exterieur"
+      },
+      {
+        "id": "interieur",
+        "name": "Intérieur",
+        "type": "zone",
+        "description": "Zones intérieures",
+        "parent_id": null
+      },
+      {
+        "id": "rdc",
+        "name": "Rez-de-chaussée",
+        "type": "niveau",
+        "description": "Rez-de-chaussée",
+        "parent_id": "interieur"
+      },
+      {
+        "id": "salon",
+        "name": "Salon",
+        "type": "piece",
+        "description": "Pièce de vie principale",
+        "parent_id": "rdc"
+      },
+      {
+        "id": "cuisine",
+        "name": "Cuisine",
+        "type": "piece",
+        "description": "Cuisine équipée",
+        "parent_id": "rdc"
+      },
+      {
+        "id": "salle-manger",
+        "name": "Salle à manger",
+        "type": "piece",
+        "description": "Salle à manger",
+        "parent_id": "rdc"
+      },
+      {
+        "id": "entree",
+        "name": "Entrée",
+        "type": "piece",
+        "description": "Hall d'entrée",
+        "parent_id": "rdc"
+      },
+      {
+        "id": "wc-rdc",
+        "name": "WC",
+        "type": "piece",
+        "description": "Toilettes",
+        "parent_id": "rdc"
+      },
+      {
+        "id": "chambre-parentale-rdc",
+        "name": "Chambre parentale",
+        "type": "piece",
+        "description": "Chambre principale",
+        "parent_id": "rdc"
+      },
+      {
+        "id": "bureau_rdc",
+        "name": "Bureau",
+        "type": "piece",
+        "description": "Espace de travail",
+        "parent_id": "rdc"
+      },
+      {
+        "id": "etage",
+        "name": "Étage",
+        "type": "niveau",
+        "description": "Étage supérieur",
+        "parent_id": "interieur"
+      },
+      {
+        "id": "chambre_parentale_etage",
+        "name": "Chambre parentale",
+        "type": "piece",
+        "description": "Chambre principale",
+        "parent_id": "etage"
+      },
+      {
+        "id": "chambre-enfant-1",
+        "name": "Chambre enfant 1",
+        "type": "piece",
+        "description": "Chambre d'enfant",
+        "parent_id": "etage"
+      },
+      {
+        "id": "chambre-enfant-2",
+        "name": "Chambre enfant 2",
+        "type": "piece",
+        "description": "Chambre d'enfant",
+        "parent_id": "etage"
+      },
+      {
+        "id": "chambre-ami",
+        "name": "Chambre d'ami",
+        "type": "piece",
+        "description": "Chambre d'ami",
+        "parent_id": "etage"
+      },
+      {
+        "id": "salle-bain",
+        "name": "Salle de bain",
+        "type": "piece",
+        "description": "Salle de bain",
+        "parent_id": "etage"
+      },
+      {
+        "id": "sous_sol",
+        "name": "Sous-sol",
+        "type": "niveau",
+        "description": "Niveau inférieur",
+        "parent_id": "interieur"
+      },
+      {
+        "id": "cave",
+        "name": "Cave",
+        "type": "piece",
+        "description": "Cave à vin",
+        "parent_id": "sous_sol"
+      },
+      {
+        "id": "buanderie",
+        "name": "Buanderie",
+        "type": "piece",
+        "description": "Espace linge",
+        "parent_id": "sous_sol"
+      },
+      {
+        "id": "local-technique",
+        "name": "Local technique",
+        "type": "piece",
+        "description": "Hub domotique",
+        "parent_id": "sous_sol"
+      },
+      {
+        "id": "annexes",
+        "name": "Annexes",
+        "type": "zone",
+        "description": "Bâtiments secondaires",
+        "parent_id": null
+      },
+      {
+        "id": "abri-jardin",
+        "name": "Abri de jardin",
+        "type": "piece",
+        "description": "Cabane de jardin",
+        "parent_id": "annexes"
+      },
+      {
+        "id": "garage",
+        "name": "Garage",
+        "type": "piece",
+        "description": "Garage attaché",
+        "parent_id": "annexes"
+      },
+      {
+        "id": "veranda",
+        "name": "Véranda",
+        "type": "piece",
+        "description": "Espace vitré",
+        "parent_id": "annexes"
       }
-    },
-    {
-      "id": "tag-lighting",
-      "name": "Éclairage",
-      "color": "#F59E0B",
-      "icon": "Lightbulb",
-      "description": "Gestion automatique de l'éclairage",
-      "category": "lighting",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
+    ],
+    "locationPaths": [
+      {
+        "id": "non_localise",
+        "name": "Non localisé",
+        "path": "non_localise",
+        "segments": ["non_localise"],
+        "type": "autre",
+        "description": "Appareil sans localisation définie"
+      },
+      {
+        "id": "systeme",
+        "name": "Système",
+        "path": "systeme",
+        "segments": ["systeme"],
+        "type": "zone",
+        "description": "Zone pour les entités virtuelles et services système"
+      },
+      {
+        "id": "exterieur",
+        "name": "Extérieur",
+        "path": "exterieur",
+        "segments": ["exterieur"],
+        "type": "zone",
+        "description": "Zones extérieures de la propriété"
+      },
+      {
+        "id": "exterieur_jardin",
+        "name": "Jardin",
+        "path": "exterieur/jardin",
+        "segments": ["exterieur", "jardin"],
+        "type": "zone",
+        "description": "Espace vert principal"
+      },
+      {
+        "id": "exterieur_cour",
+        "name": "Cour",
+        "path": "exterieur/cour",
+        "segments": ["exterieur", "cour"],
+        "type": "zone",
+        "description": "Espace devant la maison"
+      },
+      {
+        "id": "exterieur_garage_ext",
+        "name": "Garage extérieur",
+        "path": "exterieur/garage_ext",
+        "segments": ["exterieur", "garage_ext"],
+        "type": "zone",
+        "description": "Garage détaché"
+      },
+      {
+        "id": "exterieur_piscine",
+        "name": "Piscine",
+        "path": "exterieur/piscine",
+        "segments": ["exterieur", "piscine"],
+        "type": "zone",
+        "description": "Zone piscine"
+      },
+      {
+        "id": "exterieur_terrasse",
+        "name": "Terrasse",
+        "path": "exterieur/terrasse",
+        "segments": ["exterieur", "terrasse"],
+        "type": "zone",
+        "description": "Terrasse principale"
+      },
+      {
+        "id": "exterieur_balcon",
+        "name": "Balcon",
+        "path": "exterieur/balcon",
+        "segments": ["exterieur", "balcon"],
+        "type": "zone",
+        "description": "Balcon"
+      },
+      {
+        "id": "exterieur_allee",
+        "name": "Allée",
+        "path": "exterieur/allee",
+        "segments": ["exterieur", "allee"],
+        "type": "zone",
+        "description": "Allée d'accès"
+      },
+      {
+        "id": "exterieur_portail",
+        "name": "Portail",
+        "path": "exterieur/portail",
+        "segments": ["exterieur", "portail"],
+        "type": "zone",
+        "description": "Portail d'accès"
+      },
+      {
+        "id": "interieur",
+        "name": "Intérieur",
+        "path": "interieur",
+        "segments": ["interieur"],
+        "type": "zone",
+        "description": "Zones intérieures"
+      },
+      {
+        "id": "interieur_rdc",
+        "name": "Rez-de-chaussée",
+        "path": "interieur/rdc",
+        "segments": ["interieur", "rdc"],
+        "type": "niveau",
+        "description": "Rez-de-chaussée"
+      },
+      {
+        "id": "interieur_rdc_salon",
+        "name": "Salon",
+        "path": "interieur/rdc/salon",
+        "segments": ["interieur", "rdc", "salon"],
+        "type": "piece",
+        "description": "Pièce de vie principale"
+      },
+      {
+        "id": "interieur_rdc_cuisine",
+        "name": "Cuisine",
+        "path": "interieur/rdc/cuisine",
+        "segments": ["interieur", "rdc", "cuisine"],
+        "type": "piece",
+        "description": "Cuisine équipée"
+      },
+      {
+        "id": "interieur_rdc_salle_manger",
+        "name": "Salle à manger",
+        "path": "interieur/rdc/salle-manger",
+        "segments": ["interieur", "rdc", "salle-manger"],
+        "type": "piece",
+        "description": "Salle à manger"
+      },
+      {
+        "id": "interieur_rdc_entree",
+        "name": "Entrée",
+        "path": "interieur/rdc/entree",
+        "segments": ["interieur", "rdc", "entree"],
+        "type": "piece",
+        "description": "Hall d'entrée"
+      },
+      {
+        "id": "interieur_rdc_wc",
+        "name": "WC",
+        "path": "interieur/rdc/wc-rdc",
+        "segments": ["interieur", "rdc", "wc-rdc"],
+        "type": "piece",
+        "description": "Toilettes"
+      },
+      {
+        "id": "interieur_rdc_chambre_parentale",
+        "name": "Chambre parentale",
+        "path": "interieur/rdc/chambre-parentale-rdc",
+        "segments": ["interieur", "rdc", "chambre-parentale-rdc"],
+        "type": "piece",
+        "description": "Chambre principale"
+      },
+      {
+        "id": "interieur_rdc_bureau",
+        "name": "Bureau",
+        "path": "interieur/rdc/bureau_rdc",
+        "segments": ["interieur", "rdc", "bureau_rdc"],
+        "type": "piece",
+        "description": "Espace de travail"
+      },
+      {
+        "id": "interieur_etage",
+        "name": "Étage",
+        "path": "interieur/etage",
+        "segments": ["interieur", "etage"],
+        "type": "niveau",
+        "description": "Étage supérieur"
+      },
+      {
+        "id": "interieur_etage_chambre_parentale",
+        "name": "Chambre parentale",
+        "path": "interieur/etage/chambre_parentale_etage",
+        "segments": ["interieur", "etage", "chambre_parentale_etage"],
+        "type": "piece",
+        "description": "Chambre principale"
+      },
+      {
+        "id": "interieur_etage_chambre_enfant_1",
+        "name": "Chambre enfant 1",
+        "path": "interieur/etage/chambre-enfant-1",
+        "segments": ["interieur", "etage", "chambre-enfant-1"],
+        "type": "piece",
+        "description": "Chambre d'enfant"
+      },
+      {
+        "id": "interieur_etage_chambre_enfant_2",
+        "name": "Chambre enfant 2",
+        "path": "interieur/etage/chambre-enfant-2",
+        "segments": ["interieur", "etage", "chambre-enfant-2"],
+        "type": "piece",
+        "description": "Chambre d'enfant"
+      },
+      {
+        "id": "interieur_etage_chambre_ami",
+        "name": "Chambre d'ami",
+        "path": "interieur/etage/chambre-ami",
+        "segments": ["interieur", "etage", "chambre-ami"],
+        "type": "piece",
+        "description": "Chambre d'ami"
+      },
+      {
+        "id": "interieur_etage_salle_bain",
+        "name": "Salle de bain",
+        "path": "interieur/etage/salle-bain",
+        "segments": ["interieur", "etage", "salle-bain"],
+        "type": "piece",
+        "description": "Salle de bain"
+      },
+      {
+        "id": "interieur_sous_sol",
+        "name": "Sous-sol",
+        "path": "interieur/sous_sol",
+        "segments": ["interieur", "sous_sol"],
+        "type": "niveau",
+        "description": "Niveau inférieur"
+      },
+      {
+        "id": "interieur_sous_sol_cave",
+        "name": "Cave",
+        "path": "interieur/sous_sol/cave",
+        "segments": ["interieur", "sous_sol", "cave"],
+        "type": "piece",
+        "description": "Cave à vin"
+      },
+      {
+        "id": "interieur_sous_sol_buanderie",
+        "name": "Buanderie",
+        "path": "interieur/sous_sol/buanderie",
+        "segments": ["interieur", "sous_sol", "buanderie"],
+        "type": "piece",
+        "description": "Espace linge"
+      },
+      {
+        "id": "interieur_sous_sol_local_technique",
+        "name": "Local technique",
+        "path": "interieur/sous_sol/local-technique",
+        "segments": ["interieur", "sous_sol", "local-technique"],
+        "type": "piece",
+        "description": "Hub domotique"
+      },
+      {
+        "id": "annexes",
+        "name": "Annexes",
+        "path": "annexes",
+        "segments": ["annexes"],
+        "type": "zone",
+        "description": "Bâtiments secondaires"
+      },
+      {
+        "id": "annexes_abri_jardin",
+        "name": "Abri de jardin",
+        "path": "annexes/abri-jardin",
+        "segments": ["annexes", "abri-jardin"],
+        "type": "piece",
+        "description": "Cabane de jardin"
+      },
+      {
+        "id": "annexes_garage",
+        "name": "Garage",
+        "path": "annexes/garage",
+        "segments": ["annexes", "garage"],
+        "type": "piece",
+        "description": "Garage attaché"
+      },
+      {
+        "id": "annexes_veranda",
+        "name": "Véranda",
+        "path": "annexes/veranda",
+        "segments": ["annexes", "veranda"],
+        "type": "piece",
+        "description": "Espace vitré"
       }
-    },
-    {
-      "id": "tag-climate",
-      "name": "Climatisation",
-      "color": "#3B82F6",
-      "icon": "Thermometer",
-      "description": "Contrôle du chauffage et de la climatisation",
-      "category": "climate",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-energy",
-      "name": "Énergie",
-      "color": "#8B5CF6",
-      "icon": "Zap",
-      "description": "Optimisation de la consommation énergétique",
-      "category": "energy",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-presence",
-      "name": "Présence",
-      "color": "#EC4899",
-      "icon": "Users",
-      "description": "Scénarios basés sur la détection de présence",
-      "category": "presence",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-scheduling",
-      "name": "Planification",
-      "color": "#06B6D4",
-      "icon": "Calendar",
-      "description": "Scénarios programmés et récurrents",
-      "category": "scheduling",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-night",
-      "name": "Nuit",
-      "color": "#1E3A8A",
-      "icon": "Moon",
-      "description": "Scénarios pour le mode nuit",
-      "category": "scheduling",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-morning",
-      "name": "Matin",
-      "color": "#FBBF24",
-      "icon": "Sunrise",
-      "description": "Scénarios de réveil et routine matinale",
-      "category": "scheduling",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-away",
-      "name": "Absence",
-      "color": "#64748B",
-      "icon": "DoorClosed",
-      "description": "Scénarios activés lors des absences",
-      "category": "presence",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-vacation",
-      "name": "Vacances",
-      "color": "#14B8A6",
-      "icon": "Palmtree",
-      "description": "Mode vacances et simulation de présence",
-      "category": "presence",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-weather",
-      "name": "Météo",
-      "color": "#0EA5E9",
-      "icon": "CloudSun",
-      "description": "Scénarios basés sur les conditions météo",
-      "category": "climate",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-automation",
-      "name": "Automatisation",
-      "color": "#A855F7",
-      "icon": "Cog",
-      "description": "Automatisations générales",
-      "category": "other",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-notification",
-      "name": "Notification",
-      "color": "#F97316",
-      "icon": "Bell",
-      "description": "Scénarios d'alertes et notifications",
-      "category": "other",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
-    },
-    {
-      "id": "tag-media",
-      "name": "Multimédia",
-      "color": "#E11D48",
-      "icon": "Play",
-      "description": "Contrôle des équipements multimédia",
-      "category": "comfort",
-      "metadata": {
-        "createdAt": "2025-01-15T00:00:00Z",
-        "updatedAt": "2025-01-15T00:00:00Z",
-        "usageCount": 0,
-        "isFromGitHub": true
-      }
+    ],
+    "defaults": {
+      "entityType": "physical",
+      "entityCategory": "smart_lamp",
+      "location": "non_localise"
     }
-  ]
+  }
 }
