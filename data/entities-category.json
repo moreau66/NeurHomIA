@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "timestamp": "2025-01-22T10:00:00Z",
+  "version": 2,
+  "timestamp": "2025-12-21T12:00:00Z",
   "data": {
     "entityCategories": [
       {
@@ -397,6 +397,472 @@
         "entityType": "virtual",
         "defaultTopics": {
           "data": "widget/{device_id}/data"
+        }
+      },
+      {
+        "id": "smart_speaker",
+        "name": "Enceinte connectée",
+        "type": "media",
+        "icon": "Speaker",
+        "description": "Enceinte audio connectée (Sonos, HomePod, Echo...)",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "media/{device_id}/state",
+          "volume": "media/{device_id}/volume",
+          "mute": "media/{device_id}/mute",
+          "track": "media/{device_id}/track"
+        }
+      },
+      {
+        "id": "smart_tv",
+        "name": "Télévision connectée",
+        "type": "media",
+        "icon": "Tv",
+        "description": "Smart TV avec contrôle à distance",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "media/{device_id}/state",
+          "source": "media/{device_id}/source",
+          "volume": "media/{device_id}/volume",
+          "channel": "media/{device_id}/channel"
+        }
+      },
+      {
+        "id": "media_player",
+        "name": "Lecteur multimédia",
+        "type": "media",
+        "icon": "Play",
+        "description": "Lecteur multimédia (Chromecast, Apple TV, Fire TV...)",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "media/{device_id}/state",
+          "playback": "media/{device_id}/playback",
+          "source": "media/{device_id}/source"
+        }
+      },
+      {
+        "id": "soundbar",
+        "name": "Barre de son",
+        "type": "media",
+        "icon": "Music",
+        "description": "Barre de son connectée",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "media/{device_id}/state",
+          "volume": "media/{device_id}/volume",
+          "mode": "media/{device_id}/sound_mode"
+        }
+      },
+      {
+        "id": "smart_washer",
+        "name": "Lave-linge connecté",
+        "type": "appliance",
+        "icon": "WashingMachine",
+        "description": "Lave-linge intelligent avec suivi du cycle",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "appliance/{device_id}/state",
+          "cycle": "appliance/{device_id}/cycle",
+          "remaining_time": "appliance/{device_id}/remaining_time"
+        }
+      },
+      {
+        "id": "smart_dryer",
+        "name": "Sèche-linge connecté",
+        "type": "appliance",
+        "icon": "Wind",
+        "description": "Sèche-linge intelligent",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "appliance/{device_id}/state",
+          "cycle": "appliance/{device_id}/cycle",
+          "remaining_time": "appliance/{device_id}/remaining_time"
+        }
+      },
+      {
+        "id": "smart_dishwasher",
+        "name": "Lave-vaisselle connecté",
+        "type": "appliance",
+        "icon": "Utensils",
+        "description": "Lave-vaisselle intelligent",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "appliance/{device_id}/state",
+          "cycle": "appliance/{device_id}/cycle",
+          "remaining_time": "appliance/{device_id}/remaining_time"
+        }
+      },
+      {
+        "id": "smart_fridge",
+        "name": "Réfrigérateur connecté",
+        "type": "appliance",
+        "icon": "Refrigerator",
+        "description": "Réfrigérateur intelligent avec contrôle de température",
+        "entityType": "physical",
+        "defaultTopics": {
+          "temperature": "appliance/{device_id}/temperature",
+          "door": "appliance/{device_id}/door",
+          "mode": "appliance/{device_id}/mode"
+        }
+      },
+      {
+        "id": "smart_oven",
+        "name": "Four connecté",
+        "type": "appliance",
+        "icon": "ChefHat",
+        "description": "Four intelligent avec contrôle à distance",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "appliance/{device_id}/state",
+          "temperature": "appliance/{device_id}/temperature",
+          "mode": "appliance/{device_id}/mode",
+          "timer": "appliance/{device_id}/timer"
+        }
+      },
+      {
+        "id": "robot_vacuum",
+        "name": "Aspirateur robot",
+        "type": "appliance",
+        "icon": "Bot",
+        "description": "Aspirateur robot (Roomba, Roborock, Dyson...)",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "appliance/{device_id}/state",
+          "battery": "appliance/{device_id}/battery",
+          "command": "appliance/{device_id}/command",
+          "location": "appliance/{device_id}/location"
+        }
+      },
+      {
+        "id": "air_conditioner",
+        "name": "Climatiseur",
+        "type": "climate",
+        "icon": "Snowflake",
+        "description": "Climatiseur réversible connecté",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "climate/{device_id}/state",
+          "temperature": "climate/{device_id}/temperature",
+          "target_temp": "climate/{device_id}/target_temp",
+          "mode": "climate/{device_id}/mode",
+          "fan_speed": "climate/{device_id}/fan_speed"
+        }
+      },
+      {
+        "id": "fan",
+        "name": "Ventilateur connecté",
+        "type": "climate",
+        "icon": "Fan",
+        "description": "Ventilateur intelligent avec contrôle de vitesse",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "climate/{device_id}/state",
+          "speed": "climate/{device_id}/speed",
+          "oscillation": "climate/{device_id}/oscillation"
+        }
+      },
+      {
+        "id": "humidifier",
+        "name": "Humidificateur",
+        "type": "climate",
+        "icon": "Droplets",
+        "description": "Humidificateur d'air connecté",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "climate/{device_id}/state",
+          "humidity": "climate/{device_id}/humidity",
+          "target_humidity": "climate/{device_id}/target_humidity"
+        }
+      },
+      {
+        "id": "dehumidifier",
+        "name": "Déshumidificateur",
+        "type": "climate",
+        "icon": "CloudDrizzle",
+        "description": "Déshumidificateur connecté",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "climate/{device_id}/state",
+          "humidity": "climate/{device_id}/humidity",
+          "target_humidity": "climate/{device_id}/target_humidity"
+        }
+      },
+      {
+        "id": "air_purifier",
+        "name": "Purificateur d'air",
+        "type": "climate",
+        "icon": "Wind",
+        "description": "Purificateur d'air intelligent",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "climate/{device_id}/state",
+          "air_quality": "climate/{device_id}/air_quality",
+          "filter_life": "climate/{device_id}/filter_life",
+          "fan_speed": "climate/{device_id}/fan_speed"
+        }
+      },
+      {
+        "id": "heater",
+        "name": "Radiateur électrique",
+        "type": "climate",
+        "icon": "Flame",
+        "description": "Radiateur électrique connecté",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "climate/{device_id}/state",
+          "temperature": "climate/{device_id}/temperature",
+          "target_temp": "climate/{device_id}/target_temp",
+          "mode": "climate/{device_id}/mode"
+        }
+      },
+      {
+        "id": "sprinkler",
+        "name": "Arrosage automatique",
+        "type": "outdoor",
+        "icon": "Droplet",
+        "description": "Système d'arrosage automatique",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "outdoor/{device_id}/state",
+          "zone": "outdoor/{device_id}/zone",
+          "schedule": "outdoor/{device_id}/schedule",
+          "moisture": "outdoor/{device_id}/moisture"
+        }
+      },
+      {
+        "id": "pool_pump",
+        "name": "Pompe de piscine",
+        "type": "outdoor",
+        "icon": "Waves",
+        "description": "Pompe de piscine connectée",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "outdoor/{device_id}/state",
+          "speed": "outdoor/{device_id}/speed",
+          "timer": "outdoor/{device_id}/timer"
+        }
+      },
+      {
+        "id": "gate_opener",
+        "name": "Portail motorisé",
+        "type": "outdoor",
+        "icon": "DoorOpen",
+        "description": "Portail automatique connecté",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "outdoor/{device_id}/state",
+          "command": "outdoor/{device_id}/command",
+          "position": "outdoor/{device_id}/position"
+        }
+      },
+      {
+        "id": "garage_door",
+        "name": "Porte de garage",
+        "type": "outdoor",
+        "icon": "Warehouse",
+        "description": "Porte de garage motorisée",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "outdoor/{device_id}/state",
+          "command": "outdoor/{device_id}/command",
+          "position": "outdoor/{device_id}/position"
+        }
+      },
+      {
+        "id": "solar_panel",
+        "name": "Panneau solaire",
+        "type": "energy",
+        "icon": "Sun",
+        "description": "Installation photovoltaïque",
+        "entityType": "physical",
+        "defaultTopics": {
+          "production": "energy/{device_id}/production",
+          "voltage": "energy/{device_id}/voltage",
+          "efficiency": "energy/{device_id}/efficiency"
+        }
+      },
+      {
+        "id": "battery_storage",
+        "name": "Batterie domestique",
+        "type": "energy",
+        "icon": "BatteryCharging",
+        "description": "Stockage batterie domestique (Powerwall, etc.)",
+        "entityType": "physical",
+        "defaultTopics": {
+          "charge": "energy/{device_id}/charge",
+          "power_in": "energy/{device_id}/power_in",
+          "power_out": "energy/{device_id}/power_out",
+          "state": "energy/{device_id}/state"
+        }
+      },
+      {
+        "id": "ev_charger",
+        "name": "Borne de recharge VE",
+        "type": "energy",
+        "icon": "Plug",
+        "description": "Borne de recharge véhicule électrique",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "energy/{device_id}/state",
+          "power": "energy/{device_id}/power",
+          "energy_delivered": "energy/{device_id}/energy_delivered",
+          "vehicle_connected": "energy/{device_id}/vehicle_connected"
+        }
+      },
+      {
+        "id": "smart_meter",
+        "name": "Compteur intelligent",
+        "type": "energy",
+        "icon": "Gauge",
+        "description": "Compteur intelligent (Linky, etc.)",
+        "entityType": "physical",
+        "defaultTopics": {
+          "consumption": "energy/{device_id}/consumption",
+          "power": "energy/{device_id}/power",
+          "tariff": "energy/{device_id}/tariff"
+        }
+      },
+      {
+        "id": "alarm_panel",
+        "name": "Centrale d'alarme",
+        "type": "security",
+        "icon": "Shield",
+        "description": "Centrale d'alarme connectée",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "security/{device_id}/state",
+          "arm_mode": "security/{device_id}/arm_mode",
+          "triggered": "security/{device_id}/triggered"
+        }
+      },
+      {
+        "id": "doorbell",
+        "name": "Sonnette vidéo",
+        "type": "security",
+        "icon": "Bell",
+        "description": "Sonnette vidéo connectée (Ring, Nest...)",
+        "entityType": "physical",
+        "defaultTopics": {
+          "ring": "security/{device_id}/ring",
+          "motion": "security/{device_id}/motion",
+          "stream": "security/{device_id}/stream"
+        }
+      },
+      {
+        "id": "siren",
+        "name": "Sirène d'alarme",
+        "type": "security",
+        "icon": "Volume2",
+        "description": "Sirène d'alarme connectée",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "security/{device_id}/state",
+          "trigger": "security/{device_id}/trigger",
+          "volume": "security/{device_id}/volume"
+        }
+      },
+      {
+        "id": "co_detector",
+        "name": "Détecteur de CO",
+        "type": "sensor",
+        "icon": "AlertTriangle",
+        "description": "Détecteur de monoxyde de carbone",
+        "entityType": "physical",
+        "defaultTopics": {
+          "co_detected": "sensor/{device_id}/co_detected",
+          "co_level": "sensor/{device_id}/co_level",
+          "battery": "sensor/{device_id}/battery"
+        }
+      },
+      {
+        "id": "gas_detector",
+        "name": "Détecteur de gaz",
+        "type": "sensor",
+        "icon": "Flame",
+        "description": "Détecteur de fuite de gaz",
+        "entityType": "physical",
+        "defaultTopics": {
+          "gas_detected": "sensor/{device_id}/gas_detected",
+          "gas_level": "sensor/{device_id}/gas_level",
+          "battery": "sensor/{device_id}/battery"
+        }
+      },
+      {
+        "id": "light_sensor",
+        "name": "Capteur de luminosité",
+        "type": "sensor",
+        "icon": "SunDim",
+        "description": "Capteur de luminosité ambiante",
+        "entityType": "physical",
+        "defaultTopics": {
+          "illuminance": "sensor/{device_id}/illuminance",
+          "battery": "sensor/{device_id}/battery"
+        }
+      },
+      {
+        "id": "air_quality_sensor",
+        "name": "Capteur qualité d'air",
+        "type": "sensor",
+        "icon": "Wind",
+        "description": "Capteur de qualité d'air (CO2, PM2.5, VOC)",
+        "entityType": "physical",
+        "defaultTopics": {
+          "co2": "sensor/{device_id}/co2",
+          "pm25": "sensor/{device_id}/pm25",
+          "voc": "sensor/{device_id}/voc",
+          "aqi": "sensor/{device_id}/aqi"
+        }
+      },
+      {
+        "id": "vibration_sensor",
+        "name": "Capteur de vibration",
+        "type": "sensor",
+        "icon": "Activity",
+        "description": "Capteur de vibration pour machines ou sécurité",
+        "entityType": "physical",
+        "defaultTopics": {
+          "vibration": "sensor/{device_id}/vibration",
+          "intensity": "sensor/{device_id}/intensity",
+          "battery": "sensor/{device_id}/battery"
+        }
+      },
+      {
+        "id": "pressure_sensor",
+        "name": "Capteur de pression",
+        "type": "sensor",
+        "icon": "Gauge",
+        "description": "Capteur de pression atmosphérique",
+        "entityType": "physical",
+        "defaultTopics": {
+          "pressure": "sensor/{device_id}/pressure",
+          "battery": "sensor/{device_id}/battery"
+        }
+      },
+      {
+        "id": "pet_feeder",
+        "name": "Distributeur nourriture animaux",
+        "type": "appliance",
+        "icon": "Dog",
+        "description": "Distributeur automatique pour animaux",
+        "entityType": "physical",
+        "defaultTopics": {
+          "state": "appliance/{device_id}/state",
+          "level": "appliance/{device_id}/level",
+          "schedule": "appliance/{device_id}/schedule",
+          "dispense": "appliance/{device_id}/dispense"
+        }
+      },
+      {
+        "id": "smart_blinds",
+        "name": "Stores vénitiens",
+        "type": "cover",
+        "icon": "Blinds",
+        "description": "Stores vénitiens connectés avec contrôle d'inclinaison",
+        "entityType": "physical",
+        "defaultTopics": {
+          "position": "cover/{device_id}/position",
+          "tilt": "cover/{device_id}/tilt",
+          "command": "cover/{device_id}/command"
         }
       }
     ],
