@@ -1,0 +1,350 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://neurhomia.com/schemas/microservice-container-template.json",
+  "title": "Microservice Container Template",
+  "description": "Template standardisé pour le déploiement de microservices MCP dans NeurHomIA",
+  "type": "object",
+  "required": ["metadata", "container", "mcp"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["id", "name", "version", "category"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identifiant unique du microservice",
+          "pattern": "^[a-z0-9-]+$",
+          "examples": ["astral2mqtt", "meteo2mqtt", "docker2mqtt"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Nom d'affichage du microservice",
+          "minLength": 1,
+          "examples": ["Astral2MQTT", "Meteo2MQTT"]
+        },
+        "version": {
+          "type": "string",
+          "description": "Version du template",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "examples": ["1.0.0", "2.1.3"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Description du microservice"
+        },
+        "author": {
+          "type": "string",
+          "description": "Auteur du template"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["microservice", "core", "optional"],
+          "description": "Catégorie du template"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags pour la recherche et le filtrage",
+          "examples": [["mqtt", "astronomy", "weather"]]
+        },
+        "icon": {
+          "type": "string",
+          "description": "Nom de l'icône Lucide React",
+          "examples": ["Sun", "Cloud", "Container"]
+        }
+      }
+    },
+    "container": {
+      "type": "object",
+      "required": ["image", "defaultVersion"],
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Image Docker (sans le tag)",
+          "examples": ["moreau66/astral2mqtt", "ollama/ollama"]
+        },
+        "defaultVersion": {
+          "type": "string",
+          "description": "Version par défaut de l'image",
+          "examples": ["latest", "1.0.0"]
+        },
+        "autoStart": {
+          "type": "boolean",
+          "description": "Démarrage automatique du container",
+          "default": false
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["container", "host"],
+            "properties": {
+              "container": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "host": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "protocol": {
+                "type": "string",
+                "enum": ["tcp", "udp"],
+                "default": "tcp"
+              }
+            }
+          },
+          "description": "Mappings de ports"
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["container", "host"],
+            "properties": {
+              "container": {
+                "type": "string",
+                "description": "Chemin dans le container",
+                "pattern": "^/.*"
+              },
+              "host": {
+                "type": "string",
+                "description": "Chemin sur l'hôte"
+              },
+              "mode": {
+                "type": "string",
+                "enum": ["rw", "ro"],
+                "default": "rw"
+              }
+            }
+          },
+          "description": "Mappings de volumes"
+        },
+        "environment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["key", "value"],
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[A-Z_][A-Z0-9_]*$",
+                "description": "Nom de la variable d'environnement"
+              },
+              "value": {
+                "type": "string",
+                "description": "Valeur par défaut"
+              },
+              "required": {
+                "type": "boolean",
+                "description": "Variable obligatoire",
+                "default": false
+              },
+              "secret": {
+                "type": "boolean",
+                "description": "Variable sensible (API key, password)",
+                "default": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Description de la variable"
+              }
+            }
+          },
+          "description": "Variables d'environnement"
+        },
+        "restart": {
+          "type": "string",
+          "enum": ["no", "always", "on-failure", "unless-stopped"],
+          "description": "Politique de redémarrage",
+          "default": "unless-stopped"
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Labels Docker",
+          "examples": [
+            {
+              "discovery.type": "astronomy",
+              "discovery.topics": "astral/+/data"
+            }
+          ]
+        },
+        "healthcheck": {
+          "type": "object",
+          "properties": {
+            "test": {
+              "type": "string",
+              "description": "Commande de healthcheck"
+            },
+            "interval": {
+              "type": "string",
+              "description": "Intervalle entre les checks",
+              "default": "30s"
+            },
+            "timeout": {
+              "type": "string",
+              "description": "Timeout du check",
+              "default": "10s"
+            },
+            "retries": {
+              "type": "integer",
+              "description": "Nombre de tentatives",
+              "default": 3
+            }
+          }
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "required": ["service_id", "topics"],
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "description": "Identifiant du service MCP",
+          "examples": ["astral2mqtt", "meteo2mqtt"]
+        },
+        "topics": {
+          "type": "object",
+          "required": ["discovery"],
+          "properties": {
+            "discovery": {
+              "type": "string",
+              "description": "Topic de découverte MCP",
+              "examples": ["mcp/services/astral2mqtt/discovery"]
+            },
+            "data": {
+              "type": "string",
+              "description": "Topic racine pour les données",
+              "examples": ["astral/+/data"]
+            },
+            "commands": {
+              "type": "string",
+              "description": "Topic pour les commandes",
+              "examples": ["astral/commands/#"]
+            }
+          }
+        },
+        "schemas": {
+          "type": "object",
+          "properties": {
+            "mcp": {
+              "type": "string",
+              "description": "URL du schéma MCP principal"
+            },
+            "tools": {
+              "type": "string",
+              "description": "URL du schéma des tools MCP"
+            },
+            "resources": {
+              "type": "string",
+              "description": "URL du schéma des resources MCP"
+            }
+          }
+        }
+      }
+    },
+    "ui_component": {
+      "type": "object",
+      "properties": {
+        "component_path": {
+          "type": "string",
+          "description": "Chemin du composant React personnalisé",
+          "examples": ["Astral2MqttContainer", "Meteo2MqttContainer"]
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["embedded", "standalone"],
+          "description": "Mode d'affichage du composant",
+          "default": "embedded"
+        }
+      },
+      "description": "Configuration du composant UI personnalisé"
+    },
+    "docker_compose": {
+      "type": "object",
+      "properties": {
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Services dont dépend ce container",
+          "examples": [["mosquitto"]]
+        },
+        "networks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Réseaux Docker",
+          "examples": [["smart-home-network"]]
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Profils Docker Compose",
+          "examples": [["astral", "optional"]]
+        }
+      },
+      "description": "Configuration Docker Compose"
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Services requis",
+          "examples": [["mosquitto"]]
+        },
+        "optional": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Services optionnels",
+          "examples": [["duckdb", "sqlite"]]
+        }
+      },
+      "description": "Dépendances du microservice"
+    },
+    "documentation": {
+      "type": "object",
+      "properties": {
+        "readme_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL du README du microservice"
+        },
+        "github_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL du dépôt GitHub"
+        },
+        "docker_hub_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL Docker Hub"
+        },
+        "mcp_spec_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL de la spécification MCP"
+        }
+      },
+      "description": "Liens de documentation"
+    }
+  }
+}

@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurhome-ia.github.io/schemas/mcp-resource-schema.json",
+  "title": "MCPResourceDefinition",
+  "description": "Schéma de validation pour les ressources MCP (widgets, pages, données) exposées par les microservices",
+  "type": "object",
+  "required": ["uri", "name", "mimeType", "resourceType"],
+  "properties": {
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^mcp://[a-z0-9-]+/[a-z0-9-/]+$",
+      "description": "URI unique de la ressource (format: mcp://service-id/resource-path)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Nom humainement lisible de la ressource"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Description détaillée de la ressource"
+    },
+    "mimeType": {
+      "type": "string",
+      "enum": [
+        "application/json",
+        "application/vnd.neurhomia.widget+json",
+        "application/vnd.neurhomia.page+json",
+        "application/vnd.neurhomia.config+json",
+        "text/plain",
+        "text/html",
+        "text/markdown",
+        "text/csv",
+        "image/png",
+        "image/jpeg",
+        "image/svg+xml"
+      ],
+      "description": "Type MIME de la ressource"
+    },
+    "resourceType": {
+      "type": "string",
+      "enum": ["widget", "page", "data", "config", "documentation", "template", "schema"],
+      "description": "Type de ressource MCP"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "description": "Version de la ressource (semver)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "maxItems": 20,
+      "uniqueItems": true,
+      "description": "Tags pour catégoriser et rechercher la ressource"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "automation",
+        "monitoring", 
+        "environment",
+        "security",
+        "energy",
+        "network",
+        "storage",
+        "communication",
+        "ai",
+        "development",
+        "system",
+        "ui",
+        "other"
+      ],
+      "description": "Catégorie de la ressource"
+    },
+    "access": {
+      "type": "object",
+      "properties": {
+        "read": {
+          "type": "boolean",
+          "default": true,
+          "description": "Permission de lecture"
+        },
+        "write": {
+          "type": "boolean",
+          "default": false,
+          "description": "Permission d'écriture"
+        },
+        "subscribe": {
+          "type": "boolean",
+          "default": false,
+          "description": "Permission d'abonnement aux changements"
+        },
+        "execute": {
+          "type": "boolean",
+          "default": false,
+          "description": "Permission d'exécution (pour les templates)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Permissions d'accès à la ressource"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "read",
+          "write",
+          "admin",
+          "config",
+          "monitoring",
+          "control",
+          "discovery"
+        ]
+      },
+      "uniqueItems": true,
+      "description": "Permissions requises pour accéder à la ressource"
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Mise en cache activée"
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400,
+          "description": "TTL en secondes (0 = pas de cache)"
+        },
+        "invalidation_events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Événements qui invalident le cache"
+        },
+        "invalidation_topics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9/_+#-]+$"
+          },
+          "description": "Topics MQTT qui invalident le cache"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration de mise en cache"
+    },
+    "subscription": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Abonnement aux changements activé"
+        },
+        "notification_topic": {
+          "type": "string",
+          "pattern": "^mcp/[a-z0-9-]+/resource/[a-z0-9-/]+/changed$",
+          "description": "Topic de notification des changements"
+        },
+        "notification_method": {
+          "type": "string",
+          "enum": ["notification", "callback"],
+          "default": "notification",
+          "description": "Méthode de notification"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration d'abonnement aux changements"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uri"],
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI de la ressource dépendante"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["required", "optional", "fallback"],
+            "default": "required",
+            "description": "Type de dépendance"
+          }
+        }
+      },
+      "description": "Dépendances vers d'autres ressources"
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "object",
+          "description": "Schéma JSON de validation du contenu"
+        },
+        "checksum": {
+          "type": "string",
+          "description": "Checksum du contenu pour vérification d'intégrité"
+        },
+        "signature": {
+          "type": "string",
+          "description": "Signature cryptographique"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Validation et intégrité de la ressource"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Auteur de la ressource"
+        },
+        "license": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Licence de la ressource"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date de création"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date de dernière modification"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Taille en octets"
+        },
+        "encoding": {
+          "type": "string",
+          "enum": ["utf-8", "base64", "gzip"],
+          "default": "utf-8",
+          "description": "Encodage du contenu"
+        },
+        "documentation_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL de la documentation"
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL source de la ressource"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Métadonnées étendues de la ressource"
+    },
+    "content_preview": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Résumé du contenu"
+        },
+        "preview_data": {
+          "description": "Aperçu partiel du contenu"
+        },
+        "thumbnails": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "URIs des miniatures"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Aperçu du contenu de la ressource"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "resourceType": {"const": "widget"}
+        }
+      },
+      "then": {
+        "properties": {
+          "mimeType": {"const": "application/vnd.neurhomia.widget+json"}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resourceType": {"const": "page"}
+        }
+      },
+      "then": {
+        "properties": {
+          "mimeType": {"const": "application/vnd.neurhomia.page+json"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "WidgetResourceContent": {
+      "type": "object",
+      "description": "Contenu spécifique aux ressources de type widget",
+      "required": ["id", "name", "version", "deviceTypes"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "deviceTypes": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "mcp_bindings": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+              "type": "object",
+              "required": ["method"],
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "description": "Méthode MCP à appeler"
+                },
+                "params": {
+                  "type": "object",
+                  "description": "Paramètres par défaut"
+                },
+                "mapping": {
+                  "type": "object",
+                  "description": "Mapping des données de réponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "PageResourceContent": {
+      "type": "object",
+      "description": "Contenu spécifique aux ressources de type page",
+      "required": ["service_id", "page_info"],
+      "properties": {
+        "service_id": {"type": "string"},
+        "page_info": {
+          "type": "object",
+          "required": ["title", "sections"],
+          "properties": {
+            "title": {"type": "string"},
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "mcp_bindings": {
+                    "type": "object",
+                    "description": "Liaisons MCP pour cette section"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

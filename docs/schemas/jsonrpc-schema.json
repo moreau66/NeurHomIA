@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurhome-ia.github.io/schemas/jsonrpc-schema.json",
+  "title": "JSONRPCOverMQTT",
+  "description": "Schéma JSON-RPC 2.0 pour communication over MQTT dans l'architecture MCP",
+  "oneOf": [
+    {"$ref": "#/$defs/JSONRPCRequest"},
+    {"$ref": "#/$defs/JSONRPCResponse"},
+    {"$ref": "#/$defs/JSONRPCNotification"},
+    {"$ref": "#/$defs/JSONRPCError"}
+  ],
+  "$defs": {
+    "JSONRPCRequest": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "id"],
+      "properties": {
+        "jsonrpc": {
+          "type": "string",
+          "const": "2.0",
+          "description": "Version JSON-RPC (toujours 2.0)"
+        },
+        "method": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*$",
+          "description": "Nom de la méthode à appeler"
+        },
+        "params": {
+          "oneOf": [
+            {"type": "array"},
+            {"type": "object"}
+          ],
+          "description": "Paramètres de la méthode (array ou object)"
+        },
+        "id": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "number"},
+            {"type": "null"}
+          ],
+          "description": "Identifiant unique de la requête"
+        },
+        "meta": {
+          "$ref": "#/$defs/MCPMetadata",
+          "description": "Métadonnées MCP étendues"
+        }
+      },
+      "additionalProperties": false
+    },
+    "JSONRPCResponse": {
+      "type": "object",
+      "required": ["jsonrpc", "id"],
+      "oneOf": [
+        {
+          "required": ["result"],
+          "properties": {
+            "jsonrpc": {"type": "string", "const": "2.0"},
+            "result": {
+              "description": "Résultat de la méthode appelée"
+            },
+            "id": {
+              "oneOf": [
+                {"type": "string"},
+                {"type": "number"},
+                {"type": "null"}
+              ]
+            },
+            "meta": {
+              "$ref": "#/$defs/MCPMetadata"
+            }
+          }
+        },
+        {
+          "required": ["error"],
+          "properties": {
+            "jsonrpc": {"type": "string", "const": "2.0"},
+            "error": {
+              "$ref": "#/$defs/JSONRPCErrorObject"
+            },
+            "id": {
+              "oneOf": [
+                {"type": "string"},
+                {"type": "number"},
+                {"type": "null"}
+              ]
+            },
+            "meta": {
+              "$ref": "#/$defs/MCPMetadata"
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "JSONRPCNotification": {
+      "type": "object",
+      "required": ["jsonrpc", "method"],
+      "properties": {
+        "jsonrpc": {
+          "type": "string",
+          "const": "2.0"
+        },
+        "method": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*$"
+        },
+        "params": {
+          "oneOf": [
+            {"type": "array"},
+            {"type": "object"}
+          ]
+        },
+        "meta": {
+          "$ref": "#/$defs/MCPMetadata"
+        }
+      },
+      "additionalProperties": false,
+      "not": {
+        "required": ["id"]
+      }
+    },
+    "JSONRPCError": {
+      "type": "object",
+      "required": ["jsonrpc", "error", "id"],
+      "properties": {
+        "jsonrpc": {
+          "type": "string",
+          "const": "2.0"
+        },
+        "error": {
+          "$ref": "#/$defs/JSONRPCErrorObject"
+        },
+        "id": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "number"},
+            {"type": "null"}
+          ]
+        },
+        "meta": {
+          "$ref": "#/$defs/MCPMetadata"
+        }
+      },
+      "additionalProperties": false
+    },
+    "JSONRPCErrorObject": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "Code d'erreur numérique",
+          "oneOf": [
+            {"const": -32700, "description": "Parse error"},
+            {"const": -32600, "description": "Invalid Request"},
+            {"const": -32601, "description": "Method not found"},
+            {"const": -32602, "description": "Invalid params"},
+            {"const": -32603, "description": "Internal error"},
+            {"minimum": -32099, "maximum": -32000, "description": "Server error"},
+            {"minimum": -1999, "maximum": -1000, "description": "MCP specific errors"},
+            {"minimum": 1, "maximum": 999, "description": "Application errors"}
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Message d'erreur humainement lisible"
+        },
+        "data": {
+          "description": "Données supplémentaires sur l'erreur"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPMetadata": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "description": "Identifiant du service émetteur"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp ISO 8601"
+        },
+        "request_id": {
+          "type": "string",
+          "description": "Identifiant de corrélation"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Identifiant de session"
+        },
+        "api_key": {
+          "type": "string",
+          "description": "Clé API pour l'authentification"
+        },
+        "signature": {
+          "type": "string",
+          "description": "Signature cryptographique"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "normal", "high", "critical"],
+          "default": "normal",
+          "description": "Priorité du message"
+        },
+        "timeout": {
+          "type": "number",
+          "minimum": 1000,
+          "maximum": 300000,
+          "description": "Timeout en millisecondes"
+        },
+        "retry_count": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Nombre de tentatives"
+        },
+        "trace_id": {
+          "type": "string",
+          "description": "Identifiant de trace distribuée"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

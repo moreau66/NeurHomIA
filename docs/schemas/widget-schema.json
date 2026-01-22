@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurhome-ia.github.io/schemas/widget-schema.json",
+  "title": "WidgetSchema",
+  "description": "Schéma JSON pour la définition de widgets dynamiques NeurHome-IA",
+  "type": "object",
+  "required": ["id", "name", "version", "deviceTypes", "display", "sections", "mcp_resources", "createdAt", "updatedAt"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "minLength": 3,
+      "maxLength": 64,
+      "description": "Identifiant unique du widget (kebab-case)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Nom affiché du widget"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "description": "Version du schéma (semver)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Description optionnelle du widget"
+    },
+    "author": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Auteur du widget"
+    },
+    "deviceTypes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "weather_station",
+          "astronomy_station",
+          "thermostat", 
+          "light",
+          "plug",
+          "temp_sensor",
+          "container",
+          "climate_sensor",
+          "motion_sensor",
+          "door_sensor",
+          "switch",
+          "fan",
+          "cover",
+          "sensor",
+          "binary_sensor",
+          "camera",
+          "media_player"
+        ]
+      },
+      "description": "Types d'appareils supportés par ce widget"
+    },
+    "display": {
+      "type": "object",
+      "required": ["size"],
+      "properties": {
+        "icon": {
+          "type": "string",
+          "description": "Nom de l'icône Lucide React"
+        },
+        "primaryColor": {
+          "type": "string",
+          "pattern": "^hsl\\(\\s*\\d+\\s*,\\s*\\d+%\\s*,\\s*\\d+%\\s*\\)$",
+          "description": "Couleur primaire au format HSL"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "pattern": "^hsl\\(\\s*\\d+\\s*,\\s*\\d+%\\s*,\\s*\\d+%\\s*\\)$",
+          "description": "Couleur secondaire au format HSL"
+        },
+        "size": {
+          "type": "string",
+          "enum": ["small", "medium", "large"],
+          "description": "Taille du widget"
+        },
+        "refreshInterval": {
+          "type": "number",
+          "minimum": 1000,
+          "maximum": 3600000,
+          "description": "Intervalle de rafraîchissement en millisecondes"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/WidgetSectionConfig"
+      },
+      "description": "Sections du widget"
+    },
+    "interactions": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/WidgetInteractionConfig"
+      },
+      "description": "Interactions disponibles sur le widget"
+    },
+    "mcp_resources": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "$ref": "#/$defs/MCPResourceBinding"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Liaisons MCP pour les données du widget"
+    },
+    "dataMapping": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "$ref": "#/$defs/DataMappingConfig"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Mapping des données MQTT vers les champs du widget (legacy - déprécié)"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de création ISO 8601"
+    },
+    "updatedAt": {
+      "type": "string", 
+      "format": "date-time",
+      "description": "Date de dernière mise à jour ISO 8601"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "WidgetSectionConfig": {
+      "type": "object",
+      "required": ["id", "fields", "layout", "visible"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*[a-z0-9]$",
+          "description": "Identifiant unique de la section"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Titre de la section"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/WidgetFieldConfig"
+          }
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["grid", "list", "horizontal"]
+        },
+        "columns": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Nombre de colonnes pour layout grid"
+        },
+        "collapsible": {
+          "type": "boolean",
+          "description": "Section repliable"
+        },
+        "visible": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "WidgetFieldConfig": {
+      "type": "object",
+      "required": ["key", "label", "type", "visible"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+          "description": "Clé unique du champ"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "description": "Libellé affiché"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "number", "boolean", "icon", "progress", "chart", "button"]
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 10,
+          "description": "Unité pour les valeurs numériques"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Nom de l'icône Lucide React"
+        },
+        "format": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "Format d'affichage"
+        },
+        "min": {
+          "type": "number",
+          "description": "Valeur minimale"
+        },
+        "max": {
+          "type": "number",
+          "description": "Valeur maximale"
+        },
+        "precision": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Nombre de décimales"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "style": {
+          "type": "object",
+          "properties": {
+            "color": {
+              "type": "string",
+              "pattern": "^hsl\\(\\s*\\d+\\s*,\\s*\\d+%\\s*,\\s*\\d+%\\s*\\)$"
+            },
+            "background": {
+              "type": "string",
+              "pattern": "^hsl\\(\\s*\\d+\\s*,\\s*\\d+%\\s*,\\s*\\d+%\\s*\\)$"
+            },
+            "size": {
+              "type": "string",
+              "enum": ["small", "medium", "large"]
+            },
+            "align": {
+              "type": "string",
+              "enum": ["left", "center", "right"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "WidgetInteractionConfig": {
+      "type": "object",
+      "required": ["type", "label"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["refresh", "toggle", "command", "navigate"]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "icon": {
+          "type": "string",
+          "description": "Nom de l'icône Lucide React"
+        },
+        "topic": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9/_+-]+$",
+          "description": "Topic MQTT pour les commandes"
+        },
+        "payload": {
+          "description": "Payload à publier"
+        },
+        "confirmation": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Message de confirmation"
+        },
+        "style": {
+          "type": "string",
+          "enum": ["primary", "secondary", "destructive"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "MCPResourceBinding": {
+      "type": "object",
+      "required": ["resource_uri", "method"],
+      "properties": {
+        "resource_uri": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^mcp://[a-z0-9-]+/[a-z0-9-/]+$",
+          "description": "URI de la ressource MCP"
+        },
+        "method": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*$",
+          "description": "Méthode MCP à appeler"
+        },
+        "params": {
+          "type": "object",
+          "description": "Paramètres par défaut pour la méthode MCP"
+        },
+        "field_mapping": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+              "type": "string",
+              "description": "Chemin JSONPath vers le champ dans la réponse MCP"
+            }
+          },
+          "description": "Mapping des champs de réponse vers les champs du widget"
+        },
+        "refresh_interval": {
+          "type": "number",
+          "minimum": 1000,
+          "maximum": 3600000,
+          "description": "Intervalle de rafraîchissement en millisecondes"
+        },
+        "cache_ttl": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 86400,
+          "description": "TTL du cache en secondes"
+        },
+        "fallback": {
+          "description": "Valeur par défaut en cas d'erreur"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DataMappingConfig": {
+      "type": "object",
+      "required": ["topic"],
+      "properties": {
+        "topic": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9/_+{}-]+$",
+          "description": "Topic MQTT source (legacy - déprécié)"
+        },
+        "path": {
+          "type": "string",
+          "description": "Chemin JSONPath dans le payload"
+        },
+        "transform": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Transformation JavaScript"
+        },
+        "fallback": {
+          "description": "Valeur par défaut"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

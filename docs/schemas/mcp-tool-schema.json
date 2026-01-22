@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurhome-ia.github.io/schemas/mcp-tool-schema.json",
+  "title": "MCPToolDefinition",
+  "description": "Schéma de validation pour les outils (méthodes) MCP exposés par les microservices",
+  "type": "object",
+  "required": ["name", "description", "inputSchema"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Nom de l'outil (méthode MCP) - format: namespace.method"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500,
+      "description": "Description détaillée de l'outil et de son utilisation"
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "object"
+        },
+        "properties": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["string", "number", "integer", "boolean", "array", "object"]
+                },
+                "description": {
+                  "type": "string"
+                },
+                "default": {},
+                "enum": {
+                  "type": "array"
+                },
+                "format": {
+                  "type": "string"
+                },
+                "minimum": {
+                  "type": "number"
+                },
+                "maximum": {
+                  "type": "number"
+                },
+                "minLength": {
+                  "type": "integer"
+                },
+                "maxLength": {
+                  "type": "integer"
+                },
+                "pattern": {
+                  "type": "string"
+                },
+                "items": {
+                  "type": "object"
+                },
+                "properties": {
+                  "type": "object"
+                },
+                "required": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "required": ["type", "properties"],
+      "additionalProperties": false,
+      "description": "Schéma JSON Schema des paramètres d'entrée"
+    },
+    "outputSchema": {
+      "type": "object",
+      "description": "Schéma JSON Schema de la réponse (optionnel pour documentation)"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["query", "action", "config", "monitoring", "diagnostic"],
+      "description": "Catégorie fonctionnelle de l'outil"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "maxItems": 10,
+      "uniqueItems": true,
+      "description": "Tags pour la découverte et le filtrage"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "read",
+          "write", 
+          "admin",
+          "config",
+          "monitoring",
+          "control",
+          "discovery"
+        ]
+      },
+      "uniqueItems": true,
+      "description": "Permissions requises pour utiliser l'outil"
+    },
+    "rate_limit": {
+      "type": "object",
+      "properties": {
+        "calls_per_minute": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 60,
+          "description": "Nombre d'appels autorisés par minute"
+        },
+        "burst_limit": {
+          "type": "integer", 
+          "minimum": 1,
+          "maximum": 100,
+          "default": 10,
+          "description": "Limite de rafale d'appels"
+        },
+        "concurrent_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 5,
+          "description": "Nombre d'appels simultanés"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration de limitation de débit"
+    },
+    "timeout": {
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 300000,
+      "default": 30000,
+      "description": "Timeout d'exécution en millisecondes"
+    },
+    "caching": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400,
+          "description": "TTL du cache en secondes"
+        },
+        "key_fields": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Champs utilisés pour la clé de cache"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration de mise en cache"
+    },
+    "examples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "input"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Nom de l'exemple"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Description de l'exemple"
+          },
+          "input": {
+            "type": "object",
+            "description": "Exemple de paramètres d'entrée"
+          },
+          "output": {
+            "description": "Exemple de sortie attendue"
+          }
+        },
+        "additionalProperties": false
+      },
+      "maxItems": 5,
+      "description": "Exemples d'utilisation de l'outil"
+    },
+    "deprecated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indique si l'outil est déprécié"
+    },
+    "deprecation_message": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Message expliquant la dépréciation"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "description": "Version de l'outil (semver)"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "documentation_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Métadonnées supplémentaires de l'outil"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "StandardMCPMethods": {
+      "type": "object",
+      "description": "Méthodes MCP standard obligatoires",
+      "properties": {
+        "mcp.list_tools": {
+          "description": "Liste tous les outils disponibles",
+          "const": {
+            "name": "mcp.list_tools",
+            "description": "Retourne la liste de tous les outils disponibles sur ce microservice",
+            "inputSchema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        },
+        "mcp.call_tool": {
+          "description": "Appelle un outil spécifique",
+          "const": {
+            "name": "mcp.call_tool", 
+            "description": "Exécute un outil spécifique avec les paramètres fournis",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Nom de l'outil à appeler"
+                },
+                "arguments": {
+                  "type": "object",
+                  "description": "Arguments pour l'outil"
+                }
+              },
+              "required": ["name"]
+            }
+          }
+        },
+        "mcp.list_resources": {
+          "description": "Liste toutes les ressources disponibles",
+          "const": {
+            "name": "mcp.list_resources",
+            "description": "Retourne la liste de toutes les ressources disponibles",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["widget", "page", "data", "config"],
+                  "description": "Filtrer par type de ressource"
+                }
+              }
+            }
+          }
+        },
+        "mcp.get_resource": {
+          "description": "Récupère une ressource spécifique",
+          "const": {
+            "name": "mcp.get_resource",
+            "description": "Récupère le contenu d'une ressource spécifique",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "uri": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "URI de la ressource"
+                }
+              },
+              "required": ["uri"]
+            }
+          }
+        },
+        "mcp.health_check": {
+          "description": "Vérifie l'état de santé du microservice",
+          "const": {
+            "name": "mcp.health_check",
+            "description": "Vérifie l'état de santé et la disponibilité du microservice",
+            "inputSchema": {
+              "type": "object",
+              "properties": {},
+              "required": []
+            }
+          }
+        }
+      }
+    }
+  }
+}
