@@ -49,7 +49,10 @@ Documentation approfondie sur l'architecture et les standards techniques.
 |-------|-------------|
 | [Préconisations Architecture MCP](guide-preconisations.md) | Standards et bonnes pratiques microservices |
 | [Structure JSON Microservices](microservice-json.md) | Format des fichiers de configuration JSON |
+| [Guide d'Intégration MQTT](guide-integration-mqtt.md) | Brokers, connexion, publication et souscription |
+| [Guide du Stockage MQTT](guide-stockage-mqtt.md) | Persistance, QoS et historique des messages |
 | [Guide du Monitoring MQTT](guide-monitoring-mqtt.md) | Surveillance des communications MQTT |
+| [Guide du Local Engine](guide-local-engine.md) | Backend Node.js pour l'exécution locale des scénarios |
 
 ---
 
@@ -59,6 +62,13 @@ Guides pratiques pour utiliser les fonctionnalités de NeurHomIA.
 
 | Guide | Description |
 |-------|-------------|
+| [Guide des Entités MQTT](guide-entites-mqtt.md) | Types, configuration et découverte d'entités |
+| [Guide des Alias MQTT](guide-alias-mqtt.md) | Création, catégories et synchronisation des alias |
+| [Guide des Widgets Dynamiques](guide-widgets-dynamiques.md) | Création, configuration et découverte de widgets |
+| [Guide des Localisations](guide-localisations.md) | Structure hiérarchique et configuration |
+| [Guide des Notifications](guide-notifications.md) | Types, niveaux et centre de notifications |
+| [Guide des Scénarios](guide-scenarios.md) | Système d'automatisation QUAND/SI/ALORS |
+| [Guide des Templates de Scénarios](guide-templates-scenarios.md) | Création, catégories et partage via GitHub |
 | [Guide du Mode Simulation](guide-mode-simulation.md) | Tester sans infrastructure physique |
 | [Guide de Simulation](guide-simulation.md) | Fonctionnalités avancées de simulation |
 | [Guide des Entités Calculées](guide-entites-calculees.md) | Créer des entités virtuelles avec formules |

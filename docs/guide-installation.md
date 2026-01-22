@@ -135,6 +135,66 @@ Le fichier `docker-compose.yml` inclut :
 | `APP_PORT`        | Port de l'application  | `8080`                  |
 | `NODE_ENV`        | Environnement          | `production`            |
 
+---
+
+## ⚡ Installation du Local Engine (Optionnel)
+
+Le **Local Engine** est un backend Node.js alternatif pour l'exécution des scénarios d'automatisation. Il peut fonctionner en parallèle ou en fallback du Scheduler Python.
+
+### Prérequis
+
+- Node.js 18+ (20 recommandé)
+- Accès au broker MQTT
+
+### Installation
+
+```bash
+cd backend/local-engine
+npm install
+```
+
+### Configuration
+
+```bash
+cp .env.example .env
+```
+
+Éditez le fichier `.env` :
+
+```bash
+# MQTT
+MQTT_BROKER_HOST=localhost
+MQTT_BROKER_PORT=1883
+
+# API
+HTTP_PORT=3001
+
+# Astronomie (pour triggers lever/coucher soleil)
+LATITUDE=48.8566
+LONGITUDE=2.3522
+```
+
+### Démarrage
+
+```bash
+# Développement
+npm run dev
+
+# Production
+npm run build && npm start
+```
+
+### Vérification
+
+```bash
+curl http://localhost:3001/api/health
+# {"status":"healthy","service":"local-engine",...}
+```
+
+📚 **Documentation complète** : [Guide du Local Engine](guide-local-engine.md)
+
+---
+
 ### Commandes Docker utiles
 
 ```bash

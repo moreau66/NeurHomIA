@@ -236,6 +236,157 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `widgetDiscoveryService.ts` | Découverte automatique des widgets (MQTT, System2Mqtt). |
 | `widgetTemplates.ts` | Templates de widgets prédéfinis. |
 
+### Services Notifications
+
+| Fichier | Description |
+|---------|-------------|
+| `notificationService.ts` | Service centralisé de notifications avec intégration Watchtower. |
+
+### Services MQTT
+
+| Fichier | Description |
+|---------|-------------|
+| `mqttService.ts` | Façade principale avec bascule automatique simulation/production. |
+| `mqttProductionService.ts` | Implémentation connexion broker réel via mqtt.js. |
+| `mqttSimulation.ts` | Service de simulation sans broker physique. |
+| `mqttDiscoveryService.ts` | Découverte automatique de brokers MQTT. |
+| `interfaces/IMqttService.ts` | Interface commune des services MQTT. |
+
+### Services Alias
+
+| Fichier | Description |
+|---------|-------------|
+| `aliasesCache.ts` | Cache et synchronisation GitHub des alias globaux. |
+| `aliasGeneratorService.ts` | Génération automatique d'alias par type d'appareil. |
+| `microserviceAliasRegistry.ts` | Registre des alias fournis par les microservices système. |
+
+### Stores Alias (`src/store/`)
+
+| Fichier | Description |
+|---------|-------------|
+| `use-aliases.ts` | Store Zustand des alias globaux (CRUD, recherche, import/export). |
+| `use-aliases-sync.ts` | Configuration de synchronisation GitHub des alias. |
+
+### Services Templates Scénarios
+
+| Fichier | Description |
+|---------|-------------|
+| `scenarioTemplateCache.ts` | Cache et synchronisation GitHub des templates de scénarios. |
+| `defaultScenarioTemplates.ts` | Templates de scénarios par défaut intégrés à l'application. |
+
+### Stores Templates Scénarios (`src/store/`)
+
+| Fichier | Description |
+|---------|-------------|
+| `use-scenario-templates.ts` | Store Zustand des templates de scénarios (CRUD, import/export, fusion GitHub). |
+| `use-scenario-templates-sync.ts` | Configuration de synchronisation GitHub des templates (fréquence, notifications). |
+
+### Services Stockage MQTT (`src/services/storage/`)
+
+| Fichier | Description |
+|---------|-------------|
+| `StorageManager.ts` | Orchestration des providers de stockage avec fallback automatique. |
+| `IStorageProvider.ts` | Interface commune des providers de stockage (localStorage, SQLite, DuckDB). |
+| `LocalStorageProvider.ts` | Stockage des messages MQTT dans le navigateur (fallback). |
+| `SQLiteStorageProvider.ts` | Communication avec le container SQLite via MQTT (request/response). |
+| `DuckDBStorageProvider.ts` | Communication avec le container DuckDB via MQTT (analytics haute performance). |
+| `MqttStorageBridge.ts` | Pattern request/response pour la communication avec les microservices de stockage. |
+
+---
+
+## 🖥️ Backend Local Engine (`backend/local-engine/`)
+
+Backend Node.js pour l'exécution locale des scénarios d'automatisation.
+
+### Structure
+
+| Fichier | Description |
+|---------|-------------|
+| `src/index.ts` | Point d'entrée principal du service |
+| `src/config/config.ts` | Configuration via variables d'environnement |
+| `src/mqtt/client.ts` | Client MQTT avec reconnexion automatique |
+| `src/mqtt/topics.ts` | Définition des topics MQTT |
+| `src/engine/ScenarioManager.ts` | Gestionnaire de scénarios (chargement, sync, exécution) |
+| `src/engine/RuleEvaluator.ts` | Évaluateur de conditions (comparaisons, logique) |
+| `src/engine/ActionExecutor.ts` | Exécuteur d'actions MQTT |
+| `src/scheduler/CronScheduler.ts` | Planification cron (node-cron) |
+| `src/scheduler/CalendarProcessor.ts` | Processeur d'événements calendaires |
+| `src/state/MqttStateStore.ts` | Cache d'état des entités MQTT |
+| `src/api/server.ts` | Serveur Express HTTP |
+| `src/api/routes.ts` | Routes REST API |
+| `src/utils/logger.ts` | Logger avec niveaux configurables |
+| `src/types/index.ts` | Types TypeScript |
+| `Dockerfile` | Image Docker Node.js |
+| `docker-compose.yml` | Configuration Docker Compose |
+| `.env.example` | Template de configuration |
+
+---
+
+## 📡 Gestion des Entités (`src/components/devices/`)
+
+Composants pour la gestion des entités MQTT.
+
+| Fichier | Description |
+|---------|-------------|
+| `DeviceCard.tsx` | Carte d'affichage d'une entité avec état et contrôles |
+| `DeviceForm.tsx` | Formulaire de création/édition d'entités |
+| `DeviceTable.tsx` | Tableau listant les entités avec filtres |
+| `DevicesDiscoveryTab.tsx` | Onglet de découverte automatique multi-protocoles |
+| `TopicEditor.tsx` | Éditeur de configuration des topics MQTT |
+| `EntityLinkEditor.tsx` | Éditeur de liens entre entités |
+| `forms/CalculatedEntityConfigTab.tsx` | Configuration des entités calculées |
+| `forms/EntityMetadataTab.tsx` | Métadonnées avancées (fabricant, maintenance) |
+
+---
+
+## 🎛️ Widgets Dynamiques (`src/components/widgets/`)
+
+Composants pour le rendu et la gestion des widgets dynamiques.
+
+| Fichier | Description |
+|---------|-------------|
+| `DynamicWidget.tsx` | Rendu d'un widget à partir d'un schéma JSON |
+| `WidgetManager.tsx` | Résolution widget dynamique vs statique |
+| `WidgetsDiscovery.tsx` | Interface de découverte MQTT/GitHub |
+| `WidgetsSchemasManagement.tsx` | Gestion des schémas de widgets |
+| `WidgetsInstancesManagement.tsx` | Gestion des instances de widgets |
+| `DiscoveredWidgetCard.tsx` | Carte d'affichage d'un widget découvert |
+| `WidgetInstanceCard.tsx` | Carte d'instance de widget active |
+| `DynamicWidgetFieldRenderer.tsx` | Rendu des champs individuels |
+| `DynamicWidgetSection.tsx` | Rendu des sections de widget |
+
+---
+
+## ✏️ Éditeur de Widgets (`src/components/widget-editor/`)
+
+Composants pour la création et édition visuelle de widgets.
+
+| Fichier | Description |
+|---------|-------------|
+| `WidgetEditor.tsx` | Éditeur multi-onglets principal |
+| `WidgetCanvas.tsx` | Canevas de conception visuelle |
+| `WidgetPalette.tsx` | Palette des types de champs |
+| `WidgetPropertiesPanel.tsx` | Panneau de configuration des propriétés |
+| `WidgetTextualViewer.tsx` | Vue et édition JSON brut |
+
+---
+
+## 🎬 Scénarios d'Automatisation (`src/components/automation-builder/`)
+
+Composants pour la création et gestion des scénarios QUAND/SI/ALORS.
+
+| Fichier | Description |
+|---------|-------------|
+| `RuleBuilder.tsx` | Orchestrateur des sections QUAND/SI/ALORS |
+| `RulesEditor.tsx` | Interface principale d'édition de scénarios |
+| `RuleSection.tsx` | Gestion d'une section de règles individuelle |
+| `ScenarioWizard.tsx` | Assistant de création guidée de scénarios |
+| `ScenarioScheduleConfig.tsx` | Configuration de la planification calendaire |
+| `ExecutionBackendConfigCard.tsx` | Configuration du backend d'exécution |
+| `BackendIndicator.tsx` | Indicateur visuel du backend actif |
+| `ScenarioTemplateCard.tsx` | Carte de template de scénario |
+| `ScenarioTagsManager.tsx` | Gestionnaire de tags pour les scénarios |
+
 ---
 
 ## 🧰 Utilitaires (`src/utils/`)
@@ -347,6 +498,9 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `components/config/MicroservicesSimulationPanel.tsx` | Panneau de simulation des microservices. |
 | `components/config/GitHubConfigPanel.tsx` | Configuration de l'intégration GitHub. |
 | `components/config/MqttConnectionStatus.tsx` | Indicateur de statut de connexion MQTT. |
+| `components/config/LocationPathManager.tsx` | Interface de gestion des localisations MQTT. |
+| `components/config/CustomConfigManager.tsx` | Gestionnaire de configuration personnalisée. |
+| `components/config/EntityCategoryManager.tsx` | Gestion des catégories d'entités. |
 | `components/dashboard/ContainerStatusWidget.tsx` | Widget d'état des conteneurs Docker. |
 | `components/devices/DeviceCard.tsx` | Carte d'affichage d'un appareil. |
 | `components/layout/MainLayout.tsx` | Layout principal de l'application. |

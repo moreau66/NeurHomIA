@@ -311,6 +311,75 @@ Configurez des alertes pour :
 - [ ] Audit trimestriel de sécurité
 - [ ] Revue semestrielle de l'architecture
 
+---
+
+## ⚡ Déploiement du Local Engine
+
+Le **Local Engine** est un backend Node.js alternatif pour l'exécution locale des scénarios.
+
+### Docker Compose
+
+Ajoutez le service dans votre `docker-compose.yml` :
+
+```yaml
+services:
+  local-engine:
+    build:
+      context: ./backend/local-engine
+      dockerfile: Dockerfile
+    container_name: neurhomia-local-engine
+    restart: unless-stopped
+    environment:
+      - MQTT_BROKER_HOST=mosquitto
+      - MQTT_BROKER_PORT=1883
+      - HTTP_PORT=3001
+      - LOG_LEVEL=info
+      - LATITUDE=48.8566
+      - LONGITUDE=2.3522
+    ports:
+      - "3001:3001"
+    networks:
+      - mcp-network
+    depends_on:
+      - mosquitto
+```
+
+### Variables d'environnement Production
+
+| Variable | Défaut | Description |
+|----------|--------|-------------|
+| `MQTT_BROKER_HOST` | localhost | Hôte du broker MQTT |
+| `MQTT_BROKER_PORT` | 1883 | Port du broker MQTT |
+| `HTTP_PORT` | 3001 | Port de l'API HTTP |
+| `LOG_LEVEL` | info | Niveau de log (`debug`, `info`, `warn`, `error`) |
+| `LATITUDE` | 48.8566 | Latitude pour calculs astronomiques |
+| `LONGITUDE` | 2.3522 | Longitude pour calculs astronomiques |
+
+### Configuration Frontend
+
+Dans l'interface NeurHomIA :
+
+1. Accédez à **Configuration** → **API**
+2. Dans **Backends d'Exécution**, configurez l'URL : `http://localhost:3001`
+3. Activez le Local Engine
+4. Configurez le fallback si nécessaire
+
+### Monitoring MQTT
+
+Topics de statut du Local Engine :
+
+| Topic | Description |
+|-------|-------------|
+| `neurhomia/local-engine/status` | `online` / `offline` |
+| `neurhomia/local-engine/heartbeat` | Heartbeat toutes les 10s |
+| `neurhomia/local-engine/scenarios/status` | Statistiques des scénarios |
+| `neurhomia/local-engine/scenarios/executed` | Événement d'exécution |
+| `neurhomia/local-engine/scenarios/error` | Événement d'erreur |
+
+📚 **Documentation complète** : [Guide du Local Engine](guide-local-engine.md)
+
+---
+
 ## Troubleshooting
 
 ### Problème : Connexion échouée
