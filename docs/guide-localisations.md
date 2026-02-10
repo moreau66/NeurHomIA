@@ -1,6 +1,6 @@
 # Guide des Localisations 📍
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce guide détaille le système de localisations dans NeurHomIA, couvrant la structure hiérarchique, la configuration, les icônes et l'utilisation dans les entités.
 

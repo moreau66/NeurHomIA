@@ -1,6 +1,6 @@
 # Guide des Widgets Dynamiques 🎛️
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Les widgets dynamiques permettent de créer des interfaces personnalisées pour vos entités, générées à partir de schémas JSON. Ce guide couvre leur création, configuration et découverte automatique.
 

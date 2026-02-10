@@ -1,6 +1,6 @@
 # Structure JSON Microservices 📄
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce document décrit la structure JSON requise pour l'intégration de microservices avec l'architecture **MCP (Model Context Protocol) JSON-RPC over MQTT** et widgets personnalisés dynamiques.
 

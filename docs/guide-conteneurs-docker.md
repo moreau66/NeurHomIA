@@ -1,5 +1,7 @@
 # Guide des Conteneurs Docker
 
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-08T10:00:00
+
 ## Vue d'ensemble
 
 NeurHomeIA utilise une architecture modulaire basée sur des **templates de conteneurs Docker**. Cette approche permet :

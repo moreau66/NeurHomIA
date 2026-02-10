@@ -1,5 +1,7 @@
 # Guide des Thèmes et Personnalisation
 
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-08T10:00:00
+
 > Documentation complète du système de thèmes de NeurHomIA : architecture, tokens CSS, personnalisation de l'interface et bonnes pratiques de développement.
 
 ---

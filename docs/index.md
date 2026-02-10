@@ -1,6 +1,6 @@
 # 🏠 Documentation NeurHomIA
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Bienvenue dans la documentation officielle de NeurHomIA, votre plateforme de domotique intelligente basée sur l'architecture MCP (Model Context Protocol).
 
@@ -50,9 +50,12 @@ Documentation approfondie sur l'architecture et les standards techniques.
 | [Préconisations Architecture MCP](guide-preconisations.md) | Standards et bonnes pratiques microservices |
 | [Structure JSON Microservices](microservice-json.md) | Format des fichiers de configuration JSON |
 | [Guide d'Intégration MQTT](guide-integration-mqtt.md) | Brokers, connexion, publication et souscription |
+| [Guide de Configuration des Brokers](guide-configuration-brokers.md) | Configuration des brokers MQTT externes (HiveMQ, EMQX, CloudMQTT) |
 | [Guide du Stockage MQTT](guide-stockage-mqtt.md) | Persistance, QoS et historique des messages |
 | [Guide du Monitoring MQTT](guide-monitoring-mqtt.md) | Surveillance des communications MQTT |
 | [Guide du Local Engine](guide-local-engine.md) | Backend Node.js pour l'exécution locale des scénarios |
+| [Guide des Conteneurs Docker](guide-conteneurs-docker.md) | Templates, déploiement et Watchtower |
+| [Guide du Diagnostic Réseau](guide-diagnostic-reseau.md) | Tests de connectivité, alertes et monitoring |
 
 ---
 
@@ -116,6 +119,7 @@ Documentation de référence et inventaire.
 1. Étudiez les [Préconisations Architecture MCP](guide-preconisations.md)
 2. Maîtrisez le [Monitoring MQTT](guide-monitoring-mqtt.md)
 3. Créez des [Entités Calculées](guide-entites-calculees.md)
+4. Surveillez votre infrastructure avec le [Diagnostic Réseau](guide-diagnostic-reseau.md)
 
 ---
 

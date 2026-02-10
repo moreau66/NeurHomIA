@@ -1,6 +1,6 @@
 # Guide de Développement 💻
 
-> **Version** : 0.9.9 | **Mise à jour** : Janvier 2026
+> **Version** : 0.9.9 | **Mise à jour** : 2026-02-06T10:00:00
 
 Guide rapide pour contribuer au projet NeurHomIA.
 

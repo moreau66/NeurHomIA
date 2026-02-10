@@ -1,6 +1,6 @@
 # Guide de Synchronisation GitHub 📥
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 NeurHomIA intègre un système de synchronisation unidirectionnelle avec le dépôt GitHub officiel. Ce système permet de maintenir vos fichiers de données à jour avec les dernières configurations fournies par le développeur.
 

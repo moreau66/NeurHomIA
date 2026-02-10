@@ -1,6 +1,6 @@
 # Guide d'Installation 🚀
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce guide détaille l'installation complète de NeurHomIA, un système de gestion d'automatisation domestique avec support des widgets et pages dynamiques.
 

@@ -1,6 +1,6 @@
 # Guide des Entités Calculées 🧮
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce guide explique comment créer et utiliser les entités calculées dans NeurHomIA pour transformer et enrichir vos données d'entités.
 

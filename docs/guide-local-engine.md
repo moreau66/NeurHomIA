@@ -1,6 +1,6 @@
 # Guide du Local Engine ⚡
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Backend Node.js alternatif pour l'exécution locale des scénarios d'automatisation NeurHomIA.
 

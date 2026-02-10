@@ -1,4 +1,6 @@
-# Guide des Microservices NeurHomeIA
+# Guide des Microservices NeurHomIA
+
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-08T10:00:00
 
 ## Table des matières
 

@@ -1,6 +1,6 @@
 # Documentation des Fichiers NeurHomIA 📚
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Rapport généré automatiquement - Liste complète des fichiers documentés avec leurs descriptions françaises.
 
@@ -123,6 +123,8 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `use-visual-editor.ts` | Éditeur visuel drag-and-drop (canvas, grille, sections, overrides). |
 | `use-widget-config.ts` | Configuration d'affichage des widgets par type d'entité. |
 | `use-widget-editor.ts` | Éditeur de schémas de widgets dynamiques. |
+| `use-diagnostics-alert-config.ts` | Configuration des alertes de diagnostic réseau (seuils, notifications, cooldown). |
+| `use-execution-config.ts` | Configuration du backend d'exécution des scénarios (Local Engine, Scheduler). |
 
 ---
 
@@ -157,6 +159,7 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `useVirtualEntitySync.ts` | Synchronisation des entités virtuelles. |
 | `useWidgetPreview.ts` | Prévisualisation des widgets. |
 | `useZigbee2MqttDevices.ts` | Découverte des appareils Zigbee2MQTT. |
+| `useDiagnosticsRunner.ts` | Hook de gestion des tests de diagnostic réseau avec historique et alertes. |
 
 ---
 
@@ -235,6 +238,9 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `weatherCalculationService.ts` | Calculs météorologiques. |
 | `widgetDiscoveryService.ts` | Découverte automatique des widgets (MQTT, System2Mqtt). |
 | `widgetTemplates.ts` | Templates de widgets prédéfinis. |
+| `networkDiagnosticsService.ts` | Tests de connectivité HTTP/WebSocket/MQTT, résolution DNS, mesures de latence. |
+| `diagnosticsAlertService.ts` | Détection et envoi des alertes de diagnostic (down, recover, high_latency). |
+| `schedulerMqttService.ts` | Communication MQTT avec le Scheduler Python (heartbeat, status, sync). |
 
 ### Services Notifications
 
@@ -458,6 +464,7 @@ Composants pour la création et gestion des scénarios QUAND/SI/ALORS.
 | `Views.tsx` | Éditeur de vues personnalisées. |
 | `WidgetDetails.tsx` | Détails d'un widget. |
 | `Widgets.tsx` | Bibliothèque de widgets. |
+| `NetworkDiagnostics.tsx` | Page de diagnostic réseau avec tests de connectivité et alertes. |
 
 ---
 
@@ -489,6 +496,7 @@ Composants pour la création et gestion des scénarios QUAND/SI/ALORS.
 | `widget-editor/` | Éditeur de widgets. |
 | `widgets/` | Composants de widgets personnalisés. |
 | `zigbee/` | Composants Zigbee2MQTT. |
+| `diagnostics/` | Composants de diagnostic réseau (panels, stats, alertes). |
 
 ### Composants documentés (exemples)
 

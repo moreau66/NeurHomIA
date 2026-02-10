@@ -1,5 +1,7 @@
 # Guide du Stockage et de la Persistance MQTT
 
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-08T10:00:00
+
 Ce guide détaille l'architecture de stockage des messages MQTT dans NeurHomIA, incluant les providers de stockage, les niveaux de QoS, la rétention des données et l'historique des messages.
 
 ---

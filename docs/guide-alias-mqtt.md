@@ -1,5 +1,7 @@
 # Guide des Alias MQTT
 
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-08T10:00:00
+
 ## Introduction
 
 Les alias MQTT sont des noms lisibles et mémorisables qui remplacent les topics et payloads MQTT techniques. Ils simplifient la création de scénarios en permettant d'utiliser des termes comme "Lever du soleil" au lieu de `astral/default/sunrise`.

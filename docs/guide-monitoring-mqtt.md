@@ -1,6 +1,6 @@
 # Guide du Monitoring MQTT 📡
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce guide détaille l'utilisation du système de monitoring MQTT amélioré de NeurHomIA.
 

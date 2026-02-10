@@ -1,6 +1,6 @@
 # Guide du Mode Simulation 🧪
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce guide vous explique comment et quand utiliser le mode simulation de l'application MQTT.
 

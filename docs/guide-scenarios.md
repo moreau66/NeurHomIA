@@ -1,6 +1,6 @@
 # Guide des Scénarios d'Automatisation 🎬
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce guide couvre le système complet de scénarios d'automatisation QUAND/SI/ALORS de NeurHomIA.
 
@@ -13,13 +13,14 @@ Ce guide couvre le système complet de scénarios d'automatisation QUAND/SI/ALOR
 3. [Structure d'un scénario](#-3-structure-dun-scénario)
 4. [Création de scénarios](#-4-création-de-scénarios)
 5. [Éditeur de règles](#-5-éditeur-de-règles)
-6. [Planification calendaire](#-6-planification-calendaire)
-7. [Backend d'exécution](#-7-backend-dexécution)
-8. [Modèles et templates](#-8-modèles-et-templates)
-9. [Import/Export](#-9-importexport)
-10. [Monitoring et suivi](#-10-monitoring-et-suivi)
-11. [Bonnes pratiques](#-11-bonnes-pratiques)
-12. [Dépannage](#-12-dépannage)
+6. [Éditeur graphique de flux](#-6-éditeur-graphique-de-flux)
+7. [Planification calendaire](#-7-planification-calendaire)
+8. [Backend d'exécution](#-8-backend-dexécution)
+9. [Modèles et templates](#-9-modèles-et-templates)
+10. [Import/Export](#-10-importexport)
+11. [Monitoring et suivi](#-11-monitoring-et-suivi)
+12. [Bonnes pratiques](#-12-bonnes-pratiques)
+13. [Dépannage](#-13-dépannage)
 
 ---
 
@@ -246,7 +247,199 @@ Exemple : (Capteur1 ET Capteur2) OU (Capteur3 ET Heure > 18:00)
 
 ---
 
-## 📅 6. Planification Calendaire
+## 🔀 6. Éditeur Graphique de Flux
+
+L'éditeur graphique offre une alternative visuelle à l'éditeur de règles classique, permettant de construire et modifier des scénarios par glisser-déposer.
+
+### 6.1 Présentation
+
+| Caractéristique | Description |
+|-----------------|-------------|
+| **Mode** | Visualisation et édition interactive |
+| **Technologie** | Basé sur ReactFlow |
+| **Accès** | Onglet "Éditeur Flux" dans le builder d'automatisation |
+
+L'éditeur représente le scénario sous forme de graphe avec des nœuds connectés par des arêtes directionnelles.
+
+### 6.2 Types de Nœuds
+
+| Nœud | Couleur | Icône | Description |
+|------|---------|-------|-------------|
+| **Début** | 🟢 Vert | ▶️ | Point de départ obligatoire du scénario |
+| **Fin** | 🔴 Rouge | 🏁 | Point de terminaison obligatoire |
+| **Déclencheur** | 🟠 Orange | ⚡ | Événement MQTT déclencheur (section QUAND) |
+| **Condition** | 🔵 Cyan | ❓ | Vérification de condition (section SI) |
+| **Action** | 🟢 Vert | ✓ | Action MQTT à exécuter (section ALORS) |
+| **Délai** | 🟣 Violet | ⏱️ | Pause temporisée avant la suite |
+| **Répéter** | 🟢 Émeraude | 🔄 | Boucle d'actions répétées |
+| **Parallèle** | 🟠 Ambre | ⑃ | Actions exécutées simultanément |
+| **Choisir** | 🌸 Rose | ⑂ | Branchement conditionnel multi-voies |
+| **Attendre** | 🔵 Cyan | ⏸️ | Attente d'un événement externe |
+| **Groupe** | 🔷 Indigo | 📦 | Groupement logique de conditions |
+
+### 6.3 Indicateurs Visuels
+
+#### Badge Calendrier sur le nœud Début
+
+Un badge bleu avec une icône calendrier apparaît sur le nœud **Début** si un calendrier d'exécution est configuré et activé pour le scénario.
+
+| Type de calendrier | Affichage tooltip |
+|--------------------|-------------------|
+| `always` | Toujours actif |
+| `fixed_time` | Heure fixe |
+| `recurring` | Récurrent |
+| `astronomical` | Événement astronomique |
+| `specific_days` | Jours spécifiques |
+| `period` | Période |
+
+Ce badge fournit un retour visuel immédiat sur les contraintes temporelles du scénario directement dans le graphe.
+
+#### Aperçu des Sous-Actions (Nœuds Complexes)
+
+Les nœuds **Parallèle** et **Choisir** affichent un aperçu compact de leur contenu directement sur le canevas :
+
+| Nœud | Contenu affiché |
+|------|-----------------|
+| **Parallèle** | Liste des sous-actions (max 4) avec icônes |
+| **Choisir** | Résumé des branches et action par défaut |
+
+**Fonctionnalité de repli/dépli :**
+
+Un bouton chevron (▼/▶) permet de replier ou déplier l'aperçu des sous-actions :
+
+| État | Icône | Comportement |
+|------|-------|--------------|
+| Déplié | ▼ | Affiche l'aperçu complet des sous-actions |
+| Replié | ▶ | Masque l'aperçu, conserve uniquement l'en-tête du nœud |
+
+> 💡 Par défaut, les aperçus sont dépliés. Le clic sur le chevron n'interfère pas avec le double-clic d'édition du nœud.
+
+**Exemple visuel (Nœud Parallèle déplié) :**
+```
+┌─────────────────────────────────────┐
+│ ⑂ PARALLELE          [3 actions] ▼ │
+│   Mon parallèle                     │
+│   Attendre toutes                   │
+├─────────────────────────────────────┤
+│  ⚡ Allumer salon                   │
+│  🕐 Délai 2s                        │
+│  ⚡ Ouvrir volets                   │
+└─────────────────────────────────────┘
+```
+
+### 6.4 Règles de Connexion
+
+Les connexions entre nœuds suivent des règles de validation strictes :
+
+| Nœud Source | Cibles Autorisées |
+|-------------|-------------------|
+| **Début** | Déclencheur uniquement |
+| **Déclencheur** | Déclencheur, Condition, Groupe, Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Condition** | Condition, Groupe, Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Groupe** | Condition, Groupe, Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Action** | Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Délai** | Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Attendre** | Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Répéter** | Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Parallèle** | Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+| **Choisir** | Action, Délai, Attendre, Répéter, Parallèle, Choisir, Fin |
+
+> ⚠️ Le nœud **Début** ne peut être connecté qu'à un **Déclencheur** ou directement à **Fin**.
+
+### 6.5 Validation en Temps Réel
+
+L'éditeur graphique inclut un indicateur de validation visible en permanence dans la barre d'outils :
+
+#### Indicateur de Statut
+
+| Couleur | Signification | Action |
+|---------|---------------|--------|
+| 🟢 Vert | Scénario valide | Sauvegarde autorisée |
+| 🟡 Jaune | Avertissements présents | Sauvegarde possible, vérifiez les recommandations |
+| 🔴 Rouge | Erreurs bloquantes | Sauvegarde impossible tant que non corrigées |
+
+> 💡 Cliquez sur l'indicateur pour ouvrir un popover détaillant les erreurs et avertissements.
+
+#### Erreurs Bloquantes
+
+| Erreur | Cause |
+|--------|-------|
+| "Le nœud Début est manquant" | Le graphe n'a pas de nœud Début |
+| "Le nœud Fin est manquant" | Le graphe n'a pas de nœud Fin |
+| "Le nœud Début n'est connecté à rien" | Aucune arête ne part du nœud Début |
+| "Le nœud Début doit être connecté à un Déclencheur" | Début connecté à autre chose qu'un Déclencheur |
+| "Le bloc 'X' n'est pas connecté" | Nœud orphelin sans aucune connexion |
+| "Le scénario doit avoir au moins un déclencheur" | Aucun nœud Déclencheur dans le graphe |
+
+#### Avertissements (Non Bloquants)
+
+| Avertissement | Cause |
+|---------------|-------|
+| "Le bloc 'X' n'a pas de connexion entrante" | Le nœud n'a pas de prédécesseur |
+| "Le bloc 'X' n'a pas de connexion sortante" | Le nœud n'a pas de successeur |
+
+### 6.6 Contrôles de Zoom
+
+La barre d'outils propose des contrôles de zoom pour naviguer dans les scénarios complexes :
+
+| Bouton | Action | Raccourci |
+|--------|--------|-----------|
+| 🔍+ | Zoom avant | Molette vers le haut |
+| 🔍- | Zoom arrière | Molette vers le bas |
+| ⊡ Ajuster | Ajuste le zoom pour afficher tout le graphe | — |
+
+> 💡 L'organisation de la barre d'outils : **Zoom** (gauche) • **Validation** (centre) • **Actions** (droite)
+
+### 6.7 Ancrages Manuels des Connexions
+
+Par défaut, les connexions s'attachent automatiquement au point d'ancrage optimal (haut, bas, gauche ou droite). Vous pouvez forcer manuellement la position des ancrages :
+
+1. **Cliquer sur une connexion** pour ouvrir son dialogue de configuration
+2. **Choisir l'ancrage source** : Automatique, Haut, Bas, Gauche ou Droite
+3. **Choisir l'ancrage cible** : Automatique, Haut, Bas, Gauche ou Droite
+4. **Valider** pour appliquer
+
+**Indicateur visuel** : Les connexions avec ancrage forcé sont affichées en **trait pointillé** pour les distinguer des connexions automatiques.
+
+### 6.8 Insertion de Blocs
+
+1. **Palette latérale** : Les types de blocs sont listés dans une palette à gauche du canvas
+2. **Glisser-déposer** : Faire glisser un bloc depuis la palette vers le canvas
+3. **Positionnement** : Le bloc est placé exactement à l'endroit où le curseur le dépose
+4. **Connexion** : Relier manuellement les blocs en tirant une arête depuis un handle source vers un handle cible
+
+### 6.9 Navigation et Contrôles
+
+| Action | Contrôle |
+|--------|----------|
+| **Sélectionner** | Clic sur un nœud |
+| **Éditer la configuration** | Double-clic sur un nœud |
+| **Annuler** | Ctrl+Z (⌘+Z sur Mac) |
+| **Refaire** | Ctrl+Y (⌘+Shift+Z sur Mac) |
+| **Zoomer** | Molette de la souris |
+| **Déplacer la vue** | Clic-glisser sur le fond du canvas |
+| **Supprimer** | Sélectionner + touche Suppr ou Backspace |
+| **Configurer une connexion** | Clic sur une arête |
+
+### 6.10 Navigation vers l'Éditeur Classique
+
+Un clic simple sur un nœud éditable dans le graphe permet de basculer automatiquement vers l'éditeur de règles classique :
+
+- Le nœud correspondant est mis en évidence avec une animation
+- La vue défile automatiquement vers l'élément concerné
+- Les nœuds **Début**, **Fin** et les points de convergence technique ne déclenchent pas de navigation
+
+### 6.11 Conversion Automatique
+
+Les modifications effectuées dans l'éditeur graphique sont automatiquement converties en structure Scénario lors de la sauvegarde :
+
+- Les **Déclencheurs** sont placés dans la section **QUAND**
+- Les **Conditions** et **Groupes** sont placés dans la section **SI**
+- Les **Actions** et blocs de contrôle sont placés dans la section **ALORS**
+
+---
+
+## 📅 7. Planification Calendaire
 
 ### Types de planification disponibles
 
@@ -314,7 +507,7 @@ interface CalendarScheduleConfig {
 
 ---
 
-## ⚡ 7. Backend d'Exécution
+## ⚡ 8. Backend d'Exécution
 
 NeurHomIA supporte deux backends d'exécution pour les scénarios :
 
@@ -363,7 +556,7 @@ Le mode automatique :
 
 ---
 
-## 📚 8. Modèles et Templates
+## 📚 9. Modèles et Templates
 
 ### Modèles officiels
 
@@ -394,7 +587,7 @@ Templates prédéfinis par catégorie :
 
 ---
 
-## 📤 9. Import/Export
+## 📤 10. Import/Export
 
 ### Exporter un scénario
 
@@ -454,7 +647,7 @@ Templates prédéfinis par catégorie :
 
 ---
 
-## 📊 10. Monitoring et Suivi
+## 📊 11. Monitoring et Suivi
 
 ### Dashboard des scénarios
 
@@ -490,7 +683,7 @@ Configuration des alertes pour :
 
 ---
 
-## ✅ 11. Bonnes Pratiques
+## ✅ 12. Bonnes Pratiques
 
 ### Nommage 📝
 
@@ -527,7 +720,7 @@ Configuration des alertes pour :
 
 ---
 
-## 🐛 12. Dépannage
+## 🐛 13. Dépannage
 
 ### Le scénario ne se déclenche pas
 

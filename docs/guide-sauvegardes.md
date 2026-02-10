@@ -1,6 +1,6 @@
 # Guide des Sauvegardes 💾
 
-> **Version** : 1.0.0 | **Mise à jour** : Janvier 2026
+> **Version** : 1.0.0 | **Mise à jour** : 2026-02-06T10:00:00
 
 Ce guide explique les différents systèmes de sauvegarde disponibles dans NeurHomIA et quand utiliser chacun d'entre eux.
 
