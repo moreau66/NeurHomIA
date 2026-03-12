@@ -1,7 +1,7 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
 # Version avec détection automatique des fichiers de boot (BIOS/UEFI)
-# Compatible avec Ubuntu 24.04+ (structure GRUB)
+# et gravure interactive sur clé USB
 
 set -e
 
@@ -44,7 +44,7 @@ OUTPUT_ISO="$WORK_DIR/neurhomia-server-${ISO_VERSION}-auto.iso"
 LABEL="NEURHOMIA_SRV"
 
 # URL du script de premier démarrage (à personnaliser !)
-FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/moreau66/neurhomia/main/firstboot-config.sh"
+FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"
 DEFAULT_PASSWORD="neurhomia"
 
 # ------------------------------
@@ -198,9 +198,100 @@ else
 fi
 
 # ------------------------------
+# Demande de gravure sur clé USB
+# ------------------------------
+burn_iso() {
+    local iso_path="$1"
+    echo -e "${YELLOW}Voulez-vous graver cette ISO sur une clé USB ? (o/N)${NC}"
+    read -r answer
+    if [[ ! "$answer" =~ ^[OoYy]$ ]]; then
+        echo -e "${GREEN}Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
+        echo -e "  sudo dd if=$iso_path of=/dev/sdX bs=4M status=progress conv=fsync"
+        return
+    fi
+
+    # Vérifier les droits sudo
+    if ! sudo -v &>/dev/null; then
+        echo -e "${RED}Vous devez avoir les droits sudo pour graver une clé USB.${NC}"
+        return
+    fi
+
+    while true; do
+        echo -e "${YELLOW}Recherche des périphériques USB...${NC}"
+        # Liste des périphériques de type disk, avec transport USB, et taille < 64 Go
+        mapfile -t devices < <(lsblk -d -o NAME,SIZE,TYPE,TRAN -n -l 2>/dev/null | grep -E 'disk.*usb' | awk '$2 ~ /^[0-9.]+[GM]?/ { if ($2 ~ /G/ && $2+0 < 64) print; else if ($2 ~ /M/ && $2+0 < 64000) print }')
+        # Si pas de périphérique USB détecté, élargir à tout disk de taille < 64G
+        if [ ${#devices[@]} -eq 0 ]; then
+            mapfile -t devices < <(lsblk -d -o NAME,SIZE,TYPE -n -l 2>/dev/null | grep disk | awk '$2 ~ /^[0-9.]+[GM]?/ { if ($2 ~ /G/ && $2+0 < 64) print; else if ($2 ~ /M/ && $2+0 < 64000) print }')
+        fi
+
+        if [ ${#devices[@]} -eq 0 ]; then
+            echo -e "${RED}Aucune clé USB détectée.${NC}"
+            echo -e "${YELLOW}Insérez une clé USB, puis appuyez sur Entrée pour réessayer, ou tapez 'q' pour quitter.${NC}"
+            read -r retry
+            if [[ "$retry" == "q" ]]; then
+                echo -e "${GREEN}Gravure annulée.${NC}"
+                return
+            fi
+            continue
+        fi
+
+        # Afficher les périphériques trouvés
+        echo -e "${GREEN}Périphériques détectés :${NC}"
+        local i=1
+        for dev in "${devices[@]}"; do
+            # Extraire le nom et la taille
+            name=$(echo "$dev" | awk '{print $1}')
+            size=$(echo "$dev" | awk '{print $2}')
+            echo "  $i) /dev/$name ($size)"
+            ((i++))
+        done
+        echo -e "${YELLOW}Choisissez le numéro du périphérique à utiliser, ou 'q' pour annuler :${NC}"
+        read -r choice
+        if [[ "$choice" == "q" ]]; then
+            echo -e "${GREEN}Gravure annulée.${NC}"
+            return
+        fi
+        if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt ${#devices[@]} ]; then
+            echo -e "${RED}Choix invalide.${NC}"
+            continue
+        fi
+
+        selected_dev="/dev/$(echo "${devices[$((choice-1))]}" | awk '{print $1}')"
+        echo -e "${RED}Attention : vous allez écraser toutes les données sur $selected_dev.${NC}"
+        echo -e "${YELLOW}Êtes-vous sûr de vouloir continuer ? (oui/NON)${NC}"
+        read -r confirm
+        if [[ ! "$confirm" =~ ^[OoYy]([Ee][Ss]?)?$ ]]; then
+            echo -e "${GREEN}Gravure annulée.${NC}"
+            return
+        fi
+
+        # Vérifier que le périphérique n'est pas monté
+        if mount | grep -q "$selected_dev"; then
+            echo -e "${RED}Le périphérique $selected_dev est monté. Démontez-le avant de continuer.${NC}"
+            continue
+        fi
+
+        # Exécuter la gravure
+        echo -e "${YELLOW}Gravure de l'ISO sur $selected_dev...${NC}"
+        sudo dd if="$iso_path" of="$selected_dev" bs=4M status=progress conv=fsync
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}Gravure terminée avec succès !${NC}"
+            echo -e "Vous pouvez maintenant utiliser cette clé pour démarrer votre mini-PC."
+        else
+            echo -e "${RED}Erreur lors de la gravure. Vérifiez que vous avez les droits sudo et que le périphérique n'est pas monté.${NC}"
+        fi
+        break
+    done
+}
+
+# Appel de la fonction de gravure
+burn_iso "$OUTPUT_ISO"
+
+# ------------------------------
 # Finalisation
 # ------------------------------
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}ISO générée : $OUTPUT_ISO${NC}"
-echo -e "${GREEN}Mot de passe par défaut : $DEFAULT_PASSWORD${NC}"
+echo -e "${GREEN}Processus terminé.${NC}"
+echo -e "${GREEN}ISO disponible : $OUTPUT_ISO${NC}"
 echo -e "${GREEN}========================================${NC}"
