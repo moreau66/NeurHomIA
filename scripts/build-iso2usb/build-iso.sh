@@ -1,6 +1,6 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
-# Version avec support GRUB (Ubuntu 24.04+)
+# Version avec support GRUB (Ubuntu 24.04+) et conservation de l'ISO téléchargée
 
 set -e
 
@@ -43,7 +43,7 @@ OUTPUT_ISO="$WORK_DIR/neurhomia-server-${ISO_VERSION}-auto.iso"
 LABEL="NEURHOMIA_SRV"
 
 # URL du script de premier démarrage (à personnaliser !)
-FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/moreau66/neurhomia/main/firstboot-config.sh"
+FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"
 DEFAULT_PASSWORD="neurhomia"
 
 # ------------------------------
@@ -59,21 +59,22 @@ command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}xorriso est requis. Insta
 # Préparation des dossiers
 # ------------------------------
 echo -e "${YELLOW}Préparation de l'espace de travail...${NC}"
-rm -rf "$WORK_DIR"
+mkdir -p "$WORK_DIR"
+rm -rf "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 
 # ------------------------------
-# Téléchargement de l'ISO
+# Téléchargement de l'ISO (si non existante)
 # ------------------------------
 if [ ! -f "$WORK_DIR/$ISO_FILENAME" ]; then
     echo -e "${YELLOW}Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
     wget -O "$WORK_DIR/$ISO_FILENAME" "$ISO_URL"
 else
-    echo -e "${GREEN}L'ISO est déjà présente.${NC}"
+    echo -e "${GREEN}L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
 fi
 
 # ------------------------------
-# Extraction
+# Extraction de l'ISO
 # ------------------------------
 echo -e "${YELLOW}Extraction de l'ISO...${NC}"
 7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR"
@@ -166,11 +167,7 @@ if [ ! -d "$EXTRACT_DIR/boot/grub" ]; then
     exit 1
 fi
 
-# Déterminer les fichiers de boot
-# Pour BIOS, on utilise généralement boot/grub/i386-pc/eltorito.img
-# Pour UEFI, on utilise boot/grub/efi.img ou EFI/BOOT/BOOTx64.EFI
-# On va utiliser une commande standard qui fonctionne pour Ubuntu live-server
-
+# Création de l'ISO hybride (BIOS + UEFI)
 xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
     -iso-level 3 -no-emul-boot -boot-load-size 4 -boot-info-table \
     -b boot/grub/i386-pc/eltorito.img -c boot.catalog \
@@ -179,9 +176,9 @@ xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
     -o "$OUTPUT_ISO" "$EXTRACT_DIR"
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}ISO créée avec succès.${NC}"
+    echo -e "${GREEN}ISO créée avec succès : $OUTPUT_ISO${NC}"
 else
-    echo -e "${RED}Échec de la création de l'ISO avec xorriso. Vérifiez la structure des fichiers de boot.${NC}"
+    echo -e "${RED}Échec de la création de l'ISO. Vérifiez la structure des fichiers de boot.${NC}"
     exit 1
 fi
 
