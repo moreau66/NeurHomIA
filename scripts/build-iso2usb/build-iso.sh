@@ -1,7 +1,7 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
 # Version avec détection automatique des fichiers de boot (BIOS/UEFI)
-# et gravure interactive sur clé USB
+# Gravure interactive sur clé USB et conservation des anciennes ISO
 
 set -e
 
@@ -10,6 +10,17 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+
+# ------------------------------
+# Déterminer le répertoire de travail (même avec sudo)
+# ------------------------------
+if [ -n "$SUDO_USER" ]; then
+    REAL_USER="$SUDO_USER"
+    REAL_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+    WORK_DIR="$REAL_HOME/neurhomia-iso"
+else
+    WORK_DIR="$HOME/neurhomia-iso"
+fi
 
 # ------------------------------
 # Demande interactive de la version d'Ubuntu
@@ -35,7 +46,6 @@ fi
 # ------------------------------
 # Configuration
 # ------------------------------
-WORK_DIR="$HOME/neurhomia-iso"
 ISO_FILENAME="ubuntu-${ISO_VERSION}-live-server-amd64.iso"
 ISO_URL="https://releases.ubuntu.com/${ISO_VERSION%.*}/ubuntu-${ISO_VERSION}-live-server-amd64.iso"
 EXTRACT_DIR="$WORK_DIR/extracted"
@@ -180,6 +190,14 @@ else
         echo -e "${RED}Erreur : aucun fichier de boot EFI trouvé (ni efi.img, ni .efi).${NC}"
         exit 1
     fi
+fi
+
+# Sauvegarde de l'ancienne ISO si elle existe
+if [ -f "$OUTPUT_ISO" ]; then
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    BACKUP_ISO="${OUTPUT_ISO%.*}_${TIMESTAMP}.${OUTPUT_ISO##*.}"
+    mv "$OUTPUT_ISO" "$BACKUP_ISO"
+    echo -e "${YELLOW}Ancienne ISO sauvegardée sous : $BACKUP_ISO${NC}"
 fi
 
 # Création de l'ISO hybride (BIOS + UEFI)
