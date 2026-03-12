@@ -1,6 +1,7 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
-# Version avec support GRUB (Ubuntu 24.04+) et conservation de l'ISO téléchargée
+# Version avec détection automatique des fichiers de boot (BIOS/UEFI)
+# Compatible avec Ubuntu 24.04+ (structure GRUB)
 
 set -e
 
@@ -43,7 +44,7 @@ OUTPUT_ISO="$WORK_DIR/neurhomia-server-${ISO_VERSION}-auto.iso"
 LABEL="NEURHOMIA_SRV"
 
 # URL du script de premier démarrage (à personnaliser !)
-FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"
+FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/moreau66/neurhomia/main/firstboot-config.sh"
 DEFAULT_PASSWORD="neurhomia"
 
 # ------------------------------
@@ -155,30 +156,44 @@ touch "$AUTOINSTALL_DIR/meta-data"
 cp -r "$AUTOINSTALL_DIR" "$EXTRACT_DIR/"
 
 # ------------------------------
-# Création de l'ISO avec xorriso (pour GRUB)
+# Création de l'ISO avec xorriso (détection automatique)
 # ------------------------------
 echo -e "${YELLOW}Création de la nouvelle ISO (avec xorriso)...${NC}"
 
-# Vérifier la présence des fichiers de boot GRUB
-if [ ! -d "$EXTRACT_DIR/boot/grub" ]; then
-    echo -e "${RED}Erreur : le dossier 'boot/grub' est introuvable dans $EXTRACT_DIR${NC}"
-    echo -e "Contenu du répertoire extrait :"
-    ls -la "$EXTRACT_DIR"
+# Vérification du fichier de boot BIOS
+if [ ! -f "$EXTRACT_DIR/boot/grub/i386-pc/eltorito.img" ]; then
+    echo -e "${RED}Erreur : fichier 'boot/grub/i386-pc/eltorito.img' introuvable. Vérifiez la structure de l'ISO extraite.${NC}"
     exit 1
+fi
+
+# Détection du fichier de boot UEFI
+EFI_PATH=""
+if [ -f "$EXTRACT_DIR/boot/grub/efi.img" ]; then
+    EFI_PATH="boot/grub/efi.img"
+else
+    # Recherche insensible à la casse d'un fichier .efi dans le dossier EFI/
+    EFI_FILE=$(find "$EXTRACT_DIR/EFI" -type f -iname "*.efi" 2>/dev/null | head -n1)
+    if [ -n "$EFI_FILE" ]; then
+        EFI_PATH="${EFI_FILE#$EXTRACT_DIR/}"
+        echo -e "${GREEN}Fichier EFI détecté : $EFI_PATH${NC}"
+    else
+        echo -e "${RED}Erreur : aucun fichier de boot EFI trouvé (ni efi.img, ni .efi).${NC}"
+        exit 1
+    fi
 fi
 
 # Création de l'ISO hybride (BIOS + UEFI)
 xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
     -iso-level 3 -no-emul-boot -boot-load-size 4 -boot-info-table \
     -b boot/grub/i386-pc/eltorito.img -c boot.catalog \
-    -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
+    -eltorito-alt-boot -e "$EFI_PATH" -no-emul-boot \
     -isohybrid-gpt-basdat -isohybrid-apm-hfsplus \
     -o "$OUTPUT_ISO" "$EXTRACT_DIR"
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}ISO créée avec succès : $OUTPUT_ISO${NC}"
 else
-    echo -e "${RED}Échec de la création de l'ISO. Vérifiez la structure des fichiers de boot.${NC}"
+    echo -e "${RED}Échec de la création de l'ISO. Vérifiez les messages ci-dessus.${NC}"
     exit 1
 fi
 
