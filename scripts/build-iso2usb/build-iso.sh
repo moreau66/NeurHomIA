@@ -303,14 +303,17 @@ burn_iso() {
             continue
         fi
 
-        # Vérifier la taille de la clé par rapport à l'ISO (utilisation de lsblk)
+        # Vérifier la taille de la clé par rapport à l'ISO via sysfs
         iso_size=$(stat -c%s "$iso_path")
-        # Récupérer la taille du périphérique en bytes avec lsblk
-        dev_size=$(lsblk -bno SIZE "$selected_dev" 2>/dev/null | head -n1)
-        if [ -z "$dev_size" ]; then
+        devname=$(basename "$selected_dev")
+        if [ -e "/sys/block/$devname/size" ]; then
+            sectors=$(cat "/sys/block/$devname/size")
+            dev_size=$((sectors * 512))
+        else
             echo -e "${RED}Impossible de déterminer la taille du périphérique $selected_dev.${NC}"
             continue
         fi
+
         if [ "$iso_size" -gt "$dev_size" ]; then
             echo -e "${RED}L'ISO ($(numfmt --to=iec $iso_size)) est plus grande que la clé ($(numfmt --to=iec $dev_size)). Impossible de graver.${NC}"
             continue
