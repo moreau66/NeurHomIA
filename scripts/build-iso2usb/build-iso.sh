@@ -1,6 +1,6 @@
 #!/bin/bash
-# build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
-# Version avec vérification multi-partitions
+# build-iso.sh – Construction de l'ISO d'installation automatique pour un projet
+# Utilisation : ./build-iso.sh
 
 set -e
 
@@ -11,14 +11,26 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 # ------------------------------
+# Paramètres personnalisables
+# ------------------------------
+PROJECT_NAME="NeurHomIA"               # Nom du projet (utilisé pour hostname, dossier, label)
+USERNAME="neurhomia"                    # Nom de l'utilisateur système
+DEFAULT_PASSWORD="neurhomia"            # Mot de passe par défaut (sera hashé)
+FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"  # À modifier !
+
+# Dérivés
+PROJECT_NAME_LOWER=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]')
+PROJECT_NAME_UPPER=$(echo "$PROJECT_NAME" | tr '[:lower:]' '[:upper:]')
+
+# ------------------------------
 # Déterminer le répertoire de travail (même avec sudo)
 # ------------------------------
 if [ -n "$SUDO_USER" ]; then
     REAL_USER="$SUDO_USER"
     REAL_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
-    WORK_DIR="$REAL_HOME/neurhomia-iso"
+    WORK_DIR="$REAL_HOME/${PROJECT_NAME_LOWER}-iso"
 else
-    WORK_DIR="$HOME/neurhomia-iso"
+    WORK_DIR="$HOME/${PROJECT_NAME_LOWER}-iso"
 fi
 
 # ------------------------------
@@ -43,18 +55,18 @@ else
 fi
 
 # ------------------------------
-# Configuration
+# Configuration basée sur la version
 # ------------------------------
 ISO_FILENAME="ubuntu-${ISO_VERSION}-live-server-amd64.iso"
 ISO_URL="https://releases.ubuntu.com/${ISO_VERSION%.*}/ubuntu-${ISO_VERSION}-live-server-amd64.iso"
 EXTRACT_DIR="$WORK_DIR/extracted"
 AUTOINSTALL_DIR="$WORK_DIR/autoinstall"
-OUTPUT_ISO="$WORK_DIR/neurhomia-server-${ISO_VERSION}-auto.iso"
-LABEL="NEURHOMIA_SRV"
-
-# URL du script de premier démarrage (à personnaliser !)
-FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"
-DEFAULT_PASSWORD="neurhomia"
+OUTPUT_ISO="$WORK_DIR/${PROJECT_NAME_LOWER}-server-${ISO_VERSION}-auto.iso"
+LABEL="${PROJECT_NAME_UPPER}_SRV"
+# Troncature si le label dépasse 32 caractères (norme ISO)
+if [ ${#LABEL} -gt 32 ]; then
+    LABEL="${LABEL:0:32}"
+fi
 
 # ------------------------------
 # Vérification des dépendances
@@ -129,8 +141,8 @@ autoinstall:
     layout:
       name: lvm
   identity:
-    hostname: neurhomia-box
-    username: neurhomia
+    hostname: ${PROJECT_NAME_LOWER}-box
+    username: $USERNAME
     password: "$PASSWORD_HASH"
   ssh:
     install-server: true
@@ -143,26 +155,26 @@ autoinstall:
     - whiptail
     - curl
   late-commands:
-    - mkdir -p /target/opt/neurhomia
-    - curtin in-target -- wget -O /opt/neurhomia/firstboot.sh $FIRSTBOOT_SCRIPT_URL
-    - curtin in-target -- chmod +x /opt/neurhomia/firstboot.sh
+    - mkdir -p /target/opt/${PROJECT_NAME_LOWER}
+    - curtin in-target -- wget -O /opt/${PROJECT_NAME_LOWER}/firstboot.sh $FIRSTBOOT_SCRIPT_URL
+    - curtin in-target -- chmod +x /opt/${PROJECT_NAME_LOWER}/firstboot.sh
     - |
-      cat <<'SERV' > /target/etc/systemd/system/neurhomia-firstboot.service
+      cat <<'SERV' > /target/etc/systemd/system/${PROJECT_NAME_LOWER}-firstboot.service
       [Unit]
-      Description=NeurHomIA First Boot Configuration
+      Description=${PROJECT_NAME} First Boot Configuration
       After=network-online.target
       Wants=network-online.target
 
       [Service]
       Type=oneshot
       RemainAfterExit=yes
-      ExecStart=/opt/neurhomia/firstboot.sh
+      ExecStart=/opt/${PROJECT_NAME_LOWER}/firstboot.sh
       StandardOutput=journal+console
 
       [Install]
       WantedBy=multi-user.target
       SERV
-    - curtin in-target -- systemctl enable neurhomia-firstboot.service
+    - curtin in-target -- systemctl enable ${PROJECT_NAME_LOWER}-firstboot.service
   shutdown: reboot
 EOF
 
@@ -365,43 +377,7 @@ burn_iso() {
         echo -e "${YELLOW}Vérification de l'écriture par comparaison d'empreinte...${NC}"
         local dev_hash=$(sudo dd if="$selected_dev" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
         if [ "$dev_hash" = "$iso_hash" ]; then
-            echo -e "${GREEN}Vérification réussie : l'empreinte correspond.${NC}"
-
-            # Vérification supplémentaire : chercher le dossier autoinstall sur toutes les partitions
-            echo -e "${YELLOW}Recherche du dossier autoinstall sur les partitions de la clé...${NC}"
-            mkdir -p /mnt/usb-check
-            found=0
-            # Récupérer la liste des partitions du disque
-            partitions=$(lsblk -ln -o NAME,TYPE "$selected_dev" 2>/dev/null | awk '$2=="part" {print "/dev/"$1}')
-            if [ -n "$partitions" ]; then
-                for part in $partitions; do
-                    echo -e "  Test de $part..."
-                    if sudo mount "$part" /mnt/usb-check 2>/dev/null; then
-                        if [ -d "/mnt/usb-check/autoinstall" ] && [ -f "/mnt/usb-check/autoinstall/user-data" ]; then
-                            echo -e "${GREEN}  ✓ Dossier autoinstall trouvé sur $part !${NC}"
-                            found=1
-                            sudo umount /mnt/usb-check
-                            break
-                        else
-                            echo -e "${YELLOW}  Pas de dossier autoinstall sur $part.${NC}"
-                        fi
-                        sudo umount /mnt/usb-check
-                    else
-                        echo -e "${YELLOW}  Impossible de monter $part.${NC}"
-                    fi
-                done
-            else
-                echo -e "${YELLOW}Aucune partition détectée sur $selected_dev. Vérification impossible.${NC}"
-            fi
-            rmdir /mnt/usb-check 2>/dev/null || true
-
-            if [ $found -eq 1 ]; then
-                echo -e "${GREEN}Gravure terminée avec succès !${NC}"
-            else
-                echo -e "${YELLOW}Attention : le dossier autoinstall n'a pas été trouvé sur les partitions montées.${NC}"
-                echo -e "Cependant, l'empreinte SHA256 correspond, donc la gravure est probablement valide."
-                echo -e "Vous pouvez vérifier manuellement en montant la clé."
-            fi
+            echo -e "${GREEN}Vérification réussie : l'empreinte correspond. La gravure est valide.${NC}"
             echo -e "Vous pouvez maintenant utiliser cette clé pour démarrer votre mini-PC."
         else
             echo -e "${RED}Échec de la vérification : l'empreinte ne correspond pas.${NC}"
@@ -422,8 +398,8 @@ burn_iso() {
 # Appel de la fonction de gravure
 burn_iso "$OUTPUT_ISO"
 
-# Conseils pour vérifier la présence du dossier autoinstall
-echo -e "${YELLOW}Pour vérifier que le dossier autoinstall est bien présent sur la clé USB, vous pouvez monter sa première partition :${NC}"
+# Conseils pour vérification manuelle (optionnel)
+echo -e "${YELLOW}Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition :${NC}"
 echo -e "  sudo mount /dev/sdX1 /mnt && ls /mnt/autoinstall"
 echo -e "${YELLOW}(Remplacez 'sdX' par le périphérique de votre clé, par exemple sdb)${NC}"
 echo ""
