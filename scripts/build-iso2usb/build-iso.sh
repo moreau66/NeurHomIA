@@ -45,7 +45,7 @@ OUTPUT_ISO="$WORK_DIR/neurhomia-server-${ISO_VERSION}-auto.iso"
 LABEL="NEURHOMIA_SRV"                          # Étiquette du volume ISO
 
 # URL du script de premier démarrage (à personnaliser !)
-FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"
+FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/moreau66/neurhomia/main/firstboot-config.sh"
 
 # Mot de passe par défaut (sera hashé automatiquement)
 DEFAULT_PASSWORD="neurhomia"
