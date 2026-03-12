@@ -1,7 +1,6 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
-# Version avec détection automatique des fichiers de boot (BIOS/UEFI)
-# Gravure interactive sur clé USB et conservation des anciennes ISO
+# Version avec sauvegarde des anciens autoinstall et vérification par hash
 
 set -e
 
@@ -67,11 +66,20 @@ command -v openssl >/dev/null 2>&1 || { echo -e "${RED}openssl est requis. Insta
 command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}xorriso est requis. Installez-le avec : sudo apt install xorriso${NC}"; exit 1; }
 
 # ------------------------------
-# Préparation des dossiers
+# Préparation des dossiers avec sauvegarde de l'ancien autoinstall
 # ------------------------------
 echo -e "${YELLOW}Préparation de l'espace de travail...${NC}"
 mkdir -p "$WORK_DIR"
-rm -rf "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
+
+# Sauvegarde de l'ancien dossier autoinstall s'il existe
+if [ -d "$AUTOINSTALL_DIR" ]; then
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    BACKUP_AUTOINSTALL="${AUTOINSTALL_DIR}_${TIMESTAMP}"
+    mv "$AUTOINSTALL_DIR" "$BACKUP_AUTOINSTALL"
+    echo -e "${YELLOW}Ancien dossier autoinstall sauvegardé sous : $BACKUP_AUTOINSTALL${NC}"
+fi
+
+rm -rf "$EXTRACT_DIR"
 mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 
 # ------------------------------
@@ -160,6 +168,13 @@ EOF
 
 touch "$AUTOINSTALL_DIR/meta-data"
 
+# Vérification que les fichiers ont bien été créés
+if [ ! -f "$AUTOINSTALL_DIR/user-data" ] || [ ! -f "$AUTOINSTALL_DIR/meta-data" ]; then
+    echo -e "${RED}Erreur : les fichiers d'autoinstall n'ont pas été créés correctement.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}Fichiers d'autoinstall créés avec succès.${NC}"
+
 # ------------------------------
 # Intégration de l'autoinstall
 # ------------------------------
@@ -218,7 +233,6 @@ fi
 # ------------------------------
 # Demande de gravure sur clé USB
 # ------------------------------
-# Fonction de gravure améliorée avec démontage automatique
 burn_iso() {
     local iso_path="$1"
     echo -e "${YELLOW}Voulez-vous graver cette ISO sur une clé USB ? (o/N)${NC}"
@@ -234,6 +248,11 @@ burn_iso() {
         echo -e "${RED}Vous devez avoir les droits sudo pour graver une clé USB.${NC}"
         return
     fi
+
+    # Calculer un hash de vérification (SHA256 des 10 premiers Mo de l'ISO)
+    echo -e "${YELLOW}Calcul de l'empreinte de vérification de l'ISO...${NC}"
+    local iso_hash=$(dd if="$iso_path" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
+    echo -e "Empreinte (10 premiers Mo) : $iso_hash"
 
     while true; do
         echo -e "${YELLOW}Recherche des périphériques USB...${NC}"
@@ -259,7 +278,6 @@ burn_iso() {
         echo -e "${GREEN}Périphériques détectés :${NC}"
         local i=1
         for dev in "${devices[@]}"; do
-            # Extraire le nom et la taille
             name=$(echo "$dev" | awk '{print $1}')
             size=$(echo "$dev" | awk '{print $2}')
             echo "  $i) /dev/$name ($size)"
@@ -284,6 +302,14 @@ burn_iso() {
             continue
         fi
 
+        # Vérifier la taille de la clé par rapport à l'ISO
+        iso_size=$(stat -c%s "$iso_path")
+        dev_size=$(sudo blockdev --getsize64 "$selected_dev")
+        if [ "$iso_size" -gt "$dev_size" ]; then
+            echo -e "${RED}L'ISO ($(numfmt --to=iec $iso_size)) est plus grande que la clé ($(numfmt --to=iec $dev_size)). Impossible de graver.${NC}"
+            continue
+        fi
+
         # Vérifier si le périphérique a des partitions montées
         mounted_partitions=$(lsblk -no NAME,MOUNTPOINT "$selected_dev" 2>/dev/null | awk '$2 {print $1, $2}')
         if [ -n "$mounted_partitions" ]; then
@@ -292,16 +318,14 @@ burn_iso() {
             echo -e "${YELLOW}Voulez-vous démonter automatiquement ces partitions ? (o/N)${NC}"
             read -r unmount_answer
             if [[ "$unmount_answer" =~ ^[OoYy]$ ]]; then
-                # Récupérer la liste des points de montage à démonter
                 mount_points=$(echo "$mounted_partitions" | awk '{print $2}')
                 for mp in $mount_points; do
                     echo -e "Démontage de $mp..."
                     sudo umount "$mp" || {
                         echo -e "${RED}Échec du démontage de $mp. Vérifiez que le point de montage n'est pas utilisé.${NC}"
-                        continue 2  # retourne au début de la boucle while
+                        continue 2
                     }
                 done
-                # Après démontage, on continue vers la confirmation
             else
                 echo -e "${RED}Veuillez démonter manuellement les partitions avant de continuer.${NC}"
                 continue
@@ -319,15 +343,39 @@ burn_iso() {
         # Exécuter la gravure
         echo -e "${YELLOW}Gravure de l'ISO sur $selected_dev...${NC}"
         sudo dd if="$iso_path" of="$selected_dev" bs=4M status=progress conv=fsync
-        if [ $? -eq 0 ]; then
+
+        if [ $? -ne 0 ]; then
+            echo -e "${RED}Erreur lors de la gravure. Vérifiez que vous avez les droits sudo et que le périphérique n'est pas monté.${NC}"
+            continue
+        fi
+
+        # Vider les caches et forcer l'écriture
+        sync
+        sudo blockdev --flushbufs "$selected_dev"
+
+        # Vérification par hash (10 premiers Mo)
+        echo -e "${YELLOW}Vérification de l'écriture par comparaison d'empreinte...${NC}"
+        local dev_hash=$(sudo dd if="$selected_dev" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
+        if [ "$dev_hash" = "$iso_hash" ]; then
+            echo -e "${GREEN}Vérification réussie : l'empreinte correspond. La gravure est valide.${NC}"
             echo -e "${GREEN}Gravure terminée avec succès !${NC}"
             echo -e "Vous pouvez maintenant utiliser cette clé pour démarrer votre mini-PC."
         else
-            echo -e "${RED}Erreur lors de la gravure. Vérifiez que vous avez les droits sudo et que le périphérique n'est pas monté.${NC}"
+            echo -e "${RED}Échec de la vérification : l'empreinte ne correspond pas.${NC}"
+            echo -e "  ISO hash   : $iso_hash"
+            echo -e "  Clé hash   : $dev_hash"
+            echo -e "${YELLOW}Voulez-vous réessayer la gravure sur le même périphérique ? (o/N)${NC}"
+            read -r retry_write
+            if [[ "$retry_write" =~ ^[OoYy]$ ]]; then
+                continue
+            else
+                echo -e "${GREEN}Gravure annulée.${NC}"
+            fi
         fi
         break
     done
 }
+
 # Appel de la fonction de gravure
 burn_iso "$OUTPUT_ISO"
 
