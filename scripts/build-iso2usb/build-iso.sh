@@ -1,6 +1,7 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
 # Version avec sauvegarde des anciens autoinstall et vérification par hash
+# Utilisation : ./build-iso.sh
 
 set -e
 
@@ -232,7 +233,8 @@ fi
 
 # ------------------------------
 # Demande de gravure sur clé USB
-# ------------------------------burn_iso() {
+# ------------------------------
+burn_iso() {
     local iso_path="$1"
     echo -e "${YELLOW}Voulez-vous graver cette ISO sur une clé USB ? (o/N)${NC}"
     read -r answer
