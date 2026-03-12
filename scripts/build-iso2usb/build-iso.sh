@@ -277,7 +277,7 @@ burn_iso() {
 
         selected_dev="/dev/$(echo "${devices[$((choice-1))]}" | awk '{print $1}')"
         echo -e "${RED}Attention : vous allez écraser toutes les données sur $selected_dev.${NC}"
-        echo -e "${YELLOW}Êtes-vous sûr de vouloir continuer ? (oui/NON)${NC}"
+        echo -e "${YELLOW}Êtes-vous sûr de vouloir continuer ? (o/n)${NC}"
         read -r confirm
         if [[ ! "$confirm" =~ ^[OoYy]([Ee][Ss]?)?$ ]]; then
             echo -e "${GREEN}Gravure annulée.${NC}"
