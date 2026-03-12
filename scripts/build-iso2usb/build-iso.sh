@@ -1,58 +1,98 @@
 #!/bin/bash
-# build-iso.sh – Script de construction de l'ISO Ubuntu Server personnalisée pour NeurHomIA
+# build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
 # Usage : ./build-iso.sh
+# Nécessite : wget, p7zip-full, genisoimage (ou mkisofs), openssl
 
 set -e  # Arrêt en cas d'erreur
 
 # Couleurs pour l'affichage
-RED='\033[0;31m'
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 YELLOW='\033[1;33m'
-NC='\033[0m'
+NC='\033[0m' # No Color
 
-# --- Variables ---
-WORK_DIR="$HOME/neurhomia-iso"
-ISO_URL="https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso"
-ISO_FILENAME="ubuntu-24.04-live-server-amd64.iso"
-EXTRACT_DIR="$WORK_DIR/extracted"
-AUTOINSTALL_DIR="$WORK_DIR/autoinstall"
-OUTPUT_ISO="$WORK_DIR/neurhomia-server-auto.iso"
-ISO_LABEL="NEURHOMIA_SRV"
+# ------------------------------
+# Demande interactive de la version d'Ubuntu
+# ------------------------------
+DEFAULT_VERSION="24.04.4"
+echo -e "${YELLOW}Quelle version d'Ubuntu Server souhaitez-vous utiliser ? (par défaut : $DEFAULT_VERSION)${NC}"
+echo -e "Format attendu : X.Y.Z (exemple : 24.04.4)"
+read -p "Version : " USER_VERSION
 
-# --- Vérification des dépendances ---
-echo -e "${YELLOW}[1/7] Vérification des dépendances...${NC}"
-for cmd in wget 7z mkisofs; do
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-        echo -e "${RED}Erreur : $cmd n'est pas installé.${NC}"
-        echo "Installez-le avec : sudo apt install p7zip-full genisoimage wget"
-        exit 1
+if [ -z "$USER_VERSION" ]; then
+    ISO_VERSION="$DEFAULT_VERSION"
+    echo -e "${GREEN}Version par défaut sélectionnée : $ISO_VERSION${NC}"
+else
+    # Validation simple : doit correspondre à un format comme 24.04.4
+    if [[ "$USER_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        ISO_VERSION="$USER_VERSION"
+        echo -e "${GREEN}Version sélectionnée : $ISO_VERSION${NC}"
+    else
+        echo -e "${RED}Format de version invalide. Utilisation de la version par défaut $DEFAULT_VERSION.${NC}"
+        ISO_VERSION="$DEFAULT_VERSION"
     fi
-done
+fi
 
-# --- Création des dossiers de travail ---
-echo -e "${YELLOW}[2/7] Création des dossiers de travail...${NC}"
+# ------------------------------
+# Configuration utilisateur (basée sur la version choisie)
+# ------------------------------
+WORK_DIR="$HOME/neurhomia-iso"                # Répertoire de travail
+ISO_FILENAME="ubuntu-${ISO_VERSION}-live-server-amd64.iso"
+ISO_URL="https://releases.ubuntu.com/${ISO_VERSION%.*}/ubuntu-${ISO_VERSION}-live-server-amd64.iso"
+EXTRACT_DIR="$WORK_DIR/extracted"              # Contenu de l'ISO extrait
+AUTOINSTALL_DIR="$WORK_DIR/autoinstall"        # Dossier autoinstall
+OUTPUT_ISO="$WORK_DIR/neurhomia-server-${ISO_VERSION}-auto.iso"
+LABEL="NEURHOMIA_SRV"                          # Étiquette du volume ISO
+
+# URL du script de premier démarrage (à personnaliser !)
+FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"
+
+# Mot de passe par défaut (sera hashé automatiquement)
+DEFAULT_PASSWORD="neurhomia"
+
+# ------------------------------
+# Vérification des dépendances
+# ------------------------------
+echo -e "${YELLOW}Vérification des dépendances...${NC}"
+command -v wget >/dev/null 2>&1 || { echo -e "${RED}wget est requis. Installez-le avec : sudo apt install wget${NC}"; exit 1; }
+command -v 7z >/dev/null 2>&1 || { echo -e "${RED}p7zip-full est requis. Installez-le avec : sudo apt install p7zip-full${NC}"; exit 1; }
+command -v mkisofs >/dev/null 2>&1 || command -v genisoimage >/dev/null 2>&1 || { echo -e "${RED}mkisofs ou genisoimage est requis. Installez-le avec : sudo apt install genisoimage${NC}"; exit 1; }
+command -v openssl >/dev/null 2>&1 || { echo -e "${RED}openssl est requis. Installez-le avec : sudo apt install openssl${NC}"; exit 1; }
+
+# ------------------------------
+# Nettoyage et création des dossiers
+# ------------------------------
+echo -e "${YELLOW}Préparation de l'espace de travail...${NC}"
+rm -rf "$WORK_DIR"
 mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 
-# --- Téléchargement de l'ISO Ubuntu ---
-echo -e "${YELLOW}[3/7] Téléchargement de l'ISO Ubuntu Server...${NC}"
+# ------------------------------
+# Téléchargement de l'ISO Ubuntu
+# ------------------------------
 if [ ! -f "$WORK_DIR/$ISO_FILENAME" ]; then
+    echo -e "${YELLOW}Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
     wget -O "$WORK_DIR/$ISO_FILENAME" "$ISO_URL"
 else
-    echo "Fichier déjà présent, téléchargement ignoré."
+    echo -e "${GREEN}L'ISO est déjà présente dans $WORK_DIR. Utilisation de la copie locale.${NC}"
 fi
 
-# --- Extraction de l'ISO ---
-echo -e "${YELLOW}[4/7] Extraction de l'ISO...${NC}"
-7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR" -y >/dev/null
+# ------------------------------
+# Extraction de l'ISO
+# ------------------------------
+echo -e "${YELLOW}Extraction de l'ISO...${NC}"
+7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR"
 
-# --- Génération du fichier user-data avec le hash du mot de passe "neurhomia" ---
-echo -e "${YELLOW}[5/7] Création du fichier user-data...${NC}"
-PASSWORD_HASH=$(openssl passwd -6 "neurhomia")
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Erreur : impossible de générer le hash du mot de passe.${NC}"
-    exit 1
-fi
+# ------------------------------
+# Génération du hash du mot de passe
+# ------------------------------
+echo -e "${YELLOW}Génération du hash du mot de passe par défaut...${NC}"
+PASSWORD_HASH=$(openssl passwd -6 "$DEFAULT_PASSWORD")
+echo -e "${GREEN}Hash généré : $PASSWORD_HASH${NC}"
 
+# ------------------------------
+# Création du fichier user-data
+# ------------------------------
+echo -e "${YELLOW}Création du fichier user-data...${NC}"
 cat > "$AUTOINSTALL_DIR/user-data" <<EOF
 #cloud-config
 autoinstall:
@@ -87,9 +127,9 @@ autoinstall:
     - whiptail
     - curl
   late-commands:
-    # Télécharger le script de premier boot (ajustez l'URL)
+    # Télécharger le script de premier boot
     - mkdir -p /target/opt/neurhomia
-    - curtin in-target -- wget -O /opt/neurhomia/firstboot.sh https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh
+    - curtin in-target -- wget -O /opt/neurhomia/firstboot.sh $FIRSTBOOT_SCRIPT_URL
     - curtin in-target -- chmod +x /opt/neurhomia/firstboot.sh
     # Créer un service systemd pour exécuter le script au premier démarrage
     - |
@@ -112,23 +152,35 @@ autoinstall:
   shutdown: reboot
 EOF
 
-# Création du fichier meta-data vide
+# Fichier meta-data vide (obligatoire)
 touch "$AUTOINSTALL_DIR/meta-data"
 
-# --- Copie du dossier autoinstall dans l'image extraite ---
-echo -e "${YELLOW}[6/7] Copie de l'autoinstall dans l'image extraite...${NC}"
+# ------------------------------
+# Copie du dossier autoinstall dans l'image extraite
+# ------------------------------
+echo -e "${YELLOW}Intégration du dossier autoinstall dans l'ISO...${NC}"
 cp -r "$AUTOINSTALL_DIR" "$EXTRACT_DIR/"
 
-# --- Recréation de la nouvelle ISO ---
-echo -e "${YELLOW}[7/7] Création de la nouvelle ISO...${NC}"
-mkisofs -D -r -V "$ISO_LABEL" -cache-inodes -J -l -b isolinux/isolinux.bin \
+# ------------------------------
+# Recréation de l'ISO
+# ------------------------------
+echo -e "${YELLOW}Création de la nouvelle ISO...${NC}"
+# On détermine la commande mkisofs disponible (mkisofs ou genisoimage)
+if command -v mkisofs >/dev/null 2>&1; then
+    MKISOFS_CMD="mkisofs"
+else
+    MKISOFS_CMD="genisoimage"
+fi
+
+$MKISOFS_CMD -D -r -V "$LABEL" -cache-inodes -J -l -b isolinux/isolinux.bin \
         -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table \
         -o "$OUTPUT_ISO" "$EXTRACT_DIR"
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}ISO générée avec succès : $OUTPUT_ISO${NC}"
-    echo "Vous pouvez maintenant graver cette ISO sur une clé USB (avec dd, Rufus, etc.)."
-else
-    echo -e "${RED}Erreur lors de la création de l'ISO.${NC}"
-    exit 1
-fi
+# ------------------------------
+# Finalisation
+# ------------------------------
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}ISO générée avec succès : $OUTPUT_ISO${NC}"
+echo -e "${GREEN}Vous pouvez maintenant graver cette ISO sur une clé USB (avec dd, Rufus, etc.).${NC}"
+echo -e "${GREEN}Le mot de passe par défaut est : $DEFAULT_PASSWORD (à changer au premier démarrage)${NC}"
+echo -e "${GREEN}========================================${NC}"
