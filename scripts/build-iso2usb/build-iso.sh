@@ -1,6 +1,6 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
-# Version avec vérification par montage du dossier autoinstall sur la clé
+# Version avec vérification multi-partitions
 
 set -e
 
@@ -367,27 +367,41 @@ burn_iso() {
         if [ "$dev_hash" = "$iso_hash" ]; then
             echo -e "${GREEN}Vérification réussie : l'empreinte correspond.${NC}"
 
-            # Vérification supplémentaire par montage de la partition
-            echo -e "${YELLOW}Vérification de la présence du dossier autoinstall sur la clé...${NC}"
+            # Vérification supplémentaire : chercher le dossier autoinstall sur toutes les partitions
+            echo -e "${YELLOW}Recherche du dossier autoinstall sur les partitions de la clé...${NC}"
             mkdir -p /mnt/usb-check
-            part_dev="${selected_dev}1"
-            if [ -e "$part_dev" ]; then
-                if sudo mount "$part_dev" /mnt/usb-check 2>/dev/null; then
-                    if [ -d "/mnt/usb-check/autoinstall" ] && [ -f "/mnt/usb-check/autoinstall/user-data" ]; then
-                        echo -e "${GREEN}✓ Dossier autoinstall trouvé sur la clé.${NC}"
+            found=0
+            # Récupérer la liste des partitions du disque
+            partitions=$(lsblk -ln -o NAME,TYPE "$selected_dev" 2>/dev/null | awk '$2=="part" {print "/dev/"$1}')
+            if [ -n "$partitions" ]; then
+                for part in $partitions; do
+                    echo -e "  Test de $part..."
+                    if sudo mount "$part" /mnt/usb-check 2>/dev/null; then
+                        if [ -d "/mnt/usb-check/autoinstall" ] && [ -f "/mnt/usb-check/autoinstall/user-data" ]; then
+                            echo -e "${GREEN}  ✓ Dossier autoinstall trouvé sur $part !${NC}"
+                            found=1
+                            sudo umount /mnt/usb-check
+                            break
+                        else
+                            echo -e "${YELLOW}  Pas de dossier autoinstall sur $part.${NC}"
+                        fi
+                        sudo umount /mnt/usb-check
                     else
-                        echo -e "${RED}✗ Dossier autoinstall introuvable sur la clé ! La gravure a peut-être échoué.${NC}"
+                        echo -e "${YELLOW}  Impossible de monter $part.${NC}"
                     fi
-                    sudo umount /mnt/usb-check
-                else
-                    echo -e "${YELLOW}Impossible de monter la partition $part_dev. La vérification par montage est ignorée.${NC}"
-                fi
+                done
             else
-                echo -e "${YELLOW}Aucune partition détectée sur $selected_dev, vérification par montage impossible.${NC}"
+                echo -e "${YELLOW}Aucune partition détectée sur $selected_dev. Vérification impossible.${NC}"
             fi
             rmdir /mnt/usb-check 2>/dev/null || true
 
-            echo -e "${GREEN}Gravure terminée avec succès !${NC}"
+            if [ $found -eq 1 ]; then
+                echo -e "${GREEN}Gravure terminée avec succès !${NC}"
+            else
+                echo -e "${YELLOW}Attention : le dossier autoinstall n'a pas été trouvé sur les partitions montées.${NC}"
+                echo -e "Cependant, l'empreinte SHA256 correspond, donc la gravure est probablement valide."
+                echo -e "Vous pouvez vérifier manuellement en montant la clé."
+            fi
             echo -e "Vous pouvez maintenant utiliser cette clé pour démarrer votre mini-PC."
         else
             echo -e "${RED}Échec de la vérification : l'empreinte ne correspond pas.${NC}"
