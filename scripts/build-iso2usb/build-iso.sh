@@ -42,7 +42,7 @@ fi
 # ------------------------------
 # Demande interactive de la version d'Ubuntu Server à installer
 # ------------------------------
-echo -e "${YELLOW}Quelle version d'Ubuntu Server souhaitez-vous installer ? (par défaut : $DEFAULT_UBUNTU_VERSION)${NC}"
+echo -e "${YELLOW} 1) Quelle version d'Ubuntu Server souhaitez-vous installer ? (défaut : $DEFAULT_UBUNTU_VERSION)${NC}"
 echo -e "Format attendu : X.Y.Z (exemple : 24.04.4)"
 read -p "Version : " USER_VERSION
 
@@ -77,7 +77,7 @@ fi
 # Vérification des dépendances
 # ------------------------------
 echo ""
-echo -e "${YELLOW}Vérification des dépendances...${NC}"
+echo -e "${YELLOW}2) Vérification des dépendances...${NC}"
 command -v wget >/dev/null 2>&1 || { echo -e "${RED}wget est requis. Installez-le avec : sudo apt install wget${NC}"; exit 1; }
 command -v 7z >/dev/null 2>&1 || { echo -e "${RED}p7zip-full est requis. Installez-le avec : sudo apt install p7zip-full${NC}"; exit 1; }
 command -v openssl >/dev/null 2>&1 || { echo -e "${RED}openssl est requis. Installez-le avec : sudo apt install openssl${NC}"; exit 1; }
@@ -87,7 +87,7 @@ command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}xorriso est requis. Insta
 # Préparation des dossiers avec sauvegarde de l'ancien autoinstall
 # ------------------------------
 echo ""
-echo -e "${YELLOW}Préparation de l'espace de travail...${NC}"
+echo -e "${YELLOW}3) Préparation de l'espace de travail...${NC}"
 mkdir -p "$WORK_DIR"
 
 # Sauvegarde de l'ancien dossier autoinstall s'il existe
@@ -123,7 +123,7 @@ echo -e "${YELLOW}Extraction de l'ISO...${NC}"
 # Génération du hash du mot de passe
 # ------------------------------
 echo ""
-echo -e "${YELLOW}Génération du hash du mot de passe par défaut...${NC}"
+echo -e "${YELLOW}4) Génération du hash du mot de passe par défaut...${NC}"
 PASSWORD_HASH=$(openssl passwd -6 "$DEFAULT_PASSWORD")
 echo -e "${GREEN}Hash généré.${NC}"
 
@@ -131,7 +131,7 @@ echo -e "${GREEN}Hash généré.${NC}"
 # Création du fichier user-data
 # ------------------------------
 echo ""
-echo -e "${YELLOW}Création du fichier user-data...${NC}"
+echo -e "${YELLOW}5) Création du fichier user-data...${NC}"
 cat > "$AUTOINSTALL_DIR/user-data" <<EOF
 #cloud-config
 autoinstall:
@@ -192,7 +192,6 @@ EOF
 touch "$AUTOINSTALL_DIR/meta-data"
 
 # Vérification que les fichiers ont bien été créés
-echo ""
 if [ ! -f "$AUTOINSTALL_DIR/user-data" ] || [ ! -f "$AUTOINSTALL_DIR/meta-data" ]; then
     echo -e "${RED}Erreur : les fichiers d'autoinstall n'ont pas été créés correctement.${NC}"
     exit 1
@@ -208,7 +207,7 @@ cp -r "$AUTOINSTALL_DIR" "$EXTRACT_DIR/"
 # Création de l'ISO avec xorriso (détection automatique)
 # ------------------------------
 echo ""
-echo -e "${YELLOW}Création de la nouvelle ISO (avec xorriso)...${NC}"
+echo -e "${YELLOW}6) Création de la nouvelle ISO (avec xorriso)...${NC}"
 
 # Vérification du fichier de boot BIOS
 if [ ! -f "$EXTRACT_DIR/boot/grub/i386-pc/eltorito.img" ]; then
@@ -223,7 +222,6 @@ if [ -f "$EXTRACT_DIR/boot/grub/efi.img" ]; then
 else
     # Recherche insensible à la casse d'un fichier .efi dans le dossier EFI/
     EFI_FILE=$(find "$EXTRACT_DIR/EFI" -type f -iname "*.efi" 2>/dev/null | head -n1)
-    echo ""
     if [ -n "$EFI_FILE" ]; then
         EFI_PATH="${EFI_FILE#$EXTRACT_DIR/}"
         echo -e "${GREEN}Fichier EFI détecté : $EFI_PATH${NC}"
@@ -250,7 +248,6 @@ xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
     -isohybrid-gpt-basdat -isohybrid-apm-hfsplus \
     -o "$OUTPUT_ISO" "$EXTRACT_DIR"
 
-echo ""
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}ISO créée avec succès : $OUTPUT_ISO${NC}"
 else
@@ -264,7 +261,7 @@ fi
 burn_iso() {
     local iso_path="$1"
     echo ""
-    echo -e "${YELLOW}Voulez-vous graver cette ISO sur une clé USB ? (o/N)${NC}"
+    echo -e "${YELLOW}7) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
     read -r answer
     if [[ ! "$answer" =~ ^[OoYy]$ ]]; then
         echo -e "${GREEN}Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
@@ -380,6 +377,7 @@ burn_iso() {
         fi
 
         # Exécuter la gravure
+        echo ""
         echo -e "${YELLOW}Gravure de l'ISO sur $selected_dev...${NC}"
         sudo dd if="$iso_path" of="$selected_dev" bs=4M status=progress conv=fsync
 
@@ -395,10 +393,9 @@ burn_iso() {
         # Vérification par hash (10 premiers Mo)
         echo -e "${YELLOW}Vérification de l'écriture par comparaison d'empreinte...${NC}"
         local dev_hash=$(sudo dd if="$selected_dev" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
-        echo ""
         if [ "$dev_hash" = "$iso_hash" ]; then
             echo -e "${GREEN}Vérification réussie : l'empreinte correspond. La gravure est valide.${NC}"
-            echo -e "Vous pouvez maintenant utiliser cette clé pour installer Ubuntu Server sur votre mini-PC."
+            echo -e "Vous pouvez maintenant installer Ubuntu Server sur votre mini-PC avec cette clé."
         else
             echo -e "${RED}Échec de la vérification : l'empreinte ne correspond pas.${NC}"
             echo -e "  ISO hash   : $iso_hash"
@@ -420,8 +417,8 @@ burn_iso "$OUTPUT_ISO"
 
 # Conseils pour vérification manuelle (optionnel)
 echo ""
-echo -e "${YELLOW}Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition :${NC}"
-echo -e "  sudo mount /dev/sdX1 /mnt && ls /mnt/autoinstall"
+echo -e "${YELLOW}Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition avec la commande :${NC}"
+echo -e " sudo mount /dev/sdX1 /mnt && ls /mnt/autoinstall"
 echo -e "${YELLOW}(Remplacez 'sdX' par le périphérique de votre clé, par exemple sdb)${NC}"
 
 # ------------------------------
@@ -432,3 +429,5 @@ echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Processus terminé.${NC}"
 echo -e "${GREEN}ISO disponible : $OUTPUT_ISO${NC}"
 echo -e "${GREEN}========================================${NC}"
+echo ""
+
