@@ -16,7 +16,7 @@ NC='\033[0m'
 PROJECT_NAME="NeurHomIA"               # Nom du projet (utilisé pour hostname, dossier, label)
 USERNAME="neurhomia"                    # Nom de l'utilisateur système
 DEFAULT_PASSWORD="neurhomia"            # Mot de passe par défaut (sera hashé)
-FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/votre-compte/neurhomia/main/firstboot-config.sh"  # À modifier !
+FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/moreau66/neurhomia/main/firstboot-config.sh"  # À modifier !
 
 # Dérivés
 PROJECT_NAME_LOWER=$(echo "$PROJECT_NAME" | tr '[:upper:]' '[:lower:]')
