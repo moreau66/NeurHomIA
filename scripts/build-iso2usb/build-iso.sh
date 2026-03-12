@@ -1,15 +1,14 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
-# Usage : ./build-iso.sh
-# Nécessite : wget, p7zip-full, genisoimage (ou mkisofs), openssl
+# Version avec support GRUB (Ubuntu 24.04+)
 
-set -e  # Arrêt en cas d'erreur
+set -e
 
-# Couleurs pour l'affichage
+# Couleurs
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 # ------------------------------
 # Demande interactive de la version d'Ubuntu
@@ -23,7 +22,6 @@ if [ -z "$USER_VERSION" ]; then
     ISO_VERSION="$DEFAULT_VERSION"
     echo -e "${GREEN}Version par défaut sélectionnée : $ISO_VERSION${NC}"
 else
-    # Validation simple : doit correspondre à un format comme 24.04.4
     if [[ "$USER_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         ISO_VERSION="$USER_VERSION"
         echo -e "${GREEN}Version sélectionnée : $ISO_VERSION${NC}"
@@ -34,20 +32,18 @@ else
 fi
 
 # ------------------------------
-# Configuration utilisateur (basée sur la version choisie)
+# Configuration
 # ------------------------------
-WORK_DIR="$HOME/neurhomia-iso"                # Répertoire de travail
+WORK_DIR="$HOME/neurhomia-iso"
 ISO_FILENAME="ubuntu-${ISO_VERSION}-live-server-amd64.iso"
 ISO_URL="https://releases.ubuntu.com/${ISO_VERSION%.*}/ubuntu-${ISO_VERSION}-live-server-amd64.iso"
-EXTRACT_DIR="$WORK_DIR/extracted"              # Contenu de l'ISO extrait
-AUTOINSTALL_DIR="$WORK_DIR/autoinstall"        # Dossier autoinstall
+EXTRACT_DIR="$WORK_DIR/extracted"
+AUTOINSTALL_DIR="$WORK_DIR/autoinstall"
 OUTPUT_ISO="$WORK_DIR/neurhomia-server-${ISO_VERSION}-auto.iso"
-LABEL="NEURHOMIA_SRV"                          # Étiquette du volume ISO
+LABEL="NEURHOMIA_SRV"
 
 # URL du script de premier démarrage (à personnaliser !)
 FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/moreau66/neurhomia/main/firstboot-config.sh"
-
-# Mot de passe par défaut (sera hashé automatiquement)
 DEFAULT_PASSWORD="neurhomia"
 
 # ------------------------------
@@ -56,28 +52,28 @@ DEFAULT_PASSWORD="neurhomia"
 echo -e "${YELLOW}Vérification des dépendances...${NC}"
 command -v wget >/dev/null 2>&1 || { echo -e "${RED}wget est requis. Installez-le avec : sudo apt install wget${NC}"; exit 1; }
 command -v 7z >/dev/null 2>&1 || { echo -e "${RED}p7zip-full est requis. Installez-le avec : sudo apt install p7zip-full${NC}"; exit 1; }
-command -v mkisofs >/dev/null 2>&1 || command -v genisoimage >/dev/null 2>&1 || { echo -e "${RED}mkisofs ou genisoimage est requis. Installez-le avec : sudo apt install genisoimage${NC}"; exit 1; }
 command -v openssl >/dev/null 2>&1 || { echo -e "${RED}openssl est requis. Installez-le avec : sudo apt install openssl${NC}"; exit 1; }
+command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}xorriso est requis. Installez-le avec : sudo apt install xorriso${NC}"; exit 1; }
 
 # ------------------------------
-# Nettoyage et création des dossiers
+# Préparation des dossiers
 # ------------------------------
 echo -e "${YELLOW}Préparation de l'espace de travail...${NC}"
 rm -rf "$WORK_DIR"
 mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 
 # ------------------------------
-# Téléchargement de l'ISO Ubuntu
+# Téléchargement de l'ISO
 # ------------------------------
 if [ ! -f "$WORK_DIR/$ISO_FILENAME" ]; then
     echo -e "${YELLOW}Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
     wget -O "$WORK_DIR/$ISO_FILENAME" "$ISO_URL"
 else
-    echo -e "${GREEN}L'ISO est déjà présente dans $WORK_DIR. Utilisation de la copie locale.${NC}"
+    echo -e "${GREEN}L'ISO est déjà présente.${NC}"
 fi
 
 # ------------------------------
-# Extraction de l'ISO
+# Extraction
 # ------------------------------
 echo -e "${YELLOW}Extraction de l'ISO...${NC}"
 7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR"
@@ -87,7 +83,7 @@ echo -e "${YELLOW}Extraction de l'ISO...${NC}"
 # ------------------------------
 echo -e "${YELLOW}Génération du hash du mot de passe par défaut...${NC}"
 PASSWORD_HASH=$(openssl passwd -6 "$DEFAULT_PASSWORD")
-echo -e "${GREEN}Hash généré : $PASSWORD_HASH${NC}"
+echo -e "${GREEN}Hash généré.${NC}"
 
 # ------------------------------
 # Création du fichier user-data
@@ -127,11 +123,9 @@ autoinstall:
     - whiptail
     - curl
   late-commands:
-    # Télécharger le script de premier boot
     - mkdir -p /target/opt/neurhomia
     - curtin in-target -- wget -O /opt/neurhomia/firstboot.sh $FIRSTBOOT_SCRIPT_URL
     - curtin in-target -- chmod +x /opt/neurhomia/firstboot.sh
-    # Créer un service systemd pour exécuter le script au premier démarrage
     - |
       cat <<'SERV' > /target/etc/systemd/system/neurhomia-firstboot.service
       [Unit]
@@ -152,35 +146,49 @@ autoinstall:
   shutdown: reboot
 EOF
 
-# Fichier meta-data vide (obligatoire)
 touch "$AUTOINSTALL_DIR/meta-data"
 
 # ------------------------------
-# Copie du dossier autoinstall dans l'image extraite
+# Intégration de l'autoinstall
 # ------------------------------
-echo -e "${YELLOW}Intégration du dossier autoinstall dans l'ISO...${NC}"
 cp -r "$AUTOINSTALL_DIR" "$EXTRACT_DIR/"
 
 # ------------------------------
-# Recréation de l'ISO
+# Création de l'ISO avec xorriso (pour GRUB)
 # ------------------------------
-echo -e "${YELLOW}Création de la nouvelle ISO...${NC}"
-# On détermine la commande mkisofs disponible (mkisofs ou genisoimage)
-if command -v mkisofs >/dev/null 2>&1; then
-    MKISOFS_CMD="mkisofs"
-else
-    MKISOFS_CMD="genisoimage"
+echo -e "${YELLOW}Création de la nouvelle ISO (avec xorriso)...${NC}"
+
+# Vérifier la présence des fichiers de boot GRUB
+if [ ! -d "$EXTRACT_DIR/boot/grub" ]; then
+    echo -e "${RED}Erreur : le dossier 'boot/grub' est introuvable dans $EXTRACT_DIR${NC}"
+    echo -e "Contenu du répertoire extrait :"
+    ls -la "$EXTRACT_DIR"
+    exit 1
 fi
 
-$MKISOFS_CMD -D -r -V "$LABEL" -cache-inodes -J -l -b isolinux/isolinux.bin \
-        -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table \
-        -o "$OUTPUT_ISO" "$EXTRACT_DIR"
+# Déterminer les fichiers de boot
+# Pour BIOS, on utilise généralement boot/grub/i386-pc/eltorito.img
+# Pour UEFI, on utilise boot/grub/efi.img ou EFI/BOOT/BOOTx64.EFI
+# On va utiliser une commande standard qui fonctionne pour Ubuntu live-server
+
+xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
+    -iso-level 3 -no-emul-boot -boot-load-size 4 -boot-info-table \
+    -b boot/grub/i386-pc/eltorito.img -c boot.catalog \
+    -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
+    -isohybrid-gpt-basdat -isohybrid-apm-hfsplus \
+    -o "$OUTPUT_ISO" "$EXTRACT_DIR"
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}ISO créée avec succès.${NC}"
+else
+    echo -e "${RED}Échec de la création de l'ISO avec xorriso. Vérifiez la structure des fichiers de boot.${NC}"
+    exit 1
+fi
 
 # ------------------------------
 # Finalisation
 # ------------------------------
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}ISO générée avec succès : $OUTPUT_ISO${NC}"
-echo -e "${GREEN}Vous pouvez maintenant graver cette ISO sur une clé USB (avec dd, Rufus, etc.).${NC}"
-echo -e "${GREEN}Le mot de passe par défaut est : $DEFAULT_PASSWORD (à changer au premier démarrage)${NC}"
+echo -e "${GREEN}ISO générée : $OUTPUT_ISO${NC}"
+echo -e "${GREEN}Mot de passe par défaut : $DEFAULT_PASSWORD${NC}"
 echo -e "${GREEN}========================================${NC}"
