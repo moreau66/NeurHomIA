@@ -218,6 +218,7 @@ fi
 # ------------------------------
 # Demande de gravure sur clé USB
 # ------------------------------
+# Fonction de gravure améliorée avec démontage automatique
 burn_iso() {
     local iso_path="$1"
     echo -e "${YELLOW}Voulez-vous graver cette ISO sur une clé USB ? (o/N)${NC}"
@@ -276,18 +277,43 @@ burn_iso() {
         fi
 
         selected_dev="/dev/$(echo "${devices[$((choice-1))]}" | awk '{print $1}')"
+
+        # Vérifier que le périphérique existe toujours
+        if [ ! -e "$selected_dev" ]; then
+            echo -e "${RED}Le périphérique $selected_dev n'existe plus. Il a peut-être été retiré.${NC}"
+            continue
+        fi
+
+        # Vérifier si le périphérique a des partitions montées
+        mounted_partitions=$(lsblk -no NAME,MOUNTPOINT "$selected_dev" 2>/dev/null | awk '$2 {print $1, $2}')
+        if [ -n "$mounted_partitions" ]; then
+            echo -e "${RED}Le périphérique $selected_dev a des partitions montées :${NC}"
+            echo "$mounted_partitions"
+            echo -e "${YELLOW}Voulez-vous démonter automatiquement ces partitions ? (o/N)${NC}"
+            read -r unmount_answer
+            if [[ "$unmount_answer" =~ ^[OoYy]$ ]]; then
+                # Récupérer la liste des points de montage à démonter
+                mount_points=$(echo "$mounted_partitions" | awk '{print $2}')
+                for mp in $mount_points; do
+                    echo -e "Démontage de $mp..."
+                    sudo umount "$mp" || {
+                        echo -e "${RED}Échec du démontage de $mp. Vérifiez que le point de montage n'est pas utilisé.${NC}"
+                        continue 2  # retourne au début de la boucle while
+                    }
+                done
+                # Après démontage, on continue vers la confirmation
+            else
+                echo -e "${RED}Veuillez démonter manuellement les partitions avant de continuer.${NC}"
+                continue
+            fi
+        fi
+
         echo -e "${RED}Attention : vous allez écraser toutes les données sur $selected_dev.${NC}"
-        echo -e "${YELLOW}Êtes-vous sûr de vouloir continuer ? (o/n)${NC}"
+        echo -e "${YELLOW}Êtes-vous sûr de vouloir continuer ? (oui/NON)${NC}"
         read -r confirm
         if [[ ! "$confirm" =~ ^[OoYy]([Ee][Ss]?)?$ ]]; then
             echo -e "${GREEN}Gravure annulée.${NC}"
             return
-        fi
-
-        # Vérifier que le périphérique n'est pas monté
-        if mount | grep -q "$selected_dev"; then
-            echo -e "${RED}Le périphérique $selected_dev est monté. Démontez-le avant de continuer.${NC}"
-            continue
         fi
 
         # Exécuter la gravure
@@ -302,7 +328,6 @@ burn_iso() {
         break
     done
 }
-
 # Appel de la fonction de gravure
 burn_iso "$OUTPUT_ISO"
 
