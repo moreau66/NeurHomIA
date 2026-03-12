@@ -422,6 +422,12 @@ burn_iso() {
 # Appel de la fonction de gravure
 burn_iso "$OUTPUT_ISO"
 
+# Conseils pour vérifier la présence du dossier autoinstall
+echo -e "${YELLOW}Pour vérifier que le dossier autoinstall est bien présent sur la clé USB, vous pouvez monter sa première partition :${NC}"
+echo -e "  sudo mount /dev/sdX1 /mnt && ls /mnt/autoinstall"
+echo -e "${YELLOW}(Remplacez 'sdX' par le périphérique de votre clé, par exemple sdb)${NC}"
+echo ""
+
 # ------------------------------
 # Finalisation
 # ------------------------------
