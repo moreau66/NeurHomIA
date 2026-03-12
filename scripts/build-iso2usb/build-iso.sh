@@ -43,18 +43,18 @@ fi
 # Demande interactive de la version d'Ubuntu Server à installer
 # ------------------------------
 echo -e "${YELLOW}1) Quelle version d'Ubuntu Server souhaitez-vous installer ? (défaut : $DEFAULT_UBUNTU_VERSION)"
-echo -e "  Format attendu : X.Y.Z (exemple : 24.04.4)${NC}"
-read -p "  Version : " USER_VERSION
+echo -e "   Format attendu : X.Y.Z (exemple : 24.04.4)${NC}"
+read -p "   Version : " USER_VERSION
 
 if [ -z "$USER_VERSION" ]; then
     ISO_VERSION="$DEFAULT_UBUNTU_VERSION"
-    echo -e "${GREEN}  Version par défaut sélectionnée : $ISO_VERSION${NC}"
+    echo -e "${GREEN}   Version par défaut sélectionnée : $ISO_VERSION${NC}"
 else
     if [[ "$USER_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         ISO_VERSION="$USER_VERSION"
-        echo -e "${GREEN}  Version sélectionnée : $ISO_VERSION${NC}"
+        echo -e "${GREEN}   Version sélectionnée : $ISO_VERSION${NC}"
     else
-        echo -e "${RED}  Format de version invalide. Utilisation de la version par défaut $DEFAULT_UBUNTU_VERSION.${NC}"
+        echo -e "${RED}   Format de version invalide. Utilisation de la version par défaut $DEFAULT_UBUNTU_VERSION.${NC}"
         ISO_VERSION="$DEFAULT_UBUNTU_VERSION"
     fi
 fi
@@ -78,10 +78,11 @@ fi
 # ------------------------------
 echo ""
 echo -e "${YELLOW}2) Vérification des dépendances...${NC}"
-command -v wget >/dev/null 2>&1 || { echo -e "${RED}  wget est requis. Installez-le avec : sudo apt install wget${NC}"; exit 1; }
-command -v 7z >/dev/null 2>&1 || { echo -e "${RED}  p7zip-full est requis. Installez-le avec : sudo apt install p7zip-full${NC}"; exit 1; }
-command -v openssl >/dev/null 2>&1 || { echo -e "${RED}  openssl est requis. Installez-le avec : sudo apt install openssl${NC}"; exit 1; }
-command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}  xorriso est requis. Installez-le avec : sudo apt install xorriso${NC}"; exit 1; }
+command -v wget >/dev/null 2>&1 || { echo -e "${RED}   wget est requis. Installez-le avec : sudo apt install wget${NC}"; exit 1; }
+command -v 7z >/dev/null 2>&1 || { echo -e "${RED}   p7zip-full est requis. Installez-le avec : sudo apt install p7zip-full${NC}"; exit 1; }
+command -v openssl >/dev/null 2>&1 || { echo -e "${RED}   openssl est requis. Installez-le avec : sudo apt install openssl${NC}"; exit 1; }
+command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}   xorriso est requis. Installez-le avec : sudo apt install xorriso${NC}"; exit 1; }
+echo -e "${GREEN}   Dépendances OK${NC}"
 
 # ------------------------------
 # Préparation des dossiers avec sauvegarde de l'ancien autoinstall
@@ -95,7 +96,7 @@ if [ -d "$AUTOINSTALL_DIR" ]; then
     TIMESTAMP=$(date +%Y%m%d_%H%M%S)
     BACKUP_AUTOINSTALL="${AUTOINSTALL_DIR}_${TIMESTAMP}"
     mv "$AUTOINSTALL_DIR" "$BACKUP_AUTOINSTALL"
-    echo -e "${GREEN}  Ancien dossier autoinstall sauvegardé sous : $BACKUP_AUTOINSTALL${NC}"
+    echo -e "${GREEN}   Ancien dossier autoinstall sauvegardé sous : $BACKUP_AUTOINSTALL${NC}"
 fi
 
 rm -rf "$EXTRACT_DIR"
@@ -106,17 +107,17 @@ mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 # ------------------------------
 echo ""
 if [ ! -f "$WORK_DIR/$ISO_FILENAME" ]; then
-    echo -e "${YELLOW}  Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
+    echo -e "${YELLOW}   Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
     wget -O "$WORK_DIR/$ISO_FILENAME" "$ISO_URL"
 else
-    echo -e "${GREEN}  L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
+    echo -e "${GREEN}   L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
 fi
 
 # ------------------------------
 # Extraction de l'ISO
 # ------------------------------
 echo ""
-echo -e "${YELLOW}  Extraction de l'ISO...${NC}"
+echo -e "${YELLOW}   Extraction de l'ISO...${NC}"
 7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR"
 
 # ------------------------------
@@ -125,7 +126,7 @@ echo -e "${YELLOW}  Extraction de l'ISO...${NC}"
 echo ""
 echo -e "${YELLOW}4) Génération du hash du mot de passe par défaut...${NC}"
 PASSWORD_HASH=$(openssl passwd -6 "$DEFAULT_PASSWORD")
-echo -e "${GREEN}  Hash généré.${NC}"
+echo -e "${GREEN}   Hash généré.${NC}"
 
 # ------------------------------
 # Création du fichier user-data
@@ -193,10 +194,10 @@ touch "$AUTOINSTALL_DIR/meta-data"
 
 # Vérification que les fichiers ont bien été créés
 if [ ! -f "$AUTOINSTALL_DIR/user-data" ] || [ ! -f "$AUTOINSTALL_DIR/meta-data" ]; then
-    echo -e "${RED}  Erreur : les fichiers d'autoinstall n'ont pas été créés correctement.${NC}"
+    echo -e "${RED}   Erreur : les fichiers d'autoinstall n'ont pas été créés correctement.${NC}"
     exit 1
 fi
-echo -e "${GREEN}  Fichiers d'autoinstall créés avec succès.${NC}"
+echo -e "${GREEN}   Fichiers d'autoinstall créés avec succès.${NC}"
 
 # ------------------------------
 # Intégration de l'autoinstall
@@ -211,7 +212,7 @@ echo -e "${YELLOW}6) Création de la nouvelle ISO (avec xorriso)...${NC}"
 
 # Vérification du fichier de boot BIOS
 if [ ! -f "$EXTRACT_DIR/boot/grub/i386-pc/eltorito.img" ]; then
-    echo -e "${RED}  Erreur : fichier 'boot/grub/i386-pc/eltorito.img' introuvable. Vérifiez la structure de l'ISO extraite.${NC}"
+    echo -e "${RED}   Erreur : fichier 'boot/grub/i386-pc/eltorito.img' introuvable. Vérifiez la structure de l'ISO extraite.${NC}"
     exit 1
 fi
 
@@ -224,9 +225,9 @@ else
     EFI_FILE=$(find "$EXTRACT_DIR/EFI" -type f -iname "*.efi" 2>/dev/null | head -n1)
     if [ -n "$EFI_FILE" ]; then
         EFI_PATH="${EFI_FILE#$EXTRACT_DIR/}"
-        echo -e "${GREEN}  Fichier EFI détecté : $EFI_PATH${NC}"
+        echo -e "${GREEN}   Fichier EFI détecté : $EFI_PATH${NC}"
     else
-        echo -e "${RED}  Erreur : aucun fichier de boot EFI trouvé (ni efi.img, ni .efi).${NC}"
+        echo -e "${RED}   Erreur : aucun fichier de boot EFI trouvé (ni efi.img, ni .efi).${NC}"
         exit 1
     fi
 fi
@@ -237,7 +238,7 @@ if [ -f "$OUTPUT_ISO" ]; then
     BACKUP_ISO="${OUTPUT_ISO%.*}_${TIMESTAMP}.${OUTPUT_ISO##*.}"
     mv "$OUTPUT_ISO" "$BACKUP_ISO"
     echo ""
-    echo -e "${YELLOW}  Ancienne ISO sauvegardée sous : $BACKUP_ISO${NC}"
+    echo -e "${YELLOW}   Ancienne ISO sauvegardée sous : $BACKUP_ISO${NC}"
 fi
 
 # Création de l'ISO hybride (BIOS + UEFI)
@@ -249,9 +250,9 @@ xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
     -o "$OUTPUT_ISO" "$EXTRACT_DIR"
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}  ISO créée avec succès : $OUTPUT_ISO${NC}"
+    echo -e "${GREEN}   ISO créée avec succès : $OUTPUT_ISO${NC}"
 else
-    echo -e "${RED}  Échec de la création de l'ISO. Vérifiez les messages ci-dessus.${NC}"
+    echo -e "${RED}   Échec de la création de l'ISO. Vérifiez les messages ci-dessus.${NC}"
     exit 1
 fi
 
@@ -264,26 +265,26 @@ burn_iso() {
     echo -e "${YELLOW}7) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
     read -r answer
     if [[ ! "$answer" =~ ^[OoYy]$ ]]; then
-        echo -e "${GREEN}  Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
+        echo -e "${GREEN}   Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
         echo -e "  sudo dd if=$iso_path of=/dev/sdX bs=4M status=progress conv=fsync"
         return
     fi
 
     # Vérifier les droits sudo
     if ! sudo -v &>/dev/null; then
-        echo -e "${RED}  Vous devez avoir les droits sudo pour graver une clé USB.${NC}"
+        echo -e "${RED}   Vous devez avoir les droits sudo pour graver une clé USB.${NC}"
         return
     fi
 
     # Calculer un hash de vérification (SHA256 des 10 premiers Mo de l'ISO)
     echo ""
-    echo -e "${YELLOW}  Calcul de l'empreinte de vérification de l'ISO...${NC}"
+    echo -e "${YELLOW}   Calcul de l'empreinte de vérification de l'ISO...${NC}"
     local iso_hash=$(dd if="$iso_path" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
-    echo -e "  Empreinte (10 premiers Mo) : $iso_hash"
+    echo -e "   Empreinte (10 premiers Mo) : $iso_hash"
 
     while true; do
         echo ""
-        echo -e "${YELLOW}  Recherche des périphériques USB...${NC}"
+        echo -e "${YELLOW}   Recherche des périphériques USB...${NC}"
         # Liste des périphériques de type disk, avec transport USB, et taille < 64 Go
         mapfile -t devices < <(lsblk -d -o NAME,SIZE,TYPE,TRAN -n -l 2>/dev/null | grep -E 'disk.*usb' | awk '$2 ~ /^[0-9.]+[GM]?/ { if ($2 ~ /G/ && $2+0 < 64) print; else if ($2 ~ /M/ && $2+0 < 64000) print }')
         # Si pas de périphérique USB détecté, élargir à tout disk de taille < 64G
@@ -292,18 +293,18 @@ burn_iso() {
         fi
 
         if [ ${#devices[@]} -eq 0 ]; then
-            echo -e "${RED}  Aucune clé USB détectée.${NC}"
-            echo -e "${YELLOW} Insérez une clé USB, puis appuyez sur Entrée pour réessayer, ou tapez 'q' pour quitter.${NC}"
+            echo -e "${RED}   Aucune clé USB détectée.${NC}"
+            echo -e "${YELLOW}  Insérez une clé USB, puis appuyez sur Entrée pour réessayer, ou tapez 'q' pour quitter.${NC}"
             read -r retry
             if [[ "$retry" == "q" ]]; then
-                echo -e "${GREEN}  Gravure annulée.${NC}"
+                echo -e "${GREEN}   Gravure annulée.${NC}"
                 return
             fi
             continue
         fi
 
         # Afficher les périphériques trouvés
-        echo -e "${GREEN}  Périphériques détectés :${NC}"
+        echo -e "${GREEN}   Périphériques détectés :${NC}"
         local i=1
         for dev in "${devices[@]}"; do
             name=$(echo "$dev" | awk '{print $1}')
@@ -311,14 +312,14 @@ burn_iso() {
             echo "  $i) /dev/$name ($size)"
             ((i++))
         done
-        echo -e "${YELLOW}  Choisissez le numéro du périphérique à utiliser, ou 'q' pour annuler :${NC}"
+        echo -e "${YELLOW}   Choisissez le numéro du périphérique à utiliser, ou 'q' pour annuler :${NC}"
         read -r choice
         if [[ "$choice" == "q" ]]; then
-            echo -e "${GREEN}  Gravure annulée.${NC}"
+            echo -e "${GREEN}   Gravure annulée.${NC}"
             return
         fi
         if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt ${#devices[@]} ]; then
-            echo -e "${RED}  Choix invalide.${NC}"
+            echo -e "${RED}   Choix invalide.${NC}"
             continue
         fi
 
@@ -326,7 +327,7 @@ burn_iso() {
 
         # Vérifier que le périphérique existe toujours
         if [ ! -e "$selected_dev" ]; then
-            echo -e "${RED}  Le périphérique $selected_dev n'existe plus. Il a peut-être été retiré.${NC}"
+            echo -e "${RED}   Le périphérique $selected_dev n'existe plus. Il a peut-être été retiré.${NC}"
             continue
         fi
 
@@ -337,12 +338,12 @@ burn_iso() {
             sectors=$(cat "/sys/block/$devname/size")
             dev_size=$((sectors * 512))
         else
-            echo -e "${RED}  Impossible de déterminer la taille du périphérique $selected_dev.${NC}"
+            echo -e "${RED}   Impossible de déterminer la taille du périphérique $selected_dev.${NC}"
             continue
         fi
 
         if [ "$iso_size" -gt "$dev_size" ]; then
-            echo -e "${RED}  L'ISO ($(numfmt --to=iec $iso_size)) est plus grande que la clé ($(numfmt --to=iec $dev_size)). Impossible de graver.${NC}"
+            echo -e "${RED}   L'ISO ($(numfmt --to=iec $iso_size)) est plus grande que la clé ($(numfmt --to=iec $dev_size)). Impossible de graver.${NC}"
             continue
         fi
 
@@ -356,33 +357,33 @@ burn_iso() {
             if [[ "$unmount_answer" =~ ^[OoYy]$ ]]; then
                 mount_points=$(echo "$mounted_partitions" | awk '{print $2}')
                 for mp in $mount_points; do
-                    echo -e "  Démontage de $mp..."
+                    echo -e "   Démontage de $mp..."
                     sudo umount "$mp" || {
-                        echo -e "${RED}  Échec du démontage de $mp. Vérifiez que le point de montage n'est pas utilisé.${NC}"
+                        echo -e "${RED}   Échec du démontage de $mp. Vérifiez que le point de montage n'est pas utilisé.${NC}"
                         continue 2
                     }
                 done
             else
-                echo -e "${RED}  Veuillez démonter manuellement les partitions avant de continuer.${NC}"
+                echo -e "${RED}   Veuillez démonter manuellement les partitions avant de continuer.${NC}"
                 continue
             fi
         fi
 
-        echo -e "${RED}  Attention : vous allez écraser toutes les données sur $selected_dev.${NC}"
-        echo -e "${YELLOW}  Êtes-vous sûr de vouloir continuer ? (o/n)${NC}"
+        echo -e "${RED}   Attention : vous allez écraser toutes les données sur $selected_dev.${NC}"
+        echo -e "${YELLOW}   Êtes-vous sûr de vouloir continuer ? (o/n)${NC}"
         read -r confirm
         if [[ ! "$confirm" =~ ^[OoYy]([Ee][Ss]?)?$ ]]; then
-            echo -e "${GREEN}  Gravure annulée.${NC}"
+            echo -e "${GREEN}   Gravure annulée.${NC}"
             return
         fi
 
         # Exécuter la gravure
         echo ""
-        echo -e "${YELLOW}  Gravure de l'ISO sur $selected_dev...${NC}"
+        echo -e "${YELLOW}   Gravure de l'ISO sur $selected_dev...${NC}"
         sudo dd if="$iso_path" of="$selected_dev" bs=4M status=progress conv=fsync
 
         if [ $? -ne 0 ]; then
-            echo -e "${RED}  Erreur lors de la gravure. Vérifiez que vous avez les droits sudo et que le périphérique n'est pas monté.${NC}"
+            echo -e "${RED}   Erreur lors de la gravure. Vérifiez que vous avez les droits sudo et que le périphérique n'est pas monté.${NC}"
             continue
         fi
 
@@ -391,21 +392,21 @@ burn_iso() {
         sudo blockdev --flushbufs "$selected_dev" 2>/dev/null || true  # Ignorer si échec
 
         # Vérification par hash (10 premiers Mo)
-        echo -e "${YELLOW}  Vérification de l'écriture par comparaison d'empreinte...${NC}"
+        echo -e "${YELLOW}   Vérification de l'écriture par comparaison d'empreinte...${NC}"
         local dev_hash=$(sudo dd if="$selected_dev" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
         if [ "$dev_hash" = "$iso_hash" ]; then
-            echo -e "${GREEN}  Vérification réussie : l'empreinte correspond. La gravure est valide.${NC}"
-            echo -e "  Vous pouvez maintenant installer Ubuntu Server sur votre mini-PC avec cette clé."
+            echo -e "${GREEN}   Vérification réussie : l'empreinte correspond. La gravure est valide.${NC}"
+            echo -e "   Vous pouvez maintenant installer Ubuntu Server sur votre mini-PC avec cette clé."
         else
-            echo -e "${RED}  Échec de la vérification : l'empreinte ne correspond pas.${NC}"
-            echo -e "  ISO hash   : $iso_hash"
-            echo -e "  Clé hash   : $dev_hash"
-            echo -e "${YELLOW}  Voulez-vous réessayer la gravure sur le même périphérique ? (o/n)${NC}"
+            echo -e "${RED}   Échec de la vérification : l'empreinte ne correspond pas.${NC}"
+            echo -e "   ISO hash   : $iso_hash"
+            echo -e "   Clé hash   : $dev_hash"
+            echo -e "${YELLOW}   Voulez-vous réessayer la gravure sur le même périphérique ? (o/n)${NC}"
             read -r retry_write
             if [[ "$retry_write" =~ ^[OoYy]$ ]]; then
                 continue
             else
-                echo -e "${GREEN}  Gravure annulée.${NC}"
+                echo -e "${GREEN}   Gravure annulée.${NC}"
             fi
         fi
         break
@@ -416,18 +417,18 @@ burn_iso() {
 burn_iso "$OUTPUT_ISO"
 
 # Conseils pour vérification manuelle (optionnel)
-echo ""
-echo -e "${YELLOW}Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition avec la commande :${NC}"
+echo -e "${YELLOW}========================================${NC}"
+echo -e "${YELLOW} Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition avec la commande :${NC}"
 echo -e " sudo mount /dev/sdX1 /mnt && ls /mnt/autoinstall"
-echo -e "${YELLOW}(Remplacez 'sdX' par le périphérique de votre clé, par exemple sdb)${NC}"
+echo -e "${YELLOW} (Remplacez 'sdX' par le périphérique de votre clé, par exemple sdb)${NC}"
+echo -e "${YELLOW}========================================${NC}"
 
 # ------------------------------
 # Finalisation
 # ------------------------------
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Processus terminé.${NC}"
-echo -e "${GREEN}ISO disponible : $OUTPUT_ISO${NC}"
+echo -e "${GREEN} Processus terminé.${NC}"
+echo -e "${GREEN} ISO disponible : $OUTPUT_ISO${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-
