@@ -1,7 +1,6 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique pour NeurHomIA
-# Version avec sauvegarde des anciens autoinstall et vérification par hash
-# Utilisation : ./build-iso.sh
+# Version avec vérification par montage du dossier autoinstall sur la clé
 
 set -e
 
@@ -366,7 +365,28 @@ burn_iso() {
         echo -e "${YELLOW}Vérification de l'écriture par comparaison d'empreinte...${NC}"
         local dev_hash=$(sudo dd if="$selected_dev" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
         if [ "$dev_hash" = "$iso_hash" ]; then
-            echo -e "${GREEN}Vérification réussie : l'empreinte correspond. La gravure est valide.${NC}"
+            echo -e "${GREEN}Vérification réussie : l'empreinte correspond.${NC}"
+
+            # Vérification supplémentaire par montage de la partition
+            echo -e "${YELLOW}Vérification de la présence du dossier autoinstall sur la clé...${NC}"
+            mkdir -p /mnt/usb-check
+            part_dev="${selected_dev}1"
+            if [ -e "$part_dev" ]; then
+                if sudo mount "$part_dev" /mnt/usb-check 2>/dev/null; then
+                    if [ -d "/mnt/usb-check/autoinstall" ] && [ -f "/mnt/usb-check/autoinstall/user-data" ]; then
+                        echo -e "${GREEN}✓ Dossier autoinstall trouvé sur la clé.${NC}"
+                    else
+                        echo -e "${RED}✗ Dossier autoinstall introuvable sur la clé ! La gravure a peut-être échoué.${NC}"
+                    fi
+                    sudo umount /mnt/usb-check
+                else
+                    echo -e "${YELLOW}Impossible de monter la partition $part_dev. La vérification par montage est ignorée.${NC}"
+                fi
+            else
+                echo -e "${YELLOW}Aucune partition détectée sur $selected_dev, vérification par montage impossible.${NC}"
+            fi
+            rmdir /mnt/usb-check 2>/dev/null || true
+
             echo -e "${GREEN}Gravure terminée avec succès !${NC}"
             echo -e "Vous pouvez maintenant utiliser cette clé pour démarrer votre mini-PC."
         else
