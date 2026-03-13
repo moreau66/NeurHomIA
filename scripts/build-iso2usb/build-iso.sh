@@ -17,7 +17,7 @@ PROJECT_NAME_UPPER=$(echo "$PROJECT_NAME" | tr '[:lower:]' '[:upper:]')
 USERNAME="neurhomia"                    # Nom de l'utilisateur système
 DEFAULT_PASSWORD="neurhomia"            # Mot de passe par défaut (sera hashé)
 
-GITHUB_OWNER_NAME="moreau66"            # Propriétaire du github 
+GITHUB_OWNER_NAME=""            # Propriétaire du github 
 FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_OWNER_NAME}/${PROJECT_NAME}/main/scripts/build-iso2usb/firstboot-config.sh"  
 
 # ------------------------------
@@ -40,7 +40,7 @@ else
 fi
 
 # ------------------------------
-# Demande interactive de la version d'Ubuntu Server à installer
+# 1) Demande interactive de la version d'Ubuntu Server à installer
 # ------------------------------
 echo -e "${YELLOW}1) Quelle version d'Ubuntu Server souhaitez-vous installer ? (défaut : $DEFAULT_UBUNTU_VERSION)"
 echo -e "   Format attendu : X.Y.Z (exemple : 24.04.4)${NC}"
@@ -74,7 +74,7 @@ if [ ${#LABEL} -gt 32 ]; then
 fi
 
 # ------------------------------
-# Vérification des dépendances
+# 2) Vérification des dépendances
 # ------------------------------
 echo ""
 echo -e "${YELLOW}2) Vérification des dépendances...${NC}"
@@ -85,7 +85,7 @@ command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}   xorriso est requis. In
 echo -e "${GREEN}   Dépendances OK${NC}"
 
 # ------------------------------
-# Préparation des dossiers avec sauvegarde de l'ancien autoinstall
+# 3) Préparation des dossiers avec sauvegarde de l'ancien autoinstall
 # ------------------------------
 echo ""
 echo -e "${YELLOW}3) Préparation de l'espace de travail...${NC}"
@@ -103,36 +103,36 @@ rm -rf "$EXTRACT_DIR"
 mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 
 # ------------------------------
-# Téléchargement de l'ISO (si non existante)
+# 4) Téléchargement de l'ISO (si non existante)
 # ------------------------------
 echo ""
 if [ ! -f "$WORK_DIR/$ISO_FILENAME" ]; then
-    echo -e "${GREEN}   Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
+    echo -e "${GREEN}4) Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
     wget -O "$WORK_DIR/$ISO_FILENAME" "$ISO_URL"
 else
-    echo -e "${GREEN}   L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
+    echo -e "${GREEN}4) L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
 fi
 
 # ------------------------------
-# Extraction de l'ISO
+# 5) Extraction de l'ISO
 # ------------------------------
 echo ""
-echo -e "${YELLOW}4) Extraction de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
+echo -e "${YELLOW}5) Extraction de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
 7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR"
 
 # ------------------------------
-# Génération du hash du mot de passe
+# 6) Génération du hash du mot de passe
 # ------------------------------
 echo ""
-echo -e "${YELLOW}5) Génération du hash du mot de passe par défaut...${NC}"
+echo -e "${YELLOW}6) Génération du hash du mot de passe par défaut...${NC}"
 PASSWORD_HASH=$(openssl passwd -6 "$DEFAULT_PASSWORD")
 echo -e "${GREEN}   Hash généré.${NC}"
 
 # ------------------------------
-# Création du fichier user-data
+# 7) Création du fichier user-data
 # ------------------------------
 echo ""
-echo -e "${YELLOW}6) Création du fichier user-data...${NC}"
+echo -e "${YELLOW}7) Création du fichier user-data...${NC}"
 cat > "$AUTOINSTALL_DIR/user-data" <<EOF
 #cloud-config
 autoinstall:
@@ -168,7 +168,7 @@ autoinstall:
     - curl
     - language-pack-fr          # Paquet de langue français
     - language-pack-fr-base      # Paquet de base pour le français
-    - wfrench                    # Dictionnaire français (optionnel, pour les correcteurs)
+    - wfrench                    # Dictionnaire français (optionnel)
   late-commands:
     - mkdir -p /target/opt/${PROJECT_NAME_LOWER}
     - curtin in-target -- wget -O /opt/${PROJECT_NAME_LOWER}/firstboot.sh $FIRSTBOOT_SCRIPT_URL
@@ -203,15 +203,33 @@ fi
 echo -e "${GREEN}   Fichiers d'autoinstall créés avec succès.${NC}"
 
 # ------------------------------
-# Intégration de l'autoinstall
+# 8) Intégration de l'autoinstall
 # ------------------------------
 cp -r "$AUTOINSTALL_DIR" "$EXTRACT_DIR/"
 
 # ------------------------------
-# Création de l'ISO avec xorriso (détection automatique)
+# 9) Modification du fichier grub.cfg pour forcer l'autoinstall
 # ------------------------------
 echo ""
-echo -e "${YELLOW}7) Création de la nouvelle ISO (avec xorriso)...${NC}"
+echo -e "${YELLOW}9) Modification du fichier grub.cfg pour forcer l'autoinstall...${NC}"
+GRUB_CFG="$EXTRACT_DIR/boot/grub/grub.cfg"
+if [ -f "$GRUB_CFG" ]; then
+    # Sauvegarde du fichier original
+    cp "$GRUB_CFG" "$GRUB_CFG.orig"
+    # Ajout des paramètres autoinstall à chaque entrée linux
+    # On utilise sed pour remplacer "linux /casper/vmlinuz" par "linux /casper/vmlinuz autoinstall ds=nocloud\;s=/cdrom/autoinstall/"
+    # Le point-virgule doit être échappé pour sed avec un backslash supplémentaire
+    sudo sed -i 's|linux /casper/vmlinuz|linux /casper/vmlinuz autoinstall ds=nocloud\\;s=/cdrom/autoinstall/|g' "$GRUB_CFG"
+    echo -e "${GREEN}   Fichier grub.cfg modifié.${NC}"
+else
+    echo -e "${RED}   Fichier grub.cfg introuvable ! L'autoinstall pourrait ne pas fonctionner.${NC}"
+fi
+
+# ------------------------------
+# 10) Création de l'ISO avec xorriso (détection automatique)
+# ------------------------------
+echo ""
+echo -e "${YELLOW}10) Création de la nouvelle ISO (avec xorriso)...${NC}"
 
 # Vérification du fichier de boot BIOS
 if [ ! -f "$EXTRACT_DIR/boot/grub/i386-pc/eltorito.img" ]; then
@@ -246,7 +264,7 @@ fi
 
 # Création de l'ISO hybride (BIOS + UEFI)
 echo ""
-echo -e "${GREEN}   Cre&ation de l'ISO...${NC}"
+echo -e "${GREEN}   Création de l'ISO...${NC}"
 xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
     -iso-level 3 -no-emul-boot -boot-load-size 4 -boot-info-table \
     -b boot/grub/i386-pc/eltorito.img -c boot.catalog \
@@ -262,12 +280,12 @@ else
 fi
 
 # ------------------------------
-# Demande de gravure sur clé USB
+# 11) Demande de gravure sur clé USB
 # ------------------------------
 burn_iso() {
     local iso_path="$1"
     echo ""
-    echo -e "${YELLOW}8) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
+    echo -e "${YELLOW}11) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
     read -r answer
     if [[ ! "$answer" =~ ^[OoYy]$ ]]; then
         echo -e "${GREEN}   Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
