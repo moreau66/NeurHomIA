@@ -166,6 +166,9 @@ autoinstall:
     - git
     - whiptail
     - curl
+    - language-pack-fr          # Paquet de langue français
+    - language-pack-fr-base      # Paquet de base pour le français
+    - wfrench                    # Dictionnaire français (optionnel, pour les correcteurs)
   late-commands:
     - mkdir -p /target/opt/${PROJECT_NAME_LOWER}
     - curtin in-target -- wget -O /opt/${PROJECT_NAME_LOWER}/firstboot.sh $FIRSTBOOT_SCRIPT_URL
