@@ -394,13 +394,14 @@ burn_iso() {
         sudo blockdev --flushbufs "$selected_dev" 2>/dev/null || true  # Ignorer si échec
 
         # Vérification par hash (10 premiers Mo)
+        echo ""
         echo -e "${YELLOW}   Vérification de l'écriture par comparaison d'empreinte...${NC}"
         local dev_hash=$(sudo dd if="$selected_dev" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
         if [ "$dev_hash" = "$iso_hash" ]; then
-            echo -e "${GREEN}   Vérification réussie : l'empreinte correspond. La gravure est valide.${NC}"
-            echo -e "   Vous pouvez maintenant installer Ubuntu Server sur votre mini-PC avec cette clé."
+            echo -e "${GREEN}   Vérification réussie : l'empreinte correspond. La gravure est valide."
+            echo -e "   Vous pouvez maintenant installer Ubuntu Server sur votre mini-PC avec cette clé.${NC}"
         else
-            echo -e "${RED}   Échec de la vérification : l'empreinte ne correspond pas.${NC}"
+            echo -e "${RED}   Échec de la vérification : l'empreinte ne correspond pas."
             echo -e "   ISO hash   : $iso_hash"
             echo -e "   Clé hash   : $dev_hash"
             echo -e "${YELLOW}   Voulez-vous réessayer la gravure sur le même périphérique ? (o/n)${NC}"
@@ -419,18 +420,19 @@ burn_iso() {
 burn_iso "$OUTPUT_ISO"
 
 # Conseils pour vérification manuelle (optionnel)
-echo -e "${YELLOW}========================================${NC}"
-echo -e "${YELLOW} Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition avec la commande :${NC}"
+echo "${YELLOW}"
+echo -e "========================================"
+echo -e "Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition avec la commande :"
 echo -e " sudo mount /dev/sdX1 /mnt && ls /mnt/autoinstall"
-echo -e "${YELLOW} (Remplacez 'sdX' par le périphérique de votre clé, par exemple sdb)${NC}"
-echo -e "${YELLOW}========================================${NC}"
+echo -e "(Remplacez 'sdX' par le périphérique de votre clé, par exemple sdb)"
+echo -e "========================================${NC}"
 
 # ------------------------------
 # Finalisation
 # ------------------------------
-echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN} Processus terminé.${NC}"
-echo -e "${GREEN} ISO disponible : $OUTPUT_ISO${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo "${GREEN}"
+echo -e "========================================"
+echo -e "Processus terminé."
+echo -e "ISO disponible : $OUTPUT_ISO"
+echo -e "========================================${NC}"
 echo ""
