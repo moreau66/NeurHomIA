@@ -107,7 +107,7 @@ mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 # ------------------------------
 echo ""
 if [ ! -f "$WORK_DIR/$ISO_FILENAME" ]; then
-    echo -e "${YELLOW}   Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
+    echo -e "${GREEN}   Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
     wget -O "$WORK_DIR/$ISO_FILENAME" "$ISO_URL"
 else
     echo -e "${GREEN}   L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
@@ -117,14 +117,14 @@ fi
 # Extraction de l'ISO
 # ------------------------------
 echo ""
-echo -e "${YELLOW}   Extraction de l'ISO...${NC}"
+echo -e "${YELLOW}4) Extraction de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
 7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR"
 
 # ------------------------------
 # Génération du hash du mot de passe
 # ------------------------------
 echo ""
-echo -e "${YELLOW}4) Génération du hash du mot de passe par défaut...${NC}"
+echo -e "${YELLOW}5) Génération du hash du mot de passe par défaut...${NC}"
 PASSWORD_HASH=$(openssl passwd -6 "$DEFAULT_PASSWORD")
 echo -e "${GREEN}   Hash généré.${NC}"
 
@@ -132,7 +132,7 @@ echo -e "${GREEN}   Hash généré.${NC}"
 # Création du fichier user-data
 # ------------------------------
 echo ""
-echo -e "${YELLOW}5) Création du fichier user-data...${NC}"
+echo -e "${YELLOW}6) Création du fichier user-data...${NC}"
 cat > "$AUTOINSTALL_DIR/user-data" <<EOF
 #cloud-config
 autoinstall:
@@ -208,7 +208,7 @@ cp -r "$AUTOINSTALL_DIR" "$EXTRACT_DIR/"
 # Création de l'ISO avec xorriso (détection automatique)
 # ------------------------------
 echo ""
-echo -e "${YELLOW}6) Création de la nouvelle ISO (avec xorriso)...${NC}"
+echo -e "${YELLOW}7) Création de la nouvelle ISO (avec xorriso)...${NC}"
 
 # Vérification du fichier de boot BIOS
 if [ ! -f "$EXTRACT_DIR/boot/grub/i386-pc/eltorito.img" ]; then
@@ -238,7 +238,7 @@ if [ -f "$OUTPUT_ISO" ]; then
     BACKUP_ISO="${OUTPUT_ISO%.*}_${TIMESTAMP}.${OUTPUT_ISO##*.}"
     mv "$OUTPUT_ISO" "$BACKUP_ISO"
     echo ""
-    echo -e "${YELLOW}   Ancienne ISO sauvegardée sous : $BACKUP_ISO${NC}"
+    echo -e "${GREEN}   Ancienne ISO sauvegardée sous : $BACKUP_ISO${NC}"
 fi
 
 # Création de l'ISO hybride (BIOS + UEFI)
@@ -262,7 +262,7 @@ fi
 burn_iso() {
     local iso_path="$1"
     echo ""
-    echo -e "${YELLOW}7) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
+    echo -e "${YELLOW}8) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
     read -r answer
     if [[ ! "$answer" =~ ^[OoYy]$ ]]; then
         echo -e "${GREEN}   Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
@@ -278,15 +278,17 @@ burn_iso() {
 
     # Calculer un hash de vérification (SHA256 des 10 premiers Mo de l'ISO)
     echo ""
-    echo -e "${YELLOW}   Calcul de l'empreinte de vérification de l'ISO...${NC}"
+    echo -e "${GREEN}   Calcul de l'empreinte de vérification de l'ISO...${NC}"
     local iso_hash=$(dd if="$iso_path" bs=1M count=10 2>/dev/null | sha256sum | awk '{print $1}')
-    echo -e "   Empreinte (10 premiers Mo) : $iso_hash"
+    echo -e "${GREEN}   Empreinte (10 premiers Mo) : $iso_hash"
 
     while true; do
         echo ""
         echo -e "${YELLOW}   Recherche des périphériques USB...${NC}"
+        
         # Liste des périphériques de type disk, avec transport USB, et taille < 64 Go
         mapfile -t devices < <(lsblk -d -o NAME,SIZE,TYPE,TRAN -n -l 2>/dev/null | grep -E 'disk.*usb' | awk '$2 ~ /^[0-9.]+[GM]?/ { if ($2 ~ /G/ && $2+0 < 64) print; else if ($2 ~ /M/ && $2+0 < 64000) print }')
+        
         # Si pas de périphérique USB détecté, élargir à tout disk de taille < 64G
         if [ ${#devices[@]} -eq 0 ]; then
             mapfile -t devices < <(lsblk -d -o NAME,SIZE,TYPE -n -l 2>/dev/null | grep disk | awk '$2 ~ /^[0-9.]+[GM]?/ { if ($2 ~ /G/ && $2+0 < 64) print; else if ($2 ~ /M/ && $2+0 < 64000) print }')
@@ -304,12 +306,12 @@ burn_iso() {
         fi
 
         # Afficher les périphériques trouvés
-        echo -e "${GREEN}   Périphériques détectés :${NC}"
+        echo -e "${GREEN}   Périphériques détectés :"
         local i=1
         for dev in "${devices[@]}"; do
             name=$(echo "$dev" | awk '{print $1}')
             size=$(echo "$dev" | awk '{print $2}')
-            echo "  $i) /dev/$name ($size)"
+            echo "   $i) /dev/$name ($size)"
             ((i++))
         done
         echo -e "${YELLOW}   Choisissez le numéro du périphérique à utiliser, ou 'q' pour annuler :${NC}"
