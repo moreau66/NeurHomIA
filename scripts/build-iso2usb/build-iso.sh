@@ -242,6 +242,8 @@ if [ -f "$OUTPUT_ISO" ]; then
 fi
 
 # Création de l'ISO hybride (BIOS + UEFI)
+echo ""
+echo -e "${GREEN}   Cre&ation de l'ISO...${NC}"
 xorriso -as mkisofs -r -V "$LABEL" -J -joliet-long -l \
     -iso-level 3 -no-emul-boot -boot-load-size 4 -boot-info-table \
     -b boot/grub/i386-pc/eltorito.img -c boot.catalog \
@@ -420,7 +422,7 @@ burn_iso() {
 burn_iso "$OUTPUT_ISO"
 
 # Conseils pour vérification manuelle (optionnel)
-echo "${YELLOW}"
+echo -e "${YELLOW}"
 echo -e "========================================"
 echo -e "Pour vérifier la présence du dossier autoinstall sur la clé, vous pouvez monter sa première partition avec la commande :"
 echo -e " sudo mount /dev/sdX1 /mnt && ls /mnt/autoinstall"
@@ -430,7 +432,7 @@ echo -e "========================================${NC}"
 # ------------------------------
 # Finalisation
 # ------------------------------
-echo "${GREEN}"
+echo -e "${GREEN}"
 echo -e "========================================"
 echo -e "Processus terminé."
 echo -e "ISO disponible : $OUTPUT_ISO"
