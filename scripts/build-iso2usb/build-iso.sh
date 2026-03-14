@@ -17,7 +17,7 @@ PROJECT_NAME_UPPER=$(echo "$PROJECT_NAME" | tr '[:lower:]' '[:upper:]')
 USERNAME="neurhomia"                    # Nom de l'utilisateur système
 DEFAULT_PASSWORD="neurhomia"            # Mot de passe par défaut (sera hashé)
 
-GITHUB_OWNER_NAME=""            # Propriétaire du github 
+GITHUB_OWNER_NAME="moreau66"            # Propriétaire du github 
 FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_OWNER_NAME}/${PROJECT_NAME}/main/scripts/build-iso2usb/firstboot-config.sh"  
 
 # ------------------------------
@@ -175,22 +175,22 @@ autoinstall:
     - curtin in-target -- wget -O /opt/${PROJECT_NAME_LOWER}/firstboot.sh $FIRSTBOOT_SCRIPT_URL
     - curtin in-target -- chmod +x /opt/${PROJECT_NAME_LOWER}/firstboot.sh
     - |
-      cat <<'SERV' > /target/etc/systemd/system/${PROJECT_NAME_LOWER}-firstboot.service
+      cat <<'SERV' > /target/etc/systemd/system/neurhomia-firstboot.service
       [Unit]
-      Description=${PROJECT_NAME} First Boot Configuration
+      Description=NeurHomIA First Boot Configuration
       After=network-online.target
       Wants=network-online.target
 
       [Service]
       Type=oneshot
       RemainAfterExit=yes
-      ExecStart=/opt/${PROJECT_NAME_LOWER}/firstboot.sh
+      ExecStart=/opt/neurhomia/firstboot.sh
       StandardOutput=journal+console
 
       [Install]
       WantedBy=multi-user.target
       SERV
-    - curtin in-target -- systemctl enable ${PROJECT_NAME_LOWER}-firstboot.service
+    - curtin in-target -- systemctl enable neurhomia-firstboot.service
   shutdown: reboot
 EOF
 
