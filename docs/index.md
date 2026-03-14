@@ -38,6 +38,7 @@ Ces guides vous accompagnent dans l'installation et la prise en main de NeurHomI
 | [Guide d'Installation](guide-installation.md) | Installation complète de NeurHomIA |
 | [Guide de Développement](guide-developpement.md) | Configuration de l'environnement de développement |
 | [Guide de Production](guide-production.md) | Déploiement en environnement de production |
+| [Clé USB d'Installation](guide-cle-usb-installation.md) | Installation automatique sur mini-PC via clé USB bootable |
 
 ---
 

@@ -74,6 +74,7 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `visual-editor.ts` | Types pour l'éditeur visuel drag-and-drop (VisualSection, CanvasConfig, ResolutionPreset). |
 | `widget-config.ts` | Types pour la configuration des widgets (WidgetTopicConfig, WidgetDisplayConfig, EntityWidgetConfig). |
 | `widget-settings.ts` | Types et valeurs par défaut pour les paramètres des widgets (DisplaySettings, DiscoverySettings). |
+| `device-catalog.ts` | Types génériques pour les catalogues d'appareils multi-technologies (Zigbee, Z-Wave, Matter, KNX). |
 
 ---
 
@@ -125,6 +126,7 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `use-widget-editor.ts` | Éditeur de schémas de widgets dynamiques. |
 | `use-diagnostics-alert-config.ts` | Configuration des alertes de diagnostic réseau (seuils, notifications, cooldown). |
 | `use-execution-config.ts` | Configuration du backend d'exécution des scénarios (Local Engine, Scheduler). |
+| `use-device-catalog.ts` | Catalogue d'appareils multi-technologies via MQTT (réception, cache images base64, chunking, recherche). |
 
 ---
 
@@ -241,6 +243,7 @@ Rapport généré automatiquement - Liste complète des fichiers documentés ave
 | `networkDiagnosticsService.ts` | Tests de connectivité HTTP/WebSocket/MQTT, résolution DNS, mesures de latence. |
 | `diagnosticsAlertService.ts` | Détection et envoi des alertes de diagnostic (down, recover, high_latency). |
 | `schedulerMqttService.ts` | Communication MQTT avec le Scheduler Python (heartbeat, status, sync). |
+| `deviceCatalogService.ts` | Conversion des exposes d'appareils en TopicConfig[], recherche dans le catalogue, résolution d'images. |
 
 ### Services Notifications
 
@@ -482,7 +485,7 @@ Composants pour la création et gestion des scénarios QUAND/SI/ALORS.
 | `dashboard/` | Widgets du tableau de bord. |
 | `devices/` | Composants pour les appareils. |
 | `dynamic-pages/` | Rendu des pages dynamiques. |
-| `entity-editor/` | Éditeur d'entités. |
+| `entity-editor/` | Éditeur d'entités (inclut `DeviceModelPicker.tsx` et `DeviceCatalogImage.tsx`). |
 | `entity-links/` | Éditeur de liens entre entités. |
 | `ia2mqtt/` | Interface IA2MQTT. |
 | `kiosk/` | Composants mode kiosque. |

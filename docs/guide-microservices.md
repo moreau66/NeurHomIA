@@ -1,6 +1,6 @@
 # Guide des Microservices NeurHomIA
 
-> **Version** : 1.0.0 | **Mise à jour** : 2026-02-08T10:00:00
+> **Version** : 1.1.0 | **Mise à jour** : 2026-03-08T10:00:00
 
 ## Table des matières
 
@@ -13,9 +13,10 @@
 7. [IA2MQTT / Ollama - LLM Local](#ia2mqtt--ollama---llm-local)
 8. [SQLite2MQTT - Base de Données Légère](#sqlite2mqtt---base-de-données-légère)
 9. [DuckDB2MQTT - Base Analytique](#duckdb2mqtt---base-analytique)
-10. [Découverte et Intégration MCP](#découverte-et-intégration-mcp)
-11. [Tableau Récapitulatif](#tableau-récapitulatif)
-12. [Bonnes Pratiques](#bonnes-pratiques)
+10. [xMqtt2Mqtt - Bridge MQTT Multi-Broker](#xmqtt2mqtt---bridge-mqtt-multi-broker)
+11. [Découverte et Intégration MCP](#découverte-et-intégration-mcp)
+12. [Tableau Récapitulatif](#tableau-récapitulatif)
+13. [Bonnes Pratiques](#bonnes-pratiques)
 
 ---
 
@@ -1208,6 +1209,67 @@ healthcheck:
 
 ---
 
+## xMqtt2Mqtt - Bridge MQTT Multi-Broker
+
+### Description
+
+xMqtt2Mqtt est un bridge MQTT permettant de connecter plusieurs brokers MQTT et de créer des mappings de données entre eux. Il supporte le split JSON (1→N topics), l'agrégation (N→1), et le passthrough transparent. Idéal pour interconnecter des réseaux MQTT isolés ou transformer des payloads entre services.
+
+### Configuration de Base
+
+| Paramètre | Valeur |
+|-----------|--------|
+| **Image Docker** | `moreau66/xmqtt2mqtt:latest` |
+| **Catégorie** | Gateway |
+| **Interface Web** | Aucune |
+| **Ports** | Aucun |
+| **Dépendances** | Mosquitto |
+
+### Variables d'Environnement
+
+| Variable | Valeur par défaut | Obligatoire | Description |
+|----------|-------------------|-------------|-------------|
+| `MQTT_BROKER` | `mosquitto` | Oui | Adresse du broker MQTT principal |
+| `MQTT_PORT` | `1883` | Oui | Port du broker MQTT |
+| `MCP_SERVICE_ID` | `xmqtt2mqtt` | Oui | Identifiant MCP du service |
+| `MCP_API_KEY` | `` | Non | Clé API pour l'authentification MCP |
+| `MCP_HEARTBEAT_INTERVAL` | `30` | Non | Intervalle de heartbeat en secondes |
+| `LOG_LEVEL` | `INFO` | Non | Niveau de log (DEBUG, INFO, WARNING, ERROR) |
+
+### MCP Tools (9)
+
+| Outil | Description |
+|-------|-------------|
+| `get_status` | État du service et statistiques de mapping |
+| `update_config` | Mise à jour dynamique de la configuration |
+| `list_mappings` | Liste tous les mappings MQTT configurés |
+| `add_mapping` | Ajoute un nouveau mapping source→destination |
+| `remove_mapping` | Supprime un mapping existant |
+| `toggle_mapping` | Active/désactive un mapping |
+| `test_mapping` | Teste un mapping avec un payload de test |
+| `get_statistics` | Statistiques détaillées (messages/s, latence) |
+| `health_check` | Vérification de santé du service |
+
+### Types de Mappings
+
+| Type | Description | Exemple |
+|------|-------------|---------|
+| **passthrough** | Copie directe d'un topic à un autre | `broker-A/temp` → `broker-B/temp` |
+| **json_split** | Éclate un payload JSON en N topics | `sensors/all` → `sensors/temp`, `sensors/hum` |
+| **aggregate** | Combine N topics en un seul payload | `room/+/temp` → `rooms/all_temps` |
+
+### Composant UI
+
+**Fichier** : `src/components/containers/XMqtt2MqttContainer.tsx`
+
+**Fonctionnalités** :
+- Liste et gestion des mappings MQTT
+- Ajout/suppression de mappings en temps réel
+- Statistiques de transfert (messages/seconde)
+- Test de mapping interactif
+
+---
+
 ## Découverte et Intégration MCP
 
 ### Protocole MCP (Microservice Communication Protocol)
@@ -1306,6 +1368,7 @@ Chaque microservice peut définir des alias pour simplifier l'accès à ses donn
 | **Ollama** | `ollama/ollama` | AI | 11434 | - | ❌ |
 | **SQLite2MQTT** | `moreau66/sqlite2mqtt` | Data | 8080 | Mosquitto | ❌ |
 | **DuckDB2MQTT** | `moreau66/duckdb2mqtt` | Data | 8081 | Mosquitto | ❌ |
+| **xMqtt2Mqtt** | `moreau66/xmqtt2mqtt` | Gateway | - | Mosquitto | ❌ |
 
 ### Ressources Requises
 
@@ -1319,6 +1382,7 @@ Chaque microservice peut définir des alias pour simplifier l'accès à ses donn
 | Ollama | 4-48 GB | 2.0+ | 10+ GB | ✅ (optionnel) |
 | SQLite2MQTT | 128 MB | 0.2 | 1+ GB | ❌ |
 | DuckDB2MQTT | 2+ GB | 1.0 | 5+ GB | ❌ |
+| xMqtt2Mqtt | 64 MB | 0.1 | 50 MB | ❌ |
 
 ### Préfixes de Topics MQTT
 
@@ -1332,6 +1396,7 @@ Chaque microservice peut définir des alias pour simplifier l'accès à ses donn
 | Ollama | `ia/` | `ia/response` |
 | SQLite2MQTT | `sqlite/` | `sqlite/query/result` |
 | DuckDB2MQTT | `duckdb/` | `duckdb/aggregate/hourly` |
+| xMqtt2Mqtt | `xmqtt/` | `xmqtt/mappings/status` |
 
 ---
 
