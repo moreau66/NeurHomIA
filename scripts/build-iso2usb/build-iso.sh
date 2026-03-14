@@ -17,7 +17,7 @@ PROJECT_NAME_UPPER=$(echo "$PROJECT_NAME" | tr '[:lower:]' '[:upper:]')
 USERNAME="neurhomia"                    # Nom de l'utilisateur système
 DEFAULT_PASSWORD="neurhomia"            # Mot de passe par défaut (sera hashé)
 
-GITHUB_OWNER_NAME="moreau66"            # Propriétaire du github 
+GITHUB_OWNER_NAME=""            # Propriétaire du github 
 FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_OWNER_NAME}/${PROJECT_NAME}/main/scripts/build-iso2usb/firstboot-config.sh"  
 
 # ------------------------------
@@ -26,6 +26,7 @@ FIRSTBOOT_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_OWNER_NAME}/${P
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 # ------------------------------
@@ -217,8 +218,6 @@ if [ -f "$GRUB_CFG" ]; then
     # Sauvegarde du fichier original
     cp "$GRUB_CFG" "$GRUB_CFG.orig"
     # Ajout des paramètres autoinstall à chaque entrée linux
-    # On utilise sed pour remplacer "linux /casper/vmlinuz" par "linux /casper/vmlinuz autoinstall ds=nocloud\;s=/cdrom/autoinstall/"
-    # Le point-virgule doit être échappé pour sed avec un backslash supplémentaire
     sudo sed -i 's|linux /casper/vmlinuz|linux /casper/vmlinuz autoinstall ds=nocloud\\;s=/cdrom/autoinstall/|g' "$GRUB_CFG"
     echo -e "${GREEN}   Fichier grub.cfg modifié.${NC}"
 else
@@ -280,12 +279,126 @@ else
 fi
 
 # ------------------------------
-# 11) Demande de gravure sur clé USB
+# 11) Validation de l'ISO générée
+# ------------------------------
+validate_iso() {
+    local iso_path="$1"
+    local mount_dir="/tmp/${PROJECT_NAME_LOWER}-iso-check"
+    local checks_passed=0
+    local checks_failed=0
+
+    echo ""
+    echo -e "${YELLOW}11) Validation de l'ISO générée...${NC}"
+    echo ""
+
+    # Montage de l'ISO
+    mkdir -p "$mount_dir"
+    if ! mount -o loop,ro "$iso_path" "$mount_dir" 2>/dev/null; then
+        # Fallback : essayer avec sudo
+        if ! sudo mount -o loop,ro "$iso_path" "$mount_dir" 2>/dev/null; then
+            echo -e "  ${YELLOW}⚠ Impossible de monter l'ISO pour validation (droits insuffisants).${NC}"
+            echo -e "  ${YELLOW}  Vérification par taille et checksum uniquement.${NC}"
+            
+            # Vérification taille minimale (> 1 Go = 1073741824 octets)
+            local iso_bytes=$(stat -c%s "$iso_path" 2>/dev/null || stat -f%z "$iso_path" 2>/dev/null)
+            if [ -n "$iso_bytes" ] && [ "$iso_bytes" -gt 1073741824 ]; then
+                echo -e "  ${GREEN}✔ Taille cohérente ($iso_bytes octets > 1 Go)${NC}"
+            else
+                echo -e "  ${RED}✘ Taille suspecte ($iso_bytes octets < 1 Go)${NC}"
+            fi
+
+            # SHA256
+            local sha256=$(sha256sum "$iso_path" | cut -d' ' -f1)
+            echo -e "  ${CYAN}🔑 SHA256 : $sha256${NC}"
+            echo ""
+            return
+        fi
+    fi
+
+    # 1. Vérifier autoinstall/user-data
+    if [ -f "$mount_dir/autoinstall/user-data" ]; then
+        echo -e "  ${GREEN}✔ autoinstall/user-data présent${NC}"
+        checks_passed=$((checks_passed + 1))
+    else
+        echo -e "  ${RED}✘ autoinstall/user-data MANQUANT${NC}"
+        checks_failed=$((checks_failed + 1))
+    fi
+
+    # 2. Vérifier autoinstall/meta-data
+    if [ -f "$mount_dir/autoinstall/meta-data" ]; then
+        echo -e "  ${GREEN}✔ autoinstall/meta-data présent${NC}"
+        checks_passed=$((checks_passed + 1))
+    else
+        echo -e "  ${RED}✘ autoinstall/meta-data MANQUANT${NC}"
+        checks_failed=$((checks_failed + 1))
+    fi
+
+    # 3. Vérifier que firstboot.sh est référencé dans user-data
+    if grep -q "firstboot.sh" "$mount_dir/autoinstall/user-data" 2>/dev/null; then
+        echo -e "  ${GREEN}✔ firstboot.sh référencé dans user-data${NC}"
+        checks_passed=$((checks_passed + 1))
+    else
+        echo -e "  ${RED}✘ firstboot.sh NON référencé dans user-data${NC}"
+        checks_failed=$((checks_failed + 1))
+    fi
+
+    # 4. Vérifier structure boot UEFI
+    if [ -d "$mount_dir/EFI" ] || [ -f "$mount_dir/boot/grub/efi.img" ]; then
+        echo -e "  ${GREEN}✔ Structure boot UEFI présente${NC}"
+        checks_passed=$((checks_passed + 1))
+    else
+        echo -e "  ${RED}✘ Structure boot UEFI MANQUANTE${NC}"
+        checks_failed=$((checks_failed + 1))
+    fi
+
+    # 5. Vérifier structure boot BIOS
+    if [ -d "$mount_dir/boot/grub/i386-pc" ] || [ -d "$mount_dir/isolinux" ] || [ -f "$mount_dir/boot/grub/i386-pc/eltorito.img" ]; then
+        echo -e "  ${GREEN}✔ Structure boot BIOS présente${NC}"
+        checks_passed=$((checks_passed + 1))
+    else
+        echo -e "  ${YELLOW}⚠ Structure boot BIOS absente (UEFI uniquement)${NC}"
+    fi
+
+    # 6. Vérification taille minimale
+    local iso_bytes=$(stat -c%s "$iso_path" 2>/dev/null || stat -f%z "$iso_path" 2>/dev/null)
+    if [ -n "$iso_bytes" ] && [ "$iso_bytes" -gt 1073741824 ]; then
+        echo -e "  ${GREEN}✔ Taille cohérente ($(du -h "$iso_path" | cut -f1) > 1 Go)${NC}"
+        checks_passed=$((checks_passed + 1))
+    else
+        echo -e "  ${RED}✘ Taille suspecte ($(du -h "$iso_path" | cut -f1) < 1 Go attendu)${NC}"
+        checks_failed=$((checks_failed + 1))
+    fi
+
+    # Démontage
+    umount "$mount_dir" 2>/dev/null || sudo umount "$mount_dir" 2>/dev/null || true
+    rmdir "$mount_dir" 2>/dev/null || true
+
+    # 7. SHA256
+    echo ""
+    local sha256=$(sha256sum "$iso_path" | cut -d' ' -f1)
+    echo -e "  ${CYAN}🔑 SHA256 : $sha256${NC}"
+
+    # Résumé
+    echo ""
+    if [ "$checks_failed" -eq 0 ]; then
+        echo -e "  ${GREEN}✅ Validation réussie ($checks_passed/$checks_passed vérifications OK)${NC}"
+    else
+        echo -e "  ${RED}⚠ Validation partielle ($checks_passed OK, $checks_failed échouée(s))${NC}"
+        echo -e "  ${RED}  L'ISO peut ne pas fonctionner correctement.${NC}"
+    fi
+    echo ""
+}
+
+# Appel de la fonction de validation
+validate_iso "$OUTPUT_ISO"
+
+# ------------------------------
+# 12) Demande de gravure sur clé USB
 # ------------------------------
 burn_iso() {
     local iso_path="$1"
     echo ""
-    echo -e "${YELLOW}11) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
+    echo -e "${YELLOW}12) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
     read -r answer
     if [[ ! "$answer" =~ ^[OoYy]$ ]]; then
         echo -e "${GREEN}   Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
