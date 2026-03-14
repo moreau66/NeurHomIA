@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "id": "ir2mqtt",
+    "name": "IR2MQTT",
+    "version": "1.0.0",
+    "description": "Pont infrarouge vers MQTT pour contrôle de TV, climatiseurs et appareils IR",
+    "author": "moreau66",
+    "category": "microservice",
+    "tags": ["infrared", "ir", "mqtt", "iot", "remote", "mcp", "tv", "ac", "climate"],
+    "icon": "Tv"
+  },
+  "container": {
+    "image": "moreau66/ir2mqtt",
+    "defaultVersion": "latest",
+    "autoStart": false,
+    "ports": [
+      { "container": 8080, "host": 8091 }
+    ],
+    "volumes": [
+      { "container": "/app/config", "host": "./ir2mqtt/config", "mode": "rw" },
+      { "container": "/app/codes", "host": "./ir2mqtt/codes", "mode": "rw" }
+    ],
+    "environment": [
+      { "key": "MQTT_BROKER", "value": "mosquitto", "required": true, "description": "Hôte du broker MQTT" },
+      { "key": "MQTT_PORT", "value": "1883", "required": true, "description": "Port du broker MQTT" },
+      { "key": "MQTT_USER", "value": "", "required": false, "description": "Utilisateur MQTT" },
+      { "key": "MQTT_PASS", "value": "", "required": false, "secret": true, "description": "Mot de passe MQTT" },
+      { "key": "MCP_SERVICE_ID", "value": "ir2mqtt", "required": true, "description": "Identifiant du service MCP" },
+      { "key": "MCP_API_KEY", "value": "", "required": true, "secret": true, "description": "Clé API MCP" },
+      { "key": "MCP_HEARTBEAT_INTERVAL", "value": "30", "required": false, "description": "Intervalle heartbeat (s)" },
+      { "key": "IR_DEVICE_TYPE", "value": "broadlink", "required": false, "description": "Type de blaster IR (broadlink, tuya, usb)" },
+      { "key": "IR_DEVICE_IP", "value": "", "required": false, "description": "IP du blaster IR réseau" },
+      { "key": "IRDB_ENABLED", "value": "true", "required": false, "description": "Activer la base IRDB" }
+    ],
+    "restart": "unless-stopped",
+    "labels": {
+      "discovery.type": "ir",
+      "discovery.topics": "ir/+/state",
+      "mcp.service_id": "ir2mqtt"
+    }
+  },
+  "mcp": {
+    "service_id": "ir2mqtt",
+    "topics": {
+      "discovery": "mcp/services/ir2mqtt/discovery",
+      "data": "ir/+/state",
+      "commands": "mcp/services/ir2mqtt/jsonrpc/request"
+    },
+    "tools": [
+      "get_status", "update_config", "learn_code", "send_code", "send_raw",
+      "add_device", "remove_device", "list_devices",
+      "add_command", "remove_command", "list_commands",
+      "search_irdb", "import_from_irdb", "test_command", "get_recent_logs"
+    ],
+    "resources": ["ir_dashboard_widget", "ir_devices_list", "ir_remote_control"]
+  },
+  "ui_component": {
+    "component_path": "IR2MqttContainer",
+    "mode": "embedded"
+  },
+  "docker_compose": {
+    "depends_on": ["mosquitto"],
+    "networks": ["smart-home-network"],
+    "profiles": ["ir", "media", "optional"]
+  },
+  "dependencies": {
+    "required": ["mosquitto"],
+    "optional": []
+  },
+  "documentation": {
+    "readme_url": "https://github.com/moreau66/MCP-IR2Mqtt/blob/main/README.md",
+    "github_url": "https://github.com/moreau66/MCP-IR2Mqtt",
+    "docker_hub_url": "https://hub.docker.com/r/moreau66/ir2mqtt"
+  }
+}

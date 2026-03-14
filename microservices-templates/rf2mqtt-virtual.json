@@ -1,0 +1,257 @@
+{
+  "metadata": {
+    "id": "rf2mqtt-virtual",
+    "name": "RF2MQTT (Simulation)",
+    "version": "1.0.0",
+    "description": "Simulation d'un bridge RF 433/868 MHz avec capteurs de porte, fenêtre, PIR, station météo et détecteur de fumée",
+    "author": "moreau66",
+    "category": "virtual-microservice",
+    "tags": ["rf433", "rf868", "mqtt", "simulation", "virtual", "mcp"],
+    "icon": "Radio"
+  },
+  "simulation": {
+    "type": "rf-bridge",
+    "enabled": false,
+    "heartbeat": {
+      "enabled": true,
+      "interval": 30000,
+      "topic": "mcp/services/rf2mqtt/discovery",
+      "stability": 96
+    },
+    "entities": [
+      {
+        "id": "rf-door-sensor-1",
+        "name": "Capteur Porte Entrée",
+        "entityType": "virtual",
+        "category": "binary_sensor",
+        "discoverySchema": {
+          "name": "Capteur Porte Entrée",
+          "unique_id": "rf_door_sensor_1",
+          "state_topic": "rf/door-sensor-1/state",
+          "device_class": "door",
+          "payload_on": "open",
+          "payload_off": "closed",
+          "device": {
+            "identifiers": ["rf_door_sensor_1"],
+            "name": "Capteur Porte Entrée",
+            "manufacturer": "Generic EV1527",
+            "model": "RF Door Sensor 433MHz"
+          }
+        }
+      },
+      {
+        "id": "rf-door-sensor-2",
+        "name": "Capteur Fenêtre Salon",
+        "entityType": "virtual",
+        "category": "binary_sensor",
+        "discoverySchema": {
+          "name": "Capteur Fenêtre Salon",
+          "unique_id": "rf_door_sensor_2",
+          "state_topic": "rf/door-sensor-2/state",
+          "device_class": "window",
+          "payload_on": "open",
+          "payload_off": "closed",
+          "device": {
+            "identifiers": ["rf_door_sensor_2"],
+            "name": "Capteur Fenêtre Salon",
+            "manufacturer": "Generic EV1527",
+            "model": "RF Window Sensor 433MHz"
+          }
+        }
+      },
+      {
+        "id": "rf-pir-garage",
+        "name": "Détecteur Mouvement Garage",
+        "entityType": "virtual",
+        "category": "binary_sensor",
+        "discoverySchema": {
+          "name": "Détecteur Mouvement Garage",
+          "unique_id": "rf_pir_garage",
+          "state_topic": "rf/pir-garage/state",
+          "device_class": "motion",
+          "payload_on": "motion",
+          "payload_off": "clear",
+          "device": {
+            "identifiers": ["rf_pir_garage"],
+            "name": "Détecteur Mouvement Garage",
+            "manufacturer": "Generic EV1527",
+            "model": "RF PIR Sensor 433MHz"
+          }
+        }
+      },
+      {
+        "id": "rf-remote-1",
+        "name": "Télécommande 4 boutons",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Télécommande 4 boutons",
+          "unique_id": "rf_remote_1",
+          "state_topic": "rf/remote-1/state",
+          "device": {
+            "identifiers": ["rf_remote_1"],
+            "name": "Télécommande 4 boutons",
+            "manufacturer": "Generic PT2262",
+            "model": "RF Remote 433MHz"
+          }
+        }
+      },
+      {
+        "id": "rf-weather-sensor",
+        "name": "Station Météo Oregon",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Station Météo Oregon",
+          "unique_id": "rf_weather_sensor",
+          "state_topic": "rf/weather-sensor/state",
+          "device_class": "temperature",
+          "unit_of_measurement": "°C",
+          "device": {
+            "identifiers": ["rf_weather_sensor"],
+            "name": "Station Météo Oregon",
+            "manufacturer": "Oregon Scientific",
+            "model": "THGR810"
+          }
+        }
+      },
+      {
+        "id": "rf-smoke-detector",
+        "name": "Détecteur Fumée RF",
+        "entityType": "virtual",
+        "category": "binary_sensor",
+        "discoverySchema": {
+          "name": "Détecteur Fumée RF",
+          "unique_id": "rf_smoke_detector",
+          "state_topic": "rf/smoke-detector/state",
+          "device_class": "smoke",
+          "payload_on": "smoke",
+          "payload_off": "clear",
+          "device": {
+            "identifiers": ["rf_smoke_detector"],
+            "name": "Détecteur Fumée RF",
+            "manufacturer": "Generic",
+            "model": "RF Smoke Detector 433MHz"
+          }
+        }
+      }
+    ],
+    "publications": [
+      {
+        "id": "pub-rf-discovery",
+        "topic": "mcp/services/rf2mqtt/discovery",
+        "payload": "{\"service_id\":\"rf2mqtt\",\"name\":\"RF2MQTT\",\"version\":\"1.0.0\",\"status\":\"online\",\"frequency\":433.92,\"protocol\":\"auto\",\"devices_count\":6,\"listening\":true}",
+        "schedule": { "type": "interval", "value": 60000 },
+        "enabled": true,
+        "qos": 1,
+        "retain": true,
+        "description": "Découverte MCP RF2MQTT"
+      },
+      {
+        "id": "pub-rf-door1",
+        "topic": "rf/door-sensor-1/state",
+        "payload": "{\"state\":\"closed\",\"battery\":85,\"rssi\":-52,\"protocol\":\"ev1527\",\"code\":\"A1B2C3\"}",
+        "schedule": { "type": "interval", "value": 15000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État capteur porte entrée (ouvre/ferme aléatoirement)"
+      },
+      {
+        "id": "pub-rf-door2",
+        "topic": "rf/door-sensor-2/state",
+        "payload": "{\"state\":\"closed\",\"battery\":72,\"rssi\":-65,\"protocol\":\"ev1527\",\"code\":\"D4E5F6\"}",
+        "schedule": { "type": "interval", "value": 20000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État capteur fenêtre salon"
+      },
+      {
+        "id": "pub-rf-pir",
+        "topic": "rf/pir-garage/state",
+        "payload": "{\"state\":\"clear\",\"battery\":90,\"rssi\":-45,\"protocol\":\"ev1527\",\"code\":\"789ABC\"}",
+        "schedule": { "type": "interval", "value": 10000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "Détecteur mouvement garage (mouvements aléatoires)"
+      },
+      {
+        "id": "pub-rf-weather",
+        "topic": "rf/weather-sensor/state",
+        "payload": "{\"temperature\":18.5,\"humidity\":62,\"battery\":65,\"rssi\":-70,\"channel\":1}",
+        "schedule": { "type": "interval", "value": 30000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "Station météo Oregon Scientific"
+      },
+      {
+        "id": "pub-rf-smoke",
+        "topic": "rf/smoke-detector/state",
+        "payload": "{\"state\":\"clear\",\"battery\":95,\"rssi\":-38}",
+        "schedule": { "type": "interval", "value": 60000 },
+        "enabled": true,
+        "qos": 0,
+        "retain": true,
+        "description": "Détecteur de fumée RF"
+      },
+      {
+        "id": "pub-rf-bridge-status",
+        "topic": "rf/bridge/status",
+        "payload": "{\"listening\":true,\"frequency\":433.92,\"protocol\":\"auto\",\"devices_registered\":6,\"last_signal\":\"\",\"uptime\":0}",
+        "schedule": { "type": "interval", "value": 30000 },
+        "enabled": true,
+        "qos": 0,
+        "retain": true,
+        "description": "Statut du bridge RF"
+      }
+    ],
+    "adminCommands": [
+      {
+        "id": "cmd-rf-status",
+        "command": "get_status",
+        "topic": "mcp/services/rf2mqtt/jsonrpc/request",
+        "responsePayload": "{\"status\":\"running\",\"frequency\":433.92,\"protocol\":\"auto\",\"devices_count\":6,\"listening\":true,\"learning_mode\":false}",
+        "successRate": 98,
+        "responseDelay": 80
+      },
+      {
+        "id": "cmd-rf-learn",
+        "command": "learn_code",
+        "topic": "mcp/services/rf2mqtt/jsonrpc/request",
+        "responsePayload": "{\"success\":true,\"code\":\"A1B2C3D4\",\"protocol\":\"ev1527\",\"frequency\":433.92}",
+        "successRate": 75,
+        "responseDelay": 5000
+      },
+      {
+        "id": "cmd-rf-send",
+        "command": "send_code",
+        "topic": "mcp/services/rf2mqtt/jsonrpc/request",
+        "responsePayload": "{\"success\":true,\"code\":\"A1B2C3\",\"protocol\":\"ev1527\",\"repeat\":3}",
+        "successRate": 90,
+        "responseDelay": 200
+      },
+      {
+        "id": "cmd-rf-list",
+        "command": "list_devices",
+        "topic": "mcp/services/rf2mqtt/jsonrpc/request",
+        "responsePayload": "{\"devices\":[{\"id\":\"door-sensor-1\",\"name\":\"Capteur Porte Entrée\",\"code\":\"A1B2C3\",\"type\":\"sensor\",\"protocol\":\"ev1527\"},{\"id\":\"door-sensor-2\",\"name\":\"Capteur Fenêtre Salon\",\"code\":\"D4E5F6\",\"type\":\"sensor\",\"protocol\":\"ev1527\"},{\"id\":\"pir-garage\",\"name\":\"Détecteur Mouvement Garage\",\"code\":\"789ABC\",\"type\":\"sensor\",\"protocol\":\"ev1527\"},{\"id\":\"remote-1\",\"name\":\"Télécommande 4 boutons\",\"code\":\"AABB11\",\"type\":\"remote\",\"protocol\":\"pt2262\"},{\"id\":\"weather-sensor\",\"name\":\"Station Météo Oregon\",\"code\":\"OR4321\",\"type\":\"sensor\",\"protocol\":\"oregon\"},{\"id\":\"smoke-detector\",\"name\":\"Détecteur Fumée RF\",\"code\":\"SMK001\",\"type\":\"sensor\",\"protocol\":\"ev1527\"}]}",
+        "successRate": 98,
+        "responseDelay": 50
+      }
+    ],
+    "realism": {
+      "enabled": true,
+      "variancePercent": 10,
+      "networkLatency": { "min": 20, "max": 150 },
+      "successRate": 92,
+      "disconnectProbability": 2
+    }
+  },
+  "mcp": {
+    "service_id": "rf2mqtt",
+    "topics": {
+      "discovery": "mcp/services/rf2mqtt/discovery",
+      "data": "rf/+/state",
+      "commands": "mcp/services/rf2mqtt/jsonrpc/request"
+    }
+  }
+}

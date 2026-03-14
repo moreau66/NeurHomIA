@@ -1,0 +1,287 @@
+{
+  "metadata": {
+    "id": "ir2mqtt-virtual",
+    "name": "IR2MQTT (Simulation)",
+    "version": "1.0.0",
+    "description": "Simulation d'un bridge IR avec TV Samsung, climatiseurs Daikin/Mitsubishi, barre de son et ventilateur",
+    "author": "moreau66",
+    "category": "virtual-microservice",
+    "tags": ["infrared", "ir", "mqtt", "simulation", "virtual", "tv", "ac", "mcp"],
+    "icon": "Tv"
+  },
+  "simulation": {
+    "type": "ir-bridge",
+    "enabled": false,
+    "heartbeat": {
+      "enabled": true,
+      "interval": 30000,
+      "topic": "mcp/services/ir2mqtt/discovery",
+      "stability": 97
+    },
+    "entities": [
+      {
+        "id": "ir-tv-salon",
+        "name": "TV Salon Samsung",
+        "entityType": "virtual",
+        "category": "media_player",
+        "discoverySchema": {
+          "name": "TV Salon Samsung",
+          "unique_id": "ir_tv_salon",
+          "state_topic": "ir/tv-salon/state",
+          "command_topic": "ir/tv-salon/send",
+          "device": {
+            "identifiers": ["ir_tv_salon"],
+            "name": "TV Salon Samsung",
+            "manufacturer": "Samsung",
+            "model": "QE55Q80B"
+          }
+        }
+      },
+      {
+        "id": "ir-ac-chambre",
+        "name": "Clim Chambre Daikin",
+        "entityType": "virtual",
+        "category": "climate",
+        "discoverySchema": {
+          "name": "Climatisation Chambre",
+          "unique_id": "ir_ac_chambre",
+          "state_topic": "ir/ac-chambre/state",
+          "command_topic": "ir/ac-chambre/send",
+          "modes": ["off", "cool", "heat", "auto", "dry", "fan_only"],
+          "fan_modes": ["low", "medium", "high", "auto"],
+          "swing_modes": ["on", "off"],
+          "min_temp": 16,
+          "max_temp": 30,
+          "temp_step": 1,
+          "device": {
+            "identifiers": ["ir_ac_chambre"],
+            "name": "Clim Chambre Daikin",
+            "manufacturer": "Daikin",
+            "model": "FTXM35R"
+          }
+        }
+      },
+      {
+        "id": "ir-ac-salon",
+        "name": "Clim Salon Mitsubishi",
+        "entityType": "virtual",
+        "category": "climate",
+        "discoverySchema": {
+          "name": "Climatisation Salon",
+          "unique_id": "ir_ac_salon",
+          "state_topic": "ir/ac-salon/state",
+          "command_topic": "ir/ac-salon/send",
+          "modes": ["off", "cool", "heat", "auto", "dry"],
+          "fan_modes": ["low", "medium", "high", "auto"],
+          "swing_modes": ["on", "off"],
+          "min_temp": 16,
+          "max_temp": 31,
+          "temp_step": 0.5,
+          "device": {
+            "identifiers": ["ir_ac_salon"],
+            "name": "Clim Salon Mitsubishi",
+            "manufacturer": "Mitsubishi Electric",
+            "model": "MSZ-AP42VGK"
+          }
+        }
+      },
+      {
+        "id": "ir-soundbar",
+        "name": "Barre de Son Sony",
+        "entityType": "virtual",
+        "category": "media_player",
+        "discoverySchema": {
+          "name": "Barre de Son Sony",
+          "unique_id": "ir_soundbar",
+          "state_topic": "ir/soundbar/state",
+          "command_topic": "ir/soundbar/send",
+          "device": {
+            "identifiers": ["ir_soundbar"],
+            "name": "Barre de Son Sony",
+            "manufacturer": "Sony",
+            "model": "HT-A7000"
+          }
+        }
+      },
+      {
+        "id": "ir-projector",
+        "name": "Vidéoprojecteur Epson",
+        "entityType": "virtual",
+        "category": "media_player",
+        "discoverySchema": {
+          "name": "Vidéoprojecteur",
+          "unique_id": "ir_projector",
+          "state_topic": "ir/projector/state",
+          "command_topic": "ir/projector/send",
+          "device": {
+            "identifiers": ["ir_projector"],
+            "name": "Vidéoprojecteur Epson",
+            "manufacturer": "Epson",
+            "model": "EH-TW7100"
+          }
+        }
+      },
+      {
+        "id": "ir-fan-bureau",
+        "name": "Ventilateur Bureau Dyson",
+        "entityType": "virtual",
+        "category": "fan",
+        "discoverySchema": {
+          "name": "Ventilateur Bureau",
+          "unique_id": "ir_fan_bureau",
+          "state_topic": "ir/fan-bureau/state",
+          "command_topic": "ir/fan-bureau/send",
+          "speed_range_min": 1,
+          "speed_range_max": 10,
+          "device": {
+            "identifiers": ["ir_fan_bureau"],
+            "name": "Ventilateur Bureau Dyson",
+            "manufacturer": "Dyson",
+            "model": "Pure Cool TP07"
+          }
+        }
+      }
+    ],
+    "publications": [
+      {
+        "id": "pub-ir-discovery",
+        "topic": "mcp/services/ir2mqtt/discovery",
+        "payload": "{\"service_id\":\"ir2mqtt\",\"name\":\"IR2MQTT\",\"version\":\"1.0.0\",\"status\":\"online\",\"blaster\":\"broadlink\",\"devices_count\":6,\"total_commands\":42}",
+        "schedule": { "type": "interval", "value": 60000 },
+        "enabled": true,
+        "qos": 1,
+        "retain": true,
+        "description": "Découverte MCP IR2MQTT"
+      },
+      {
+        "id": "pub-ir-tv",
+        "topic": "ir/tv-salon/state",
+        "payload": "{\"power\":\"on\",\"input\":\"HDMI1\",\"volume\":25,\"muted\":false,\"channel\":3}",
+        "schedule": { "type": "interval", "value": 15000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État TV Samsung — alimentation, entrée, volume"
+      },
+      {
+        "id": "pub-ir-ac-chambre",
+        "topic": "ir/ac-chambre/state",
+        "payload": "{\"power\":\"on\",\"mode\":\"cool\",\"temperature\":22,\"fan_speed\":\"auto\",\"swing\":\"on\",\"current_temperature\":24.5}",
+        "schedule": { "type": "interval", "value": 20000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État Clim Daikin — mode, température, ventilation"
+      },
+      {
+        "id": "pub-ir-ac-salon",
+        "topic": "ir/ac-salon/state",
+        "payload": "{\"power\":\"on\",\"mode\":\"heat\",\"temperature\":21,\"fan_speed\":\"medium\",\"swing\":\"off\",\"current_temperature\":19.8}",
+        "schedule": { "type": "interval", "value": 20000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État Clim Mitsubishi — mode, température, ventilation"
+      },
+      {
+        "id": "pub-ir-soundbar",
+        "topic": "ir/soundbar/state",
+        "payload": "{\"power\":\"on\",\"volume\":30,\"muted\":false,\"input\":\"HDMI\",\"mode\":\"movie\"}",
+        "schedule": { "type": "interval", "value": 25000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État Barre de Son Sony"
+      },
+      {
+        "id": "pub-ir-projector",
+        "topic": "ir/projector/state",
+        "payload": "{\"power\":\"off\",\"input\":\"HDMI1\",\"lamp_hours\":1250}",
+        "schedule": { "type": "interval", "value": 30000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État Vidéoprojecteur Epson"
+      },
+      {
+        "id": "pub-ir-fan",
+        "topic": "ir/fan-bureau/state",
+        "payload": "{\"power\":\"on\",\"speed\":5,\"oscillation\":\"on\",\"timer\":0}",
+        "schedule": { "type": "interval", "value": 15000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "État Ventilateur Dyson"
+      },
+      {
+        "id": "pub-ir-bridge-status",
+        "topic": "ir/bridge/status",
+        "payload": "{\"type\":\"broadlink\",\"model\":\"RM4 Pro\",\"ip\":\"192.168.1.42\",\"online\":true,\"commands_sent\":127,\"last_command\":\"\",\"irdb_available\":true,\"uptime\":0}",
+        "schedule": { "type": "interval", "value": 30000 },
+        "enabled": true,
+        "qos": 0,
+        "retain": true,
+        "description": "Statut du bridge IR Broadlink"
+      }
+    ],
+    "adminCommands": [
+      {
+        "id": "cmd-ir-status",
+        "command": "get_status",
+        "topic": "mcp/services/ir2mqtt/jsonrpc/request",
+        "responsePayload": "{\"status\":\"running\",\"device_type\":\"broadlink\",\"device_ip\":\"192.168.1.42\",\"devices_count\":6,\"total_commands\":42,\"irdb_enabled\":true,\"learning_mode\":false}",
+        "successRate": 99,
+        "responseDelay": 60
+      },
+      {
+        "id": "cmd-ir-learn",
+        "command": "learn_code",
+        "topic": "mcp/services/ir2mqtt/jsonrpc/request",
+        "responsePayload": "{\"success\":true,\"code\":\"0000 006D 0022 0002 0156 00AB 0015 0015 0015 0040\",\"format\":\"pronto\"}",
+        "successRate": 70,
+        "responseDelay": 8000
+      },
+      {
+        "id": "cmd-ir-send",
+        "command": "send_code",
+        "topic": "mcp/services/ir2mqtt/jsonrpc/request",
+        "responsePayload": "{\"success\":true,\"format\":\"pronto\",\"repeat\":1}",
+        "successRate": 95,
+        "responseDelay": 150
+      },
+      {
+        "id": "cmd-ir-list",
+        "command": "list_devices",
+        "topic": "mcp/services/ir2mqtt/jsonrpc/request",
+        "responsePayload": "{\"devices\":[{\"id\":\"tv-salon\",\"name\":\"TV Salon Samsung\",\"type\":\"tv\",\"brand\":\"Samsung\",\"model\":\"QE55Q80B\",\"commands_count\":12},{\"id\":\"ac-chambre\",\"name\":\"Clim Chambre Daikin\",\"type\":\"ac\",\"brand\":\"Daikin\",\"model\":\"FTXM35R\",\"commands_count\":8},{\"id\":\"ac-salon\",\"name\":\"Clim Salon Mitsubishi\",\"type\":\"ac\",\"brand\":\"Mitsubishi\",\"model\":\"MSZ-AP42VGK\",\"commands_count\":8},{\"id\":\"soundbar\",\"name\":\"Barre de Son Sony\",\"type\":\"soundbar\",\"brand\":\"Sony\",\"model\":\"HT-A7000\",\"commands_count\":6},{\"id\":\"projector\",\"name\":\"Vidéoprojecteur Epson\",\"type\":\"projector\",\"brand\":\"Epson\",\"model\":\"EH-TW7100\",\"commands_count\":4},{\"id\":\"fan-bureau\",\"name\":\"Ventilateur Bureau Dyson\",\"type\":\"fan\",\"brand\":\"Dyson\",\"model\":\"Pure Cool TP07\",\"commands_count\":4}]}",
+        "successRate": 99,
+        "responseDelay": 50
+      },
+      {
+        "id": "cmd-ir-search-irdb",
+        "command": "search_irdb",
+        "topic": "mcp/services/ir2mqtt/jsonrpc/request",
+        "responsePayload": "{\"results\":[{\"brand\":\"Samsung\",\"model\":\"QE55Q80B\",\"type\":\"tv\",\"commands\":45},{\"brand\":\"Samsung\",\"model\":\"UE55AU7172\",\"type\":\"tv\",\"commands\":42},{\"brand\":\"Daikin\",\"model\":\"FTXM35R\",\"type\":\"ac\",\"commands\":28}],\"total\":3}",
+        "successRate": 95,
+        "responseDelay": 300
+      },
+      {
+        "id": "cmd-ir-test",
+        "command": "test_command",
+        "topic": "mcp/services/ir2mqtt/jsonrpc/request",
+        "responsePayload": "{\"success\":true,\"device_id\":\"tv-salon\",\"command\":\"power\"}",
+        "successRate": 88,
+        "responseDelay": 200
+      }
+    ],
+    "realism": {
+      "enabled": true,
+      "variancePercent": 8,
+      "networkLatency": { "min": 20, "max": 120 },
+      "successRate": 94,
+      "disconnectProbability": 1
+    }
+  },
+  "mcp": {
+    "service_id": "ir2mqtt",
+    "topics": {
+      "discovery": "mcp/services/ir2mqtt/discovery",
+      "data": "ir/+/state",
+      "commands": "mcp/services/ir2mqtt/jsonrpc/request"
+    }
+  }
+}

@@ -1,0 +1,526 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurhome-ia.github.io/schemas/microservice-mcp-schema.json",
+  "title": "MicroserviceMCPConfig",
+  "description": "Schéma JSON complet pour la configuration d'un microservice MCP (Model Context Protocol) NeurHome-IA",
+  "type": "object",
+  "required": ["service_id", "mcp_info", "discovery", "tools", "resources", "capabilities", "createdAt", "updatedAt"],
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "minLength": 3,
+      "maxLength": 64,
+      "description": "Identifiant unique du microservice MCP (kebab-case)"
+    },
+    "mcp_info": {
+      "type": "object",
+      "required": ["name", "description", "version", "protocol_version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Nom du microservice"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Description détaillée du microservice"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+          "description": "Version du microservice (semver)"
+        },
+        "protocol_version": {
+          "type": "string",
+          "enum": ["2024-11-05"],
+          "description": "Version du protocole MCP"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "automation",
+            "monitoring", 
+            "environment",
+            "security",
+            "energy",
+            "network",
+            "storage",
+            "communication",
+            "ai",
+            "development",
+            "system",
+            "other"
+          ],
+          "description": "Catégorie du microservice"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Nom de l'icône Lucide React"
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Auteur du microservice"
+        },
+        "license": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Licence du microservice"
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL du dépôt de code"
+        },
+        "documentation": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL de la documentation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "discovery": {
+      "type": "object",
+      "required": ["topic", "interval", "enabled"],
+      "properties": {
+        "topic": {
+          "type": "string",
+          "pattern": "^mcp/[a-z0-9-]+/discovery$",
+          "description": "Topic de découverte MCP"
+        },
+        "interval": {
+          "type": "number",
+          "minimum": 30000,
+          "maximum": 300000,
+          "default": 60000,
+          "description": "Intervalle de publication discovery en millisecondes"
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Discovery activé"
+        },
+        "retain": {
+          "type": "boolean",
+          "default": true,
+          "description": "Message discovery retained"
+        }
+      },
+      "additionalProperties": false
+    },
+    "jsonrpc": {
+      "type": "object",
+      "required": ["topic_pattern", "timeout", "qos"],
+      "properties": {
+        "topic_pattern": {
+          "type": "string",
+          "pattern": "^mcp/[a-z0-9-]+/jsonrpc/(request|response|notification)$",
+          "description": "Pattern des topics JSON-RPC"
+        },
+        "timeout": {
+          "type": "number",
+          "minimum": 5000,
+          "maximum": 300000,
+          "default": 30000,
+          "description": "Timeout par défaut des requêtes JSON-RPC"
+        },
+        "qos": {
+          "type": "number",
+          "enum": [0, 1, 2],
+          "default": 1,
+          "description": "Niveau QoS MQTT pour JSON-RPC"
+        },
+        "retain": {
+          "type": "boolean",
+          "default": false,
+          "description": "Messages JSON-RPC retained"
+        },
+        "max_message_size": {
+          "type": "number",
+          "minimum": 1024,
+          "maximum": 1048576,
+          "default": 65536,
+          "description": "Taille maximale des messages JSON-RPC en octets"
+        }
+      },
+      "additionalProperties": false
+    },
+    "heartbeat": {
+      "type": "object",
+      "required": ["topic", "interval", "enabled"],
+      "properties": {
+        "topic": {
+          "type": "string",
+          "pattern": "^mcp/[a-z0-9-]+/heartbeat$",
+          "description": "Topic de heartbeat"
+        },
+        "interval": {
+          "type": "number",
+          "minimum": 5000,
+          "maximum": 60000,
+          "default": 30000,
+          "description": "Intervalle de heartbeat en millisecondes"
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Heartbeat activé"
+        },
+        "timeout": {
+          "type": "number",
+          "minimum": 10000,
+          "maximum": 180000,
+          "default": 90000,
+          "description": "Timeout de heartbeat en millisecondes"
+        }
+      },
+      "additionalProperties": false
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "api_key_required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Authentification par API key requise"
+        },
+        "allowed_origins": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Origines autorisées pour CORS"
+        },
+        "rate_limiting": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "requests_per_minute": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 60
+            },
+            "burst_limit": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "concurrent_limit": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 5
+            }
+          }
+        },
+        "encryption": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "algorithm": {
+              "type": "string",
+              "enum": ["AES-256-GCM"],
+              "default": "AES-256-GCM"
+            },
+            "key_rotation_interval": {
+              "type": "number",
+              "minimum": 3600,
+              "maximum": 86400,
+              "description": "Intervalle de rotation des clés en secondes"
+            }
+          }
+        },
+        "permissions": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*$": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["read", "write", "admin", "config", "monitoring", "control", "discovery"]
+              }
+            }
+          },
+          "description": "Permissions par méthode MCP"
+        }
+      },
+      "additionalProperties": false
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "inputSchema"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*$",
+            "description": "Nom de l'outil (méthode MCP)"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "Description de l'outil"
+          },
+          "inputSchema": {
+            "type": "object",
+            "description": "Schéma JSON des paramètres d'entrée"
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "Schéma JSON de la réponse"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["query", "action", "config", "monitoring", "diagnostic"]
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["read", "write", "admin", "config", "monitoring", "control"]
+            }
+          },
+          "rate_limit": {
+            "type": "object",
+            "properties": {
+              "calls_per_minute": {"type": "number"},
+              "burst_limit": {"type": "number"}
+            }
+          }
+        }
+      },
+      "description": "Outils (méthodes) exposés par le microservice"
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["uri", "name", "mimeType", "resourceType"],
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^mcp://[a-z0-9-]+/[a-z0-9-/]+$",
+            "description": "URI unique de la ressource"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nom de la ressource"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description de la ressource"
+          },
+          "mimeType": {
+            "type": "string",
+            "enum": [
+              "application/json",
+              "application/vnd.neurhomia.widget+json",
+              "application/vnd.neurhomia.page+json",
+              "text/plain"
+            ]
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": ["widget", "page", "data", "config", "documentation"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "access": {
+            "type": "object",
+            "properties": {
+              "read": {"type": "boolean", "default": true},
+              "write": {"type": "boolean", "default": false},
+              "subscribe": {"type": "boolean", "default": false}
+            }
+          }
+        }
+      },
+      "description": "Ressources (widgets, pages) exposées par le microservice"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "version"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "tools",
+              "resources",
+              "logging",
+              "prompts",
+              "sampling",
+              "roots",
+              "experimental/progressive_notifications"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "configuration": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Capacités MCP du microservice"
+    },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "level": {
+          "type": "string",
+          "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+          "default": "INFO"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["json", "text"],
+          "default": "json"
+        },
+        "topic": {
+          "type": "string",
+          "pattern": "^mcp/[a-z0-9-]+/logs$",
+          "description": "Topic de publication des logs"
+        }
+      },
+      "additionalProperties": false
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "health_check": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "interval": {
+              "type": "number",
+              "minimum": 5000,
+              "maximum": 300000,
+              "default": 30000
+            },
+            "timeout": {
+              "type": "number",
+              "minimum": 1000,
+              "maximum": 30000,
+              "default": 5000
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "topic": {
+              "type": "string",
+              "pattern": "^mcp/[a-z0-9-]+/metrics$"
+            },
+            "interval": {
+              "type": "number",
+              "minimum": 10000,
+              "maximum": 300000,
+              "default": 60000
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "deployment": {
+      "type": "object",
+      "properties": {
+        "docker": {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "string",
+              "description": "Image Docker du microservice"
+            },
+            "tag": {
+              "type": "string",
+              "description": "Tag de l'image Docker"
+            },
+            "ports": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^\\d+:\\d+$"
+              }
+            },
+            "environment": {
+              "type": "object",
+              "patternProperties": {
+                "^[A-Z_][A-Z0-9_]*$": {
+                  "type": "string"
+                }
+              }
+            },
+            "volumes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "requirements": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "description": "Exigences CPU (ex: '100m', '0.5')"
+            },
+            "memory": {
+              "type": "string",
+              "description": "Exigences mémoire (ex: '128Mi', '1Gi')"
+            },
+            "storage": {
+              "type": "string",
+              "description": "Exigences stockage (ex: '1Gi')"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de création ISO 8601"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de dernière mise à jour ISO 8601"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "id": "devicedb2mqtt",
+    "name": "DeviceDB2MQTT",
+    "version": "1.0.0",
+    "description": "Catalogue générique d'appareils multi-technologies (Zigbee, Z-Wave, Matter, RF 433/868, Modbus, IR). Publie les définitions d'appareils sur MQTT pour le frontend.",
+    "author": "NeurHomIA",
+    "category": "microservice",
+    "tags": ["devicedb", "catalog", "zigbee", "zwave", "matter", "rf", "modbus", "ir"],
+    "icon": "📦"
+  },
+  "container": {
+    "image": "neurhomia/devicedb2mqtt",
+    "defaultVersion": "1.0.0",
+    "autoStart": true,
+    "ports": [],
+    "volumes": [
+      {
+        "container": "/app/data",
+        "host": "./data/devicedb",
+        "mode": "rw"
+      }
+    ],
+    "environment": [
+      {
+        "key": "MQTT_HOST",
+        "value": "mosquitto",
+        "required": true,
+        "description": "Adresse du broker MQTT"
+      },
+      {
+        "key": "MQTT_PORT",
+        "value": "1883",
+        "required": false,
+        "description": "Port du broker MQTT"
+      },
+      {
+        "key": "TECHNOLOGIES",
+        "value": "zigbee,zwave,matter,rf,modbus,ir",
+        "required": false,
+        "description": "Technologies à charger (comma-separated: zigbee,zwave,matter,knx,rf,modbus,ir)"
+      }
+    ],
+    "restart": "unless-stopped"
+  },
+  "mcp": {
+    "service_id": "devicedb2mqtt",
+    "topics": {
+      "discovery": "mcp/services/devicedb/discovery",
+      "data": "devicedb/+/devices/list",
+      "commands": "devicedb2mqtt/admin/command"
+    }
+  },
+  "docker_compose": {
+    "depends_on": ["mosquitto"],
+    "networks": ["neurhomia"]
+  },
+  "dependencies": {
+    "required": ["mosquitto"],
+    "optional": []
+  },
+  "documentation": {
+    "readme_url": "https://github.com/neurhomia/devicedb2mqtt",
+    "mcp_spec_url": "/docs/guide-device-catalog.md"
+  }
+}

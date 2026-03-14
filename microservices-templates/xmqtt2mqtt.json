@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "id": "xmqtt2mqtt",
+    "name": "xMqtt2Mqtt Bridge",
+    "version": "2.0.0",
+    "description": "Pont MQTT bidirectionnel avec transformations avancées (split JSON, agrégation, passthrough) via MCP JSON-RPC MQTT",
+    "author": "cce66",
+    "category": "gateway",
+    "tags": ["mqtt", "bridge", "transformation", "json-split", "aggregation", "mcp"],
+    "icon": "ArrowRightLeft"
+  },
+  "container": {
+    "image": "moreau66/xmqtt2mqtt",
+    "defaultVersion": "latest",
+    "autoStart": false,
+    "ports": [],
+    "volumes": [
+      {
+        "container": "/app/config",
+        "host": "./xmqtt2mqtt/config",
+        "mode": "ro"
+      },
+      {
+        "container": "/app/logs",
+        "host": "./xmqtt2mqtt/logs",
+        "mode": "rw"
+      }
+    ],
+    "environment": [
+      {
+        "key": "MQTT_BROKER",
+        "value": "mosquitto",
+        "required": true,
+        "description": "Hôte du broker MQTT"
+      },
+      {
+        "key": "MQTT_PORT",
+        "value": "1883",
+        "required": true,
+        "description": "Port du broker MQTT"
+      },
+      {
+        "key": "MQTT_USER",
+        "value": "",
+        "required": false,
+        "description": "Utilisateur MQTT"
+      },
+      {
+        "key": "MQTT_PASS",
+        "value": "",
+        "required": false,
+        "secret": true,
+        "description": "Mot de passe MQTT"
+      },
+      {
+        "key": "MCP_SERVICE_ID",
+        "value": "xmqtt2mqtt",
+        "required": true,
+        "description": "Identifiant du service MCP"
+      },
+      {
+        "key": "MCP_API_KEY",
+        "value": "",
+        "required": true,
+        "secret": true,
+        "description": "Clé API pour l'authentification MCP"
+      },
+      {
+        "key": "MCP_HEARTBEAT_INTERVAL",
+        "value": "30",
+        "required": false,
+        "description": "Intervalle de heartbeat en secondes"
+      },
+      {
+        "key": "LOG_LEVEL",
+        "value": "INFO",
+        "required": false,
+        "description": "Niveau de log (DEBUG, INFO, WARNING, ERROR)"
+      },
+      {
+        "key": "DISCOVERY_ENABLED",
+        "value": "true",
+        "required": false,
+        "description": "Activer la découverte automatique"
+      }
+    ],
+    "restart": "unless-stopped",
+    "healthcheck": {
+      "test": ["CMD", "python", "-c", "import sys; sys.exit(0)"],
+      "interval": "30s",
+      "timeout": "10s",
+      "retries": 3,
+      "start_period": "15s"
+    },
+    "labels": {
+      "discovery.type": "gateway",
+      "discovery.topics": "mcp/services/xmqtt2mqtt/#",
+      "mcp.service_id": "xmqtt2mqtt"
+    }
+  },
+  "mcp": {
+    "service_id": "xmqtt2mqtt",
+    "topics": {
+      "discovery": "mcp/services/xmqtt2mqtt/discovery",
+      "status": "mcp/services/xmqtt2mqtt/status",
+      "commands": "mcp/services/xmqtt2mqtt/jsonrpc/request",
+      "responses": "mcp/services/xmqtt2mqtt/jsonrpc/response"
+    },
+    "tools": [
+      "get_status",
+      "update_config",
+      "list_mappings",
+      "add_mapping",
+      "remove_mapping",
+      "toggle_mapping",
+      "test_mapping",
+      "get_statistics",
+      "health_check"
+    ],
+    "resources": [
+      "xmqtt2mqtt_management_page",
+      "xmqtt2mqtt_widget_schema"
+    ]
+  },
+  "ui_component": {
+    "component_path": "XMqtt2MqttContainer",
+    "mode": "embedded"
+  },
+  "docker_compose": {
+    "depends_on": ["mosquitto"],
+    "networks": ["smart-home-network"],
+    "profiles": ["mqtt", "optional"]
+  },
+  "dependencies": {
+    "required": ["mosquitto"],
+    "optional": []
+  },
+  "documentation": {
+    "readme_url": "https://github.com/moreau66/MCP-xMqtt2Mqtt/blob/main/README.md",
+    "github_url": "https://github.com/moreau66/MCP-xMqtt2Mqtt",
+    "features": [
+      "Division JSON (1→N messages)",
+      "Agrégation avec timeout (N→1 message)",
+      "Passthrough avec routage dynamique",
+      "Wildcards MQTT (+, #) et variables dynamiques",
+      "Configuration YAML rechargeable à chaud",
+      "Protocole MCP JSON-RPC 2.0 over MQTT"
+    ]
+  }
+}

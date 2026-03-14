@@ -1,0 +1,524 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurhome-ia.github.io/schemas/page-schema.json",
+  "title": "MicroservicePageConfig",
+  "description": "Schéma JSON pour la définition de pages dynamiques de microservices NeurHome-IA",
+  "type": "object",
+  "required": ["service_id", "page_info", "mcp_config", "actions", "createdAt", "updatedAt"],
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "minLength": 3,
+      "maxLength": 64,
+      "description": "Identifiant unique du service (kebab-case)"
+    },
+    "page_info": {
+      "type": "object",
+      "required": ["title", "description", "icon", "category", "version", "sections", "navigation"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Titre de la page"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Description de la page"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Nom de l'icône Lucide React"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "automation",
+            "monitoring",
+            "environment",
+            "security",
+            "energy",
+            "network",
+            "storage",
+            "communication",
+            "development",
+            "system",
+            "other"
+          ],
+          "description": "Catégorie pour le groupement"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+          "description": "Version du service (semver)"
+        },
+        "sections": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/PageSectionConfig"
+          },
+          "description": "Sections de la page"
+        },
+        "navigation": {
+          "type": "object",
+          "required": ["menuLabel", "position"],
+          "properties": {
+            "menuLabel": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50,
+              "description": "Libellé dans le menu"
+            },
+            "position": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": "Position dans le menu"
+            },
+            "parent": {
+              "type": "string",
+              "maxLength": 50,
+              "description": "Menu parent optionnel"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "mcp_config": {
+      "type": "object",
+      "required": ["discovery_topic", "jsonrpc_topics", "mcp_methods"],
+      "properties": {
+        "discovery_topic": {
+          "type": "string",
+          "pattern": "^mcp/[a-z0-9-]+/discovery$",
+          "description": "Topic de découverte MCP"
+        },
+        "jsonrpc_topics": {
+          "type": "object",
+          "required": ["request", "response", "notification"],
+          "properties": {
+            "request": {
+              "type": "string",
+              "pattern": "^mcp/[a-z0-9-]+/jsonrpc/request$"
+            },
+            "response": {
+              "type": "string", 
+              "pattern": "^mcp/[a-z0-9-]+/jsonrpc/response$"
+            },
+            "notification": {
+              "type": "string",
+              "pattern": "^mcp/[a-z0-9-]+/jsonrpc/notification$"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Topics JSON-RPC MCP"
+        },
+        "mcp_methods": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*$"
+          },
+          "description": "Méthodes MCP utilisées par cette page"
+        },
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "api_key_required": {
+              "type": "boolean",
+              "default": true
+            },
+            "permissions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["read", "write", "admin", "config", "monitoring"]
+              }
+            }
+          },
+          "description": "Configuration d'authentification MCP"
+        },
+        "legacy_mqtt": {
+          "type": "object",
+          "properties": {
+            "subscribe_topics": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "publish_topics": {
+              "type": "array", 
+              "items": {"type": "string"}
+            }
+          },
+          "description": "Support legacy MQTT (déprécié)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "api_endpoints": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL d'endpoint API"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Endpoints API optionnels"
+    },
+    "actions": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/PageActionConfig"
+      },
+      "description": "Actions disponibles sur la page"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de création ISO 8601"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date de dernière mise à jour ISO 8601"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "PageSectionConfig": {
+      "type": "object",
+      "required": ["id", "type", "title", "config", "visible", "order"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*[a-z0-9]$",
+          "description": "Identifiant unique de la section"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["form", "table", "chart", "chat", "monitoring", "widget", "info"]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Titre de la section"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Description optionnelle"
+        },
+        "config": {
+          "type": "object",
+          "description": "Configuration spécifique au type de section",
+          "anyOf": [
+            { "$ref": "#/$defs/FormSectionConfig" },
+            { "$ref": "#/$defs/TableSectionConfig" },
+            { "$ref": "#/$defs/ChartSectionConfig" },
+            { "$ref": "#/$defs/MonitoringSectionConfig" },
+            { "$ref": "#/$defs/InfoSectionConfig" },
+            { "$ref": "#/$defs/GenericSectionConfig" }
+          ]
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Ordre d'affichage"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FormSectionConfig": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/FormFieldConfig"
+          }
+        },
+        "submitAction": {
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9/_+-]+$"
+            },
+            "label": {
+              "type": "string",
+              "maxLength": 50
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "TableSectionConfig": {
+      "type": "object",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/TableColumnConfig"
+          }
+        },
+        "pagination": {
+          "type": "boolean"
+        },
+        "sorting": {
+          "type": "boolean"
+        },
+        "filtering": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "ChartSectionConfig": {
+      "type": "object",
+      "properties": {
+        "chartType": {
+          "type": "string",
+          "enum": ["line", "bar", "pie", "area", "scatter"]
+        },
+        "xAxis": {
+          "type": "string"
+        },
+        "yAxis": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "timeRange": {
+          "type": "string",
+          "enum": ["1h", "6h", "24h", "7d", "30d"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "MonitoringSectionConfig": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MetricConfig"
+          }
+        },
+        "refreshInterval": {
+          "type": "number",
+          "minimum": 1000,
+          "maximum": 300000
+        },
+        "alertThresholds": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "InfoSectionConfig": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["text", "markdown", "html"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "GenericSectionConfig": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "FormFieldConfig": {
+      "type": "object",
+      "required": ["name", "type", "label"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "number", "boolean", "select", "multiselect", "date", "time", "email", "url", "password"]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "defaultValue": {
+          "description": "Valeur par défaut"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "pattern": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "TableColumnConfig": {
+      "type": "object",
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "number", "boolean", "date", "action"]
+        },
+        "sortable": {
+          "type": "boolean"
+        },
+        "filterable": {
+          "type": "boolean"
+        },
+        "width": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MetricConfig": {
+      "type": "object",
+      "required": ["key", "label"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "type": {
+          "type": "string",
+          "enum": ["gauge", "counter", "text", "status", "timestamp", "datetime"]
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 10
+        },
+        "format": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "warning": {
+              "type": "number"
+            },
+            "critical": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "PageActionConfig": {
+      "type": "object",
+      "required": ["id", "type", "label"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*[a-z0-9]$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["button", "toggle", "command"]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "icon": {
+          "type": "string",
+          "description": "Nom de l'icône Lucide React"
+        },
+        "topic": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9/_+-]+$",
+          "description": "Topic MQTT"
+        },
+        "payload": {
+          "description": "Payload à publier"
+        },
+        "confirmation": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Message de confirmation"
+        },
+        "style": {
+          "type": "string",
+          "enum": ["primary", "secondary", "destructive"]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

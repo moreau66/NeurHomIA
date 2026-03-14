@@ -1,0 +1,319 @@
+{
+  "metadata": {
+    "id": "modbus2mqtt-virtual",
+    "name": "Modbus2MQTT (Simulation)",
+    "version": "1.0.0",
+    "description": "Simulation d'un bridge Modbus RTU/TCP avec compteur d'énergie SDM630, onduleur solaire, pompe à chaleur et batterie",
+    "author": "moreau66",
+    "category": "virtual-microservice",
+    "tags": ["modbus", "mqtt", "simulation", "virtual", "energy", "mcp"],
+    "icon": "Gauge"
+  },
+  "simulation": {
+    "type": "modbus-bridge",
+    "enabled": false,
+    "heartbeat": {
+      "enabled": true,
+      "interval": 30000,
+      "topic": "mcp/services/modbus2mqtt/discovery",
+      "stability": 98
+    },
+    "entities": [
+      {
+        "id": "modbus-sdm630-power",
+        "name": "Puissance Instantanée",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Puissance Instantanée",
+          "unique_id": "modbus_sdm630_power",
+          "state_topic": "modbus/sdm630/state",
+          "value_template": "{{ value_json.power_total }}",
+          "device_class": "power",
+          "unit_of_measurement": "W",
+          "state_class": "measurement",
+          "device": {
+            "identifiers": ["modbus_sdm630"],
+            "name": "Compteur Énergie SDM630",
+            "manufacturer": "Eastron",
+            "model": "SDM630 Modbus V2"
+          }
+        }
+      },
+      {
+        "id": "modbus-sdm630-energy",
+        "name": "Énergie Totale",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Énergie Totale Importée",
+          "unique_id": "modbus_sdm630_energy",
+          "state_topic": "modbus/sdm630/state",
+          "value_template": "{{ value_json.energy_import }}",
+          "device_class": "energy",
+          "unit_of_measurement": "kWh",
+          "state_class": "total_increasing",
+          "device": {
+            "identifiers": ["modbus_sdm630"],
+            "name": "Compteur Énergie SDM630",
+            "manufacturer": "Eastron",
+            "model": "SDM630 Modbus V2"
+          }
+        }
+      },
+      {
+        "id": "modbus-sdm630-voltage",
+        "name": "Tension Réseau L1",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Tension Réseau L1",
+          "unique_id": "modbus_sdm630_voltage_l1",
+          "state_topic": "modbus/sdm630/state",
+          "value_template": "{{ value_json.voltage_l1 }}",
+          "device_class": "voltage",
+          "unit_of_measurement": "V",
+          "state_class": "measurement",
+          "device": {
+            "identifiers": ["modbus_sdm630"],
+            "name": "Compteur Énergie SDM630",
+            "manufacturer": "Eastron",
+            "model": "SDM630 Modbus V2"
+          }
+        }
+      },
+      {
+        "id": "modbus-inverter-power",
+        "name": "Production Solaire",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Production Solaire Instantanée",
+          "unique_id": "modbus_inverter_power",
+          "state_topic": "modbus/inverter-pv/state",
+          "value_template": "{{ value_json.ac_power }}",
+          "device_class": "power",
+          "unit_of_measurement": "W",
+          "state_class": "measurement",
+          "device": {
+            "identifiers": ["modbus_inverter_pv"],
+            "name": "Onduleur Solaire SMA",
+            "manufacturer": "SMA",
+            "model": "Sunny Tripower 8.0"
+          }
+        }
+      },
+      {
+        "id": "modbus-inverter-yield",
+        "name": "Production Journalière PV",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Production Journalière",
+          "unique_id": "modbus_inverter_daily",
+          "state_topic": "modbus/inverter-pv/state",
+          "value_template": "{{ value_json.daily_yield }}",
+          "device_class": "energy",
+          "unit_of_measurement": "kWh",
+          "state_class": "total_increasing",
+          "device": {
+            "identifiers": ["modbus_inverter_pv"],
+            "name": "Onduleur Solaire SMA",
+            "manufacturer": "SMA",
+            "model": "Sunny Tripower 8.0"
+          }
+        }
+      },
+      {
+        "id": "modbus-heatpump-temp",
+        "name": "Température Eau PAC",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Température Eau PAC",
+          "unique_id": "modbus_heatpump_water_temp",
+          "state_topic": "modbus/heatpump/state",
+          "value_template": "{{ value_json.water_temp }}",
+          "device_class": "temperature",
+          "unit_of_measurement": "°C",
+          "state_class": "measurement",
+          "device": {
+            "identifiers": ["modbus_heatpump"],
+            "name": "Pompe à Chaleur Atlantic",
+            "manufacturer": "Atlantic",
+            "model": "Alfea Excellia Duo 14"
+          }
+        }
+      },
+      {
+        "id": "modbus-heatpump-cop",
+        "name": "COP PAC",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Coefficient de Performance",
+          "unique_id": "modbus_heatpump_cop",
+          "state_topic": "modbus/heatpump/state",
+          "value_template": "{{ value_json.cop }}",
+          "unit_of_measurement": "",
+          "state_class": "measurement",
+          "device": {
+            "identifiers": ["modbus_heatpump"],
+            "name": "Pompe à Chaleur Atlantic",
+            "manufacturer": "Atlantic",
+            "model": "Alfea Excellia Duo 14"
+          }
+        }
+      },
+      {
+        "id": "modbus-battery-soc",
+        "name": "Batterie SOC",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Niveau Batterie",
+          "unique_id": "modbus_battery_soc",
+          "state_topic": "modbus/battery/state",
+          "value_template": "{{ value_json.soc }}",
+          "device_class": "battery",
+          "unit_of_measurement": "%",
+          "state_class": "measurement",
+          "device": {
+            "identifiers": ["modbus_battery"],
+            "name": "Batterie Pylontech",
+            "manufacturer": "Pylontech",
+            "model": "US5000 (4.8 kWh)"
+          }
+        }
+      },
+      {
+        "id": "modbus-battery-power",
+        "name": "Puissance Batterie",
+        "entityType": "virtual",
+        "category": "sensor",
+        "discoverySchema": {
+          "name": "Puissance Charge/Décharge",
+          "unique_id": "modbus_battery_power",
+          "state_topic": "modbus/battery/state",
+          "value_template": "{{ value_json.power }}",
+          "device_class": "power",
+          "unit_of_measurement": "W",
+          "state_class": "measurement",
+          "device": {
+            "identifiers": ["modbus_battery"],
+            "name": "Batterie Pylontech",
+            "manufacturer": "Pylontech",
+            "model": "US5000 (4.8 kWh)"
+          }
+        }
+      }
+    ],
+    "publications": [
+      {
+        "id": "pub-modbus-discovery",
+        "topic": "mcp/services/modbus2mqtt/discovery",
+        "payload": "{\"service_id\":\"modbus2mqtt\",\"name\":\"Modbus2MQTT\",\"version\":\"1.0.0\",\"status\":\"online\",\"mode\":\"rtu\",\"devices_count\":4,\"devices_online\":4}",
+        "schedule": { "type": "interval", "value": 60000 },
+        "enabled": true,
+        "qos": 1,
+        "retain": true,
+        "description": "Découverte MCP Modbus2MQTT"
+      },
+      {
+        "id": "pub-modbus-sdm630",
+        "topic": "modbus/sdm630/state",
+        "payload": "{\"voltage_l1\":230.2,\"voltage_l2\":231.1,\"voltage_l3\":229.8,\"current_l1\":8.5,\"current_l2\":6.2,\"current_l3\":7.1,\"power_total\":3250,\"energy_import\":12543.7,\"energy_export\":4521.3,\"frequency\":50.01,\"power_factor\":0.92}",
+        "schedule": { "type": "interval", "value": 10000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "Compteur énergie SDM630 — données triphasées"
+      },
+      {
+        "id": "pub-modbus-inverter",
+        "topic": "modbus/inverter-pv/state",
+        "payload": "{\"dc_voltage\":385.2,\"dc_current\":12.5,\"ac_power\":4650,\"daily_yield\":18.7,\"total_yield\":15823.4,\"efficiency\":97.2,\"temperature\":42.3,\"status\":\"producing\"}",
+        "schedule": { "type": "interval", "value": 15000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "Onduleur solaire SMA — production PV"
+      },
+      {
+        "id": "pub-modbus-heatpump",
+        "topic": "modbus/heatpump/state",
+        "payload": "{\"water_temp\":42.5,\"outdoor_temp\":12.3,\"return_temp\":38.1,\"power\":1850,\"cop\":3.8,\"mode\":\"heating\",\"compressor\":true,\"defrost\":false}",
+        "schedule": { "type": "interval", "value": 20000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "Pompe à chaleur Atlantic — températures et performance"
+      },
+      {
+        "id": "pub-modbus-battery",
+        "topic": "modbus/battery/state",
+        "payload": "{\"soc\":68,\"voltage\":52.4,\"current\":5.2,\"power\":272,\"temperature\":25.1,\"cycles\":342,\"health\":98,\"status\":\"charging\"}",
+        "schedule": { "type": "interval", "value": 15000 },
+        "enabled": true,
+        "qos": 0,
+        "description": "Batterie Pylontech — état de charge et santé"
+      },
+      {
+        "id": "pub-modbus-bus-status",
+        "topic": "modbus/bridge/status",
+        "payload": "{\"mode\":\"rtu\",\"port\":\"/dev/ttyUSB0\",\"baudrate\":9600,\"parity\":\"N\",\"devices_online\":4,\"devices_total\":4,\"poll_interval\":10,\"errors_count\":0,\"uptime\":0}",
+        "schedule": { "type": "interval", "value": 30000 },
+        "enabled": true,
+        "qos": 0,
+        "retain": true,
+        "description": "Statut du bus Modbus"
+      }
+    ],
+    "adminCommands": [
+      {
+        "id": "cmd-modbus-status",
+        "command": "get_status",
+        "topic": "mcp/services/modbus2mqtt/jsonrpc/request",
+        "responsePayload": "{\"status\":\"running\",\"mode\":\"rtu\",\"port\":\"/dev/ttyUSB0\",\"baudrate\":9600,\"devices_count\":4,\"devices_online\":4,\"poll_interval\":10}",
+        "successRate": 99,
+        "responseDelay": 50
+      },
+      {
+        "id": "cmd-modbus-scan",
+        "command": "scan_bus",
+        "topic": "mcp/services/modbus2mqtt/jsonrpc/request",
+        "responsePayload": "{\"found\":[{\"slave_id\":1,\"responding\":true,\"type\":\"SDM630\"},{\"slave_id\":2,\"responding\":true,\"type\":\"SMA Inverter\"},{\"slave_id\":10,\"responding\":true,\"type\":\"Atlantic PAC\"},{\"slave_id\":20,\"responding\":true,\"type\":\"Pylontech Battery\"}],\"scanned_range\":\"1-247\"}",
+        "successRate": 95,
+        "responseDelay": 8000
+      },
+      {
+        "id": "cmd-modbus-read",
+        "command": "read_register",
+        "topic": "mcp/services/modbus2mqtt/jsonrpc/request",
+        "responsePayload": "{\"slave_id\":1,\"address\":0,\"type\":\"holding\",\"values\":[23045]}",
+        "successRate": 96,
+        "responseDelay": 200
+      },
+      {
+        "id": "cmd-modbus-list",
+        "command": "list_devices",
+        "topic": "mcp/services/modbus2mqtt/jsonrpc/request",
+        "responsePayload": "{\"devices\":[{\"id\":\"sdm630\",\"name\":\"Compteur Énergie SDM630\",\"slave_id\":1,\"type\":\"energy_meter\",\"online\":true,\"registers_count\":12},{\"id\":\"inverter-pv\",\"name\":\"Onduleur Solaire SMA\",\"slave_id\":2,\"type\":\"inverter\",\"online\":true,\"registers_count\":8},{\"id\":\"heatpump\",\"name\":\"Pompe à Chaleur Atlantic\",\"slave_id\":10,\"type\":\"heat_pump\",\"online\":true,\"registers_count\":10},{\"id\":\"battery\",\"name\":\"Batterie Pylontech\",\"slave_id\":20,\"type\":\"battery_storage\",\"online\":true,\"registers_count\":7}]}",
+        "successRate": 99,
+        "responseDelay": 80
+      }
+    ],
+    "realism": {
+      "enabled": true,
+      "variancePercent": 5,
+      "networkLatency": { "min": 30, "max": 100 },
+      "successRate": 97,
+      "disconnectProbability": 1
+    }
+  },
+  "mcp": {
+    "service_id": "modbus2mqtt",
+    "topics": {
+      "discovery": "mcp/services/modbus2mqtt/discovery",
+      "data": "modbus/+/state",
+      "commands": "mcp/services/modbus2mqtt/jsonrpc/request"
+    }
+  }
+}

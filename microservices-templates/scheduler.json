@@ -1,0 +1,142 @@
+{
+  "metadata": {
+    "id": "scheduler-service",
+    "name": "MCP-Scheduler",
+    "version": "2.0.0",
+    "description": "Scheduler autonome pour scénarios MQTT, tâches planifiées (cron/interval/once) et sauvegardes automatiques",
+    "author": "Microservices Suite",
+    "category": "microservice",
+    "tags": ["mqtt", "scheduler", "scenarios", "automation", "cron", "backup", "mcp"],
+    "icon": "Clock"
+  },
+  "container": {
+    "image": "moreau66/mcp-scheduler",
+    "defaultVersion": "latest",
+    "autoStart": false,
+    "ports": [],
+    "volumes": [
+      {
+        "container": "/app/config",
+        "host": "./scheduler/config",
+        "mode": "ro"
+      },
+      {
+        "container": "/app/data",
+        "host": "./scheduler/data",
+        "mode": "rw"
+      }
+    ],
+    "environment": [
+      {
+        "key": "MQTT_BROKER",
+        "value": "mosquitto",
+        "required": true,
+        "description": "Hôte du broker MQTT"
+      },
+      {
+        "key": "MQTT_PORT",
+        "value": "1883",
+        "required": true,
+        "description": "Port du broker MQTT"
+      },
+      {
+        "key": "MQTT_USER",
+        "value": "",
+        "required": false,
+        "description": "Utilisateur MQTT"
+      },
+      {
+        "key": "MQTT_PASS",
+        "value": "",
+        "required": false,
+        "secret": true,
+        "description": "Mot de passe MQTT"
+      },
+      {
+        "key": "MCP_SERVICE_ID",
+        "value": "scheduler-service",
+        "required": true,
+        "description": "Identifiant du service MCP"
+      },
+      {
+        "key": "MCP_API_KEY",
+        "value": "",
+        "required": true,
+        "secret": true,
+        "description": "Clé API pour l'authentification MCP"
+      },
+      {
+        "key": "MCP_HEARTBEAT_INTERVAL",
+        "value": "30",
+        "required": false,
+        "description": "Intervalle de heartbeat en secondes"
+      },
+      {
+        "key": "LOG_LEVEL",
+        "value": "INFO",
+        "required": false,
+        "description": "Niveau de log (DEBUG, INFO, WARNING, ERROR)"
+      }
+    ],
+    "restart": "unless-stopped",
+    "labels": {
+      "mcp.service_id": "scheduler-service",
+      "mcp.version": "2.0",
+      "discovery.type": "scheduler"
+    },
+    "healthcheck": {
+      "test": "python -c \"import paho.mqtt.client as mqtt; c=mqtt.Client(mqtt.CallbackAPIVersion.VERSION2); c.connect('mosquitto', 1883, 5); c.disconnect()\"",
+      "interval": "30s",
+      "timeout": "10s",
+      "retries": 3
+    }
+  },
+  "mcp": {
+    "service_id": "scheduler-service",
+    "topics": {
+      "discovery": "mcp/services/scheduler-service/discovery",
+      "data": "neurhomia/scheduler/status",
+      "commands": "mcp/scheduler-service/jsonrpc/request"
+    },
+    "schemas": {
+      "mcp": "https://github.com/moreau66/MCP-Scheduler/blob/main/docs/mcp-schema.json",
+      "tools": "https://github.com/moreau66/MCP-Scheduler/blob/main/docs/mcp-tools-schema.json",
+      "resources": "https://github.com/moreau66/MCP-Scheduler/blob/main/docs/mcp-resources-schema.json"
+    },
+    "tools": [
+      "get_status",
+      "update_config",
+      "sync_scenarios",
+      "add_scenario",
+      "update_scenario",
+      "delete_scenario",
+      "trigger_scenario",
+      "list_scenarios",
+      "get_scenario_status",
+      "sync_tasks",
+      "trigger_backup",
+      "get_recent_logs"
+    ],
+    "resources": [
+      "scheduler_dashboard_widget"
+    ]
+  },
+  "ui_component": {
+    "component_path": "SchedulerContainer",
+    "mode": "embedded"
+  },
+  "docker_compose": {
+    "depends_on": ["mosquitto"],
+    "networks": ["smart-home-network"],
+    "profiles": ["scheduler", "optional"]
+  },
+  "dependencies": {
+    "required": ["mosquitto"],
+    "optional": []
+  },
+  "documentation": {
+    "readme_url": "https://github.com/moreau66/MCP-Scheduler/blob/main/README.md",
+    "github_url": "https://github.com/moreau66/MCP-Scheduler",
+    "docker_hub_url": "https://hub.docker.com/r/moreau66/mcp-scheduler"
+  }
+}

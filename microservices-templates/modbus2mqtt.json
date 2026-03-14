@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "id": "modbus2mqtt",
+    "name": "Modbus2MQTT",
+    "version": "1.0.0",
+    "description": "Pont Modbus RTU/TCP vers MQTT pour équipements industriels et énergétiques",
+    "author": "moreau66",
+    "category": "microservice",
+    "tags": ["modbus", "mqtt", "iot", "industrial", "energy", "mcp", "rtu", "tcp"],
+    "icon": "Gauge"
+  },
+  "container": {
+    "image": "moreau66/modbus2mqtt",
+    "defaultVersion": "latest",
+    "autoStart": false,
+    "ports": [
+      { "container": 8080, "host": 8090 }
+    ],
+    "volumes": [
+      { "container": "/app/config", "host": "./modbus2mqtt/config", "mode": "rw" },
+      { "container": "/app/data", "host": "./modbus2mqtt/data", "mode": "rw" }
+    ],
+    "environment": [
+      { "key": "MQTT_BROKER", "value": "mosquitto", "required": true, "description": "Hôte du broker MQTT" },
+      { "key": "MQTT_PORT", "value": "1883", "required": true, "description": "Port du broker MQTT" },
+      { "key": "MQTT_USER", "value": "", "required": false, "description": "Utilisateur MQTT" },
+      { "key": "MQTT_PASS", "value": "", "required": false, "secret": true, "description": "Mot de passe MQTT" },
+      { "key": "MCP_SERVICE_ID", "value": "modbus2mqtt", "required": true, "description": "Identifiant du service MCP" },
+      { "key": "MCP_API_KEY", "value": "", "required": true, "secret": true, "description": "Clé API MCP" },
+      { "key": "MCP_HEARTBEAT_INTERVAL", "value": "30", "required": false, "description": "Intervalle heartbeat (s)" },
+      { "key": "MODBUS_MODE", "value": "rtu", "required": false, "description": "Mode Modbus (rtu, tcp, rtu_over_tcp)" },
+      { "key": "MODBUS_PORT", "value": "/dev/ttyUSB0", "required": false, "description": "Port série ou IP:port" },
+      { "key": "MODBUS_BAUDRATE", "value": "9600", "required": false, "description": "Vitesse en bauds" },
+      { "key": "POLL_INTERVAL", "value": "10", "required": false, "description": "Intervalle de polling (s)" }
+    ],
+    "restart": "unless-stopped",
+    "labels": {
+      "discovery.type": "modbus",
+      "discovery.topics": "modbus/+/state",
+      "mcp.service_id": "modbus2mqtt"
+    }
+  },
+  "mcp": {
+    "service_id": "modbus2mqtt",
+    "topics": {
+      "discovery": "mcp/services/modbus2mqtt/discovery",
+      "data": "modbus/+/state",
+      "commands": "mcp/services/modbus2mqtt/jsonrpc/request"
+    },
+    "tools": [
+      "get_status", "update_config", "add_device", "remove_device", "list_devices",
+      "scan_bus", "read_register", "write_register", "read_coil", "write_coil",
+      "get_device_values", "set_poll_interval", "get_recent_logs"
+    ],
+    "resources": ["modbus_dashboard_widget", "modbus_devices_list", "modbus_registers_view"]
+  },
+  "ui_component": {
+    "component_path": "Modbus2MqttContainer",
+    "mode": "embedded"
+  },
+  "docker_compose": {
+    "depends_on": ["mosquitto"],
+    "networks": ["smart-home-network"],
+    "profiles": ["modbus", "energy", "optional"]
+  },
+  "dependencies": {
+    "required": ["mosquitto"],
+    "optional": []
+  },
+  "documentation": {
+    "readme_url": "https://github.com/moreau66/MCP-Modbus2Mqtt/blob/main/README.md",
+    "github_url": "https://github.com/moreau66/MCP-Modbus2Mqtt",
+    "docker_hub_url": "https://hub.docker.com/r/moreau66/modbus2mqtt"
+  }
+}

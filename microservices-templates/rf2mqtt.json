@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "id": "rf2mqtt",
+    "name": "RF2MQTT",
+    "version": "1.0.0",
+    "description": "Pont RF 433/868 MHz vers MQTT pour capteurs et interrupteurs radio",
+    "author": "moreau66",
+    "category": "microservice",
+    "tags": ["rf433", "rf868", "mqtt", "iot", "radio", "mcp", "sonoff", "oregon"],
+    "icon": "Radio"
+  },
+  "container": {
+    "image": "moreau66/rf2mqtt",
+    "defaultVersion": "latest",
+    "autoStart": false,
+    "ports": [
+      { "container": 8080, "host": 8089 }
+    ],
+    "volumes": [
+      { "container": "/app/config", "host": "./rf2mqtt/config", "mode": "rw" },
+      { "container": "/app/data", "host": "./rf2mqtt/data", "mode": "rw" }
+    ],
+    "environment": [
+      { "key": "MQTT_BROKER", "value": "mosquitto", "required": true, "description": "Hôte du broker MQTT" },
+      { "key": "MQTT_PORT", "value": "1883", "required": true, "description": "Port du broker MQTT" },
+      { "key": "MQTT_USER", "value": "", "required": false, "description": "Utilisateur MQTT" },
+      { "key": "MQTT_PASS", "value": "", "required": false, "secret": true, "description": "Mot de passe MQTT" },
+      { "key": "MCP_SERVICE_ID", "value": "rf2mqtt", "required": true, "description": "Identifiant du service MCP" },
+      { "key": "MCP_API_KEY", "value": "", "required": true, "secret": true, "description": "Clé API MCP" },
+      { "key": "MCP_HEARTBEAT_INTERVAL", "value": "30", "required": false, "description": "Intervalle heartbeat (s)" },
+      { "key": "RF_FREQUENCY", "value": "433.92", "required": false, "description": "Fréquence radio en MHz" },
+      { "key": "RF_PROTOCOL", "value": "auto", "required": false, "description": "Protocole RF (auto, ev1527, pt2262)" },
+      { "key": "RF_DEVICE_TYPE", "value": "usb", "required": false, "description": "Type de périphérique RF" }
+    ],
+    "restart": "unless-stopped",
+    "labels": {
+      "discovery.type": "rf",
+      "discovery.topics": "rf/+/state",
+      "mcp.service_id": "rf2mqtt"
+    }
+  },
+  "mcp": {
+    "service_id": "rf2mqtt",
+    "topics": {
+      "discovery": "mcp/services/rf2mqtt/discovery",
+      "data": "rf/+/state",
+      "commands": "mcp/services/rf2mqtt/jsonrpc/request"
+    },
+    "tools": [
+      "get_status", "update_config", "start_listening", "stop_listening",
+      "learn_code", "send_code", "add_device", "remove_device",
+      "list_devices", "get_device_state", "rename_device", "test_device", "get_recent_logs"
+    ],
+    "resources": ["rf_dashboard_widget", "rf_devices_list"]
+  },
+  "ui_component": {
+    "component_path": "RF2MqttContainer",
+    "mode": "embedded"
+  },
+  "docker_compose": {
+    "depends_on": ["mosquitto"],
+    "networks": ["smart-home-network"],
+    "profiles": ["rf", "optional"]
+  },
+  "dependencies": {
+    "required": ["mosquitto"],
+    "optional": []
+  },
+  "documentation": {
+    "readme_url": "https://github.com/moreau66/MCP-RF2Mqtt/blob/main/README.md",
+    "github_url": "https://github.com/moreau66/MCP-RF2Mqtt",
+    "docker_hub_url": "https://hub.docker.com/r/moreau66/rf2mqtt"
+  }
+}
