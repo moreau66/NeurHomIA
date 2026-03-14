@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "timestamp": "2025-12-21T12:00:00Z",
+  "version": 1,
+  "timestamp": "2025-11-21T12:00:00Z",
   "data": {
     "entityCategories": [
       {
@@ -20,8 +20,8 @@
             "dataType": "string",
             "examplePayload": "ON",
             "suggestedPayloads": [
-              {"label": "Allumé", "value": "ON", "description": "Appareil activé"},
-              {"label": "Éteint", "value": "OFF", "description": "Appareil désactivé"}
+              { "label": "Allumé", "value": "ON", "description": "Appareil activé" },
+              { "label": "Éteint", "value": "OFF", "description": "Appareil désactivé" }
             ]
           },
           {
@@ -34,8 +34,8 @@
             "dataType": "string",
             "examplePayload": "ON",
             "suggestedPayloads": [
-              {"label": "Allumer", "value": "ON", "description": "Mettre sous tension"},
-              {"label": "Éteindre", "value": "OFF", "description": "Couper l'alimentation"}
+              { "label": "Allumer", "value": "ON", "description": "Mettre sous tension" },
+              { "label": "Éteindre", "value": "OFF", "description": "Couper l'alimentation" }
             ]
           },
           {
@@ -49,11 +49,11 @@
             "unit": "niveau",
             "examplePayload": "150",
             "suggestedPayloads": [
-              {"label": "Minimum", "value": "1", "description": "Luminosité minimale"},
-              {"label": "Faible", "value": "64", "description": "25% de luminosité"},
-              {"label": "Moyen", "value": "128", "description": "50% de luminosité"},
-              {"label": "Fort", "value": "192", "description": "75% de luminosité"},
-              {"label": "Maximum", "value": "255", "description": "Luminosité maximale"}
+              { "label": "Minimum", "value": "1", "description": "Luminosité minimale" },
+              { "label": "Faible", "value": "64", "description": "25% de luminosité" },
+              { "label": "Moyen", "value": "128", "description": "50% de luminosité" },
+              { "label": "Fort", "value": "192", "description": "75% de luminosité" },
+              { "label": "Maximum", "value": "255", "description": "Luminosité maximale" }
             ]
           },
           {
@@ -66,11 +66,11 @@
             "dataType": "string",
             "examplePayload": "255,0,0",
             "suggestedPayloads": [
-              {"label": "Rouge", "value": "255,0,0", "description": "Couleur rouge"},
-              {"label": "Vert", "value": "0,255,0", "description": "Couleur verte"},
-              {"label": "Bleu", "value": "0,0,255", "description": "Couleur bleue"},
-              {"label": "Blanc", "value": "255,255,255", "description": "Couleur blanche"},
-              {"label": "Jaune", "value": "255,255,0", "description": "Couleur jaune"}
+              { "label": "Rouge", "value": "255,0,0", "description": "Couleur rouge" },
+              { "label": "Vert", "value": "0,255,0", "description": "Couleur verte" },
+              { "label": "Bleu", "value": "0,0,255", "description": "Couleur bleue" },
+              { "label": "Blanc", "value": "255,255,255", "description": "Couleur blanche" },
+              { "label": "Jaune", "value": "255,255,0", "description": "Couleur jaune" }
             ]
           },
           {
@@ -83,8 +83,8 @@
             "dataType": "string",
             "examplePayload": "rgb",
             "suggestedPayloads": [
-              {"label": "RGB", "value": "rgb", "description": "Mode couleur RGB"},
-              {"label": "Température", "value": "temperature", "description": "Mode température de couleur"}
+              { "label": "RGB", "value": "rgb", "description": "Mode couleur RGB" },
+              { "label": "Température", "value": "temperature", "description": "Mode température de couleur" }
             ]
           },
           {
@@ -98,11 +98,11 @@
             "unit": "K",
             "examplePayload": "4000",
             "suggestedPayloads": [
-              {"label": "Très chaud", "value": "2000", "description": "Lumière très chaude"},
-              {"label": "Chaud", "value": "2700", "description": "Lumière chaude"},
-              {"label": "Neutre", "value": "4000", "description": "Lumière neutre"},
-              {"label": "Froid", "value": "5000", "description": "Lumière froide"},
-              {"label": "Très froid", "value": "6500", "description": "Lumière très froide"}
+              { "label": "Très chaud", "value": "2000", "description": "Lumière très chaude" },
+              { "label": "Chaud", "value": "2700", "description": "Lumière chaude" },
+              { "label": "Neutre", "value": "4000", "description": "Lumière neutre" },
+              { "label": "Froid", "value": "5000", "description": "Lumière froide" },
+              { "label": "Très froid", "value": "6500", "description": "Lumière très froide" }
             ]
           },
           {
@@ -115,36 +115,13 @@
             "dataType": "string",
             "examplePayload": "none",
             "suggestedPayloads": [
-              {"label": "Aucun", "value": "none", "description": "Pas d'effet"},
-              {"label": "Clignotement", "value": "blink", "description": "Clignotement"},
-              {"label": "Pulsation", "value": "pulse", "description": "Pulsation douce"},
-              {"label": "Arc-en-ciel", "value": "rainbow", "description": "Cycle de couleurs"}
+              { "label": "Aucun", "value": "none", "description": "Pas d'effet" },
+              { "label": "Clignotement", "value": "blink", "description": "Clignotement" },
+              { "label": "Pulsation", "value": "pulse", "description": "Pulsation douce" },
+              { "label": "Arc-en-ciel", "value": "rainbow", "description": "Cycle de couleurs" }
             ]
           }
         ]
-      },
-      {
-        "id": "smart_thermostat",
-        "name": "Thermostat intelligent",
-        "type": "climate",
-        "icon": "Thermometer",
-        "description": "Thermostat pour réguler la température",
-        "defaultTopics": {
-          "temperature": "zigbee2mqtt/{device_id}/local_temperature",
-          "target": "zigbee2mqtt/{device_id}/occupied_heating_setpoint",
-          "mode": "zigbee2mqtt/{device_id}/system_mode"
-        }
-      },
-      {
-        "id": "smart_switch",
-        "name": "Interrupteur intelligent",
-        "type": "switch",
-        "icon": "Power",
-        "description": "Interrupteur contrôlable à distance",
-        "defaultTopics": {
-          "state": "zigbee2mqtt/{device_id}/state",
-          "command": "zigbee2mqtt/{device_id}/set"
-        }
       },
       {
         "id": "temp_sensor",
