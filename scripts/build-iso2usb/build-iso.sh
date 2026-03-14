@@ -175,22 +175,22 @@ autoinstall:
     - curtin in-target -- wget -O /opt/${PROJECT_NAME_LOWER}/firstboot.sh $FIRSTBOOT_SCRIPT_URL
     - curtin in-target -- chmod +x /opt/${PROJECT_NAME_LOWER}/firstboot.sh
     - |
-      cat <<'SERV' > /target/etc/systemd/system/neurhomia-firstboot.service
+      cat <<'SERV' > /target/etc/systemd/system/${PROJECT_NAME_LOWER}-firstboot.service
       [Unit]
-      Description=NeurHomIA First Boot Configuration
+      Description=${PROJECT_NAME} First Boot Configuration
       After=network-online.target
       Wants=network-online.target
 
       [Service]
       Type=oneshot
       RemainAfterExit=yes
-      ExecStart=/opt/neurhomia/firstboot.sh
+      ExecStart=/opt/${PROJECT_NAME_LOWER}/firstboot.sh
       StandardOutput=journal+console
 
       [Install]
       WantedBy=multi-user.target
       SERV
-    - curtin in-target -- systemctl enable neurhomia-firstboot.service
+    - curtin in-target -- systemctl enable ${PROJECT_NAME_LOWER}-firstboot.service
   shutdown: reboot
 EOF
 
