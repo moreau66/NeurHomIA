@@ -1,6 +1,6 @@
 #!/bin/bash
 # build-iso.sh – Construction de l'ISO d'installation automatique d'Ubuntu Server et NeurHomIA
-# Utilisation : ./build-iso.sh
+# Utilisation : ./build-iso.sh [--force]
 
 set -e
 clear 
@@ -28,6 +28,14 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
+
+# ------------------------------
+# Option --force
+# ------------------------------
+FORCE_BUILD=false
+if [[ "${1:-}" == "--force" ]]; then
+    FORCE_BUILD=true
+fi
 
 # ------------------------------
 # Déterminer le répertoire de travail (même avec sudo)
@@ -75,10 +83,69 @@ if [ ${#LABEL} -gt 32 ]; then
 fi
 
 # ------------------------------
-# 2) Vérification des dépendances
+# 2) Validation de firstboot-config.sh (sections requises)
 # ------------------------------
 echo ""
-echo -e "${YELLOW}2) Vérification des dépendances...${NC}"
+echo -e "${YELLOW}2) Validation de firstboot-config.sh...${NC}"
+
+FIRSTBOOT_TMP=$(mktemp /tmp/firstboot-check.XXXXXX)
+if wget -q -O "$FIRSTBOOT_TMP" "$FIRSTBOOT_SCRIPT_URL" 2>/dev/null; then
+    declare -A SECTIONS=(
+        ["01-Bienvenue"]="BIENVENUE"
+        ["02-Configuration réseau"]="CONFIGURATION RÉSEAU"
+        ["03-Fuseau horaire"]="FUSEAU HORAIRE"
+        ["04-Mot de passe"]="MOT DE PASSE"
+        ["05-Configuration SSH"]="CONFIGURATION SSH"
+        ["06-Pare-feu UFW"]="PARE-FEU UFW"
+        ["07-Fail2ban"]="FAIL2BAN"
+        ["08-Mises à jour automatiques"]="MISES À JOUR AUTOMATIQUES"
+        ["09-Mot de passe MQTT"]="MOT DE PASSE MQTT"
+        ["10-Installation Docker"]="INSTALLATION"
+        ["11-Utilitaires CLI"]="UTILITAIRES CLI"
+        ["12-Finalisation"]="FINALISATION"
+    )
+
+    MISSING=0
+    for key in $(echo "${!SECTIONS[@]}" | tr ' ' '\n' | sort); do
+        section="${key#*-}"
+        marker="${SECTIONS[$key]}"
+        if grep -qi "$marker" "$FIRSTBOOT_TMP" 2>/dev/null; then
+            echo -e "   ${GREEN}✔ $section${NC}"
+        else
+            echo -e "   ${RED}✘ $section (marqueur '$marker' absent)${NC}"
+            MISSING=$((MISSING + 1))
+        fi
+    done
+
+    if [ "$MISSING" -gt 0 ]; then
+        echo ""
+        echo -e "   ${RED}⚠ $MISSING section(s) manquante(s) dans firstboot-config.sh${NC}"
+        if [ "$FORCE_BUILD" = true ]; then
+            echo -e "   ${YELLOW}--force activé : construction forcée malgré les sections manquantes.${NC}"
+        else
+            echo -e "   ${RED}Build annulé. Utilisez --force pour passer outre.${NC}"
+            rm -f "$FIRSTBOOT_TMP"
+            exit 1
+        fi
+    else
+        echo -e "   ${GREEN}✅ Toutes les sections requises sont présentes (12/12)${NC}"
+    fi
+else
+    echo -e "   ${YELLOW}⚠ Impossible de télécharger firstboot-config.sh pour validation.${NC}"
+    echo -e "   ${YELLOW}  URL : $FIRSTBOOT_SCRIPT_URL${NC}"
+    if [ "$FORCE_BUILD" = false ]; then
+        echo -e "   ${RED}Build annulé. Utilisez --force pour passer outre.${NC}"
+        rm -f "$FIRSTBOOT_TMP"
+        exit 1
+    fi
+fi
+rm -f "$FIRSTBOOT_TMP"
+
+# ------------------------------
+# 3) Vérification des dépendances
+# ------------------------------
+echo ""
+echo -e "${YELLOW}3) Vérification des dépendances...${NC}"
 command -v wget >/dev/null 2>&1 || { echo -e "${RED}   wget est requis. Installez-le avec : sudo apt install wget${NC}"; exit 1; }
 command -v 7z >/dev/null 2>&1 || { echo -e "${RED}   p7zip-full est requis. Installez-le avec : sudo apt install p7zip-full${NC}"; exit 1; }
 command -v openssl >/dev/null 2>&1 || { echo -e "${RED}   openssl est requis. Installez-le avec : sudo apt install openssl${NC}"; exit 1; }
@@ -86,10 +153,10 @@ command -v xorriso >/dev/null 2>&1 || { echo -e "${RED}   xorriso est requis. In
 echo -e "${GREEN}   Dépendances OK${NC}"
 
 # ------------------------------
-# 3) Préparation des dossiers avec sauvegarde de l'ancien autoinstall
+# 4) Préparation des dossiers avec sauvegarde de l'ancien autoinstall
 # ------------------------------
 echo ""
-echo -e "${YELLOW}3) Préparation de l'espace de travail...${NC}"
+echo -e "${YELLOW}4) Préparation de l'espace de travail...${NC}"
 mkdir -p "$WORK_DIR"
 
 # Sauvegarde de l'ancien dossier autoinstall s'il existe
@@ -104,36 +171,36 @@ rm -rf "$EXTRACT_DIR"
 mkdir -p "$EXTRACT_DIR" "$AUTOINSTALL_DIR"
 
 # ------------------------------
-# 4) Téléchargement de l'ISO (si non existante)
+# 5) Téléchargement de l'ISO (si non existante)
 # ------------------------------
 echo ""
 if [ ! -f "$WORK_DIR/$ISO_FILENAME" ]; then
-    echo -e "${GREEN}4) Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
+    echo -e "${GREEN}5) Téléchargement de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
     wget -O "$WORK_DIR/$ISO_FILENAME" "$ISO_URL"
 else
-    echo -e "${GREEN}4) L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
+    echo -e "${GREEN}5) L'ISO $ISO_FILENAME existe déjà dans $WORK_DIR. Utilisation de la copie locale.${NC}"
 fi
 
 # ------------------------------
-# 5) Extraction de l'ISO
+# 6) Extraction de l'ISO
 # ------------------------------
 echo ""
-echo -e "${YELLOW}5) Extraction de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
+echo -e "${YELLOW}6) Extraction de l'ISO Ubuntu Server ${ISO_VERSION}...${NC}"
 7z x "$WORK_DIR/$ISO_FILENAME" -o"$EXTRACT_DIR"
 
 # ------------------------------
-# 6) Génération du hash du mot de passe
+# 7) Génération du hash du mot de passe
 # ------------------------------
 echo ""
-echo -e "${YELLOW}6) Génération du hash du mot de passe par défaut...${NC}"
+echo -e "${YELLOW}7) Génération du hash du mot de passe par défaut...${NC}"
 PASSWORD_HASH=$(openssl passwd -6 "$DEFAULT_PASSWORD")
 echo -e "${GREEN}   Hash généré.${NC}"
 
 # ------------------------------
-# 7) Création du fichier user-data
+# 8) Création du fichier user-data
 # ------------------------------
 echo ""
-echo -e "${YELLOW}7) Création du fichier user-data...${NC}"
+echo -e "${YELLOW}8) Création du fichier user-data...${NC}"
 cat > "$AUTOINSTALL_DIR/user-data" <<EOF
 #cloud-config
 autoinstall:
@@ -204,31 +271,39 @@ fi
 echo -e "${GREEN}   Fichiers d'autoinstall créés avec succès.${NC}"
 
 # ------------------------------
-# 8) Intégration de l'autoinstall
+# 9) Intégration de l'autoinstall
 # ------------------------------
 cp -r "$AUTOINSTALL_DIR" "$EXTRACT_DIR/"
 
 # ------------------------------
-# 9) Modification du fichier grub.cfg pour forcer l'autoinstall
+# 10) Modification du fichier grub.cfg pour forcer l'autoinstall
 # ------------------------------
 echo ""
-echo -e "${YELLOW}9) Modification du fichier grub.cfg pour forcer l'autoinstall...${NC}"
+echo -e "${YELLOW}10) Modification du fichier grub.cfg pour forcer l'autoinstall...${NC}"
 GRUB_CFG="$EXTRACT_DIR/boot/grub/grub.cfg"
 if [ -f "$GRUB_CFG" ]; then
     # Sauvegarde du fichier original
     cp "$GRUB_CFG" "$GRUB_CFG.orig"
     # Ajout des paramètres autoinstall à chaque entrée linux
     sudo sed -i 's|linux /casper/vmlinuz|linux /casper/vmlinuz autoinstall ds=nocloud\\;s=/cdrom/autoinstall/|g' "$GRUB_CFG"
-    echo -e "${GREEN}   Fichier grub.cfg modifié.${NC}"
-else
+    
+    if grep -q "autoinstall" "$GRUB_CFG"; then
+        echo -e "${GREEN}   Fichier grub.cfg modifié avec succès.${NC}"
+      else
+        echo -e "ERREUR : la modification de grub.cfg a échoué"
+        exit 1
+    fi
+    
+  else
     echo -e "${RED}   Fichier grub.cfg introuvable ! L'autoinstall pourrait ne pas fonctionner.${NC}"
+    exit 1
 fi
 
 # ------------------------------
-# 10) Création de l'ISO avec xorriso (détection automatique)
+# 11) Création de l'ISO avec xorriso (détection automatique)
 # ------------------------------
 echo ""
-echo -e "${YELLOW}10) Création de la nouvelle ISO (avec xorriso)...${NC}"
+echo -e "${YELLOW}11) Création de la nouvelle ISO (avec xorriso)...${NC}"
 
 # Vérification du fichier de boot BIOS
 if [ ! -f "$EXTRACT_DIR/boot/grub/i386-pc/eltorito.img" ]; then
@@ -279,7 +354,7 @@ else
 fi
 
 # ------------------------------
-# 11) Validation de l'ISO générée
+# 12) Validation de l'ISO générée
 # ------------------------------
 validate_iso() {
     local iso_path="$1"
@@ -288,7 +363,7 @@ validate_iso() {
     local checks_failed=0
 
     echo ""
-    echo -e "${YELLOW}11) Validation de l'ISO générée...${NC}"
+    echo -e "${YELLOW}12) Validation de l'ISO générée...${NC}"
     echo ""
 
     # Montage de l'ISO
@@ -393,12 +468,12 @@ validate_iso() {
 validate_iso "$OUTPUT_ISO"
 
 # ------------------------------
-# 12) Demande de gravure sur clé USB
+# 13) Demande de gravure sur clé USB
 # ------------------------------
 burn_iso() {
     local iso_path="$1"
     echo ""
-    echo -e "${YELLOW}12) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
+    echo -e "${YELLOW}13) Voulez-vous graver cette ISO sur une clé USB ? (o/n)${NC}"
     read -r answer
     if [[ ! "$answer" =~ ^[OoYy]$ ]]; then
         echo -e "${GREEN}   Vous pourrez graver l'ISO plus tard avec la commande :${NC}"
